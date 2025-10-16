@@ -14,3 +14,5 @@ keytool -importkeystore -srckeystore d:\login-keystore.jks -destkeystore d:\logi
 comando para obtener SHA-1 y SHA-256:
 cd Android
 ./gradlew signingReport
+
+hola221
