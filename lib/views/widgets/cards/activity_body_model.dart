@@ -81,7 +81,7 @@ class ActivityBodyModel extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.all(10.0),
               child: Text(
-                '$descripcion', // Descripción dinámica
+                descripcion, // Descripción dinámica
                 style: const TextStyle(fontSize: 10),
               ),
             ), // Descripción dinámica

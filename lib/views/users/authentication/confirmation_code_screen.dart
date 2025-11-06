@@ -1,4 +1,3 @@
-import 'package:aprende_mas/config/utils/catalog_names.dart';
 import 'package:aprende_mas/config/utils/packages.dart';
 import 'package:aprende_mas/providers/authentication/auth_provider.dart';
 import 'package:aprende_mas/views/users/authentication/form_confirmation_code.dart';

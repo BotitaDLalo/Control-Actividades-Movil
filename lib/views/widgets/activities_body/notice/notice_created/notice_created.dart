@@ -14,10 +14,10 @@ class NoticeCreated extends StatelessWidget {
       color: Colors.white, 
       child: Row(
         children: [
-          SizedBox(width: 10,),
-          Icon(Icons.person),
-          InputNull(),
-          IconButton(onPressed: () {}, icon: Icon(Icons.assignment))
+          const SizedBox(width: 10,),
+          const Icon(Icons.person),
+          const InputNull(),
+          IconButton(onPressed: () {}, icon: const Icon(Icons.assignment))
 
         ],
       ),

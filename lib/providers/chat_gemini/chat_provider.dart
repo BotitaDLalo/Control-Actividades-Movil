@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:aprende_mas/config/utils/packages.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';

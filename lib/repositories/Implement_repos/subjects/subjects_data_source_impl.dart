@@ -16,12 +16,12 @@ class SubjectsDataSourceImpl implements SubjectsDataSource {
       List<Map<String, dynamic>> resList = [];
 
       if (role == cn.getRoleTeacherName) {
-        const uri = "/Materias/ObtenerMateriasDocente";
+        const uri = "/api/Materias/ObtenerMateriasDocente";
         final res = await dio.get(uri, queryParameters: {'docenteid': id});
         resList = List<Map<String, dynamic>>.from(res.data);
         debugPrint("SubjectsDataSourceImpl: ${res.data}");
       } else if (role == cn.getRoleStudentName) {
-        const uri = "/Materias/ObtenerMateriasAlumno";
+        const uri = "/api/Materias/ObtenerMateriasAlumno";
         final res = await dio.get(uri, queryParameters: {'alumnoid': id});
         resList = List<Map<String, dynamic>>.from(res.data);
       }
@@ -37,7 +37,7 @@ class SubjectsDataSourceImpl implements SubjectsDataSource {
   Future<List<Group>> createSubjectWithGroup(String subjectName,
       String description, Color colorCode, List<int> groupsId) async {
     try {
-      const uri = "/Materias/CrearMateriaGrupos";
+      const uri = "/api/Materias/CrearMateriaGrupos";
       final id = await storageService.getId();
       final res = await dio.post(uri, data: {
         "NombreMateria": subjectName,
@@ -59,7 +59,7 @@ class SubjectsDataSourceImpl implements SubjectsDataSource {
   Future<List<Subject>> createSubjectWithoutGroup(
       String subjectName, String description, Color colorCode) async {
     try {
-      const uri = "/Materias/CrearMateriaSinGrupo";
+      const uri = "/api/Materias/CrearMateriaSinGrupo";
 
       final id = await storageService.getId();
       final res = await dio.post(uri, data: {
@@ -93,7 +93,7 @@ class SubjectsDataSourceImpl implements SubjectsDataSource {
   Future<List<StudentGroupSubject>> addStudentsSubject(
       int subjectId, List<String> emails) async {
     try {
-      const uri = "/Alumnos/RegistrarAlumnoGMDocente";
+      const uri = "/api/Alumnos/RegistrarAlumnoGMDocente";
 
       final res =
           await dio.post(uri, data: {"Emails": emails, "MateriaId": subjectId});
@@ -113,7 +113,7 @@ class SubjectsDataSourceImpl implements SubjectsDataSource {
   @override
   Future<List<StudentGroupSubject>> getStudentsSubject(int? groupId,int subjectId) async {
     try {
-      const uri = "/Alumnos/ObtenerListaAlumnosMateria";
+      const uri = "/api/Alumnos/ObtenerListaAlumnosMateria";
       final res = await dio.post(uri, data: {"GrupoId": groupId ?? 0
       , "MateriaId": subjectId});
 
@@ -133,7 +133,7 @@ class SubjectsDataSourceImpl implements SubjectsDataSource {
   @override
   Future<VerifyEmail> verifyEmail(String email) async {
     try {
-      const uri = "/Alumnos/VerificarAlumnoEmail";
+      const uri = "/api/Alumnos/VerificarAlumnoEmail";
       final res = await dio.post(uri, data: {"Email": email});
 
       if (res.statusCode == 200) {

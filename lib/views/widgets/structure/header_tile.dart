@@ -18,7 +18,7 @@ class HeaderTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color colorWhite = Colors.white;
+    const Color colorWhite = Colors.white;
 
     return Stack(
       children: [
@@ -39,7 +39,7 @@ class HeaderTile extends StatelessWidget {
         Column(
           children: [
             const SizedBox(height: 120, width: double.infinity,),
-            Text(titulo, style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),),
+            Text(titulo, style: const TextStyle(fontSize: 30, fontWeight: FontWeight.bold),),
             const SizedBox(height: 10,),
             SvgPicture.asset(
             width: 70,

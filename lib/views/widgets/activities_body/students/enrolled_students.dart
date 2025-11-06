@@ -6,12 +6,12 @@ class EnrolledStudents extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CustomContainerStyle(
+    return const CustomContainerStyle(
       height: 30,
       width: double.infinity,
       color: Colors.transparent,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 80),
+        padding: EdgeInsets.symmetric(horizontal: 80),
         child: Text('Alumnos inscritos'),
       ),
     );

@@ -13,6 +13,8 @@ void main() async {
   SystemChrome.setPreferredOrientations(
       [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
   await FirebaseCMConfiguration.initializeFCM();
+  // Inicializar Google Sign-In si es necesario
+  //await GoogleSignIn().initialize();
   runApp(const ProviderScope(child: MainApp()));
 }
 

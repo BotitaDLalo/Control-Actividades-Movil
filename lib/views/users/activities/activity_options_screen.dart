@@ -2,8 +2,6 @@ import 'package:aprende_mas/config/utils/packages.dart';
 import 'package:aprende_mas/views/widgets/buttons/floating_action_button_custom.dart';
 import 'activity_list.dart';
 import '../../teacher/activities/options/create_activies/button_create_general.dart';
-import 'package:aprende_mas/config/utils/utils.dart';
-import 'package:aprende_mas/config/data/data.dart';
 import 'package:aprende_mas/models/models.dart';
 
 class ActivityOptionScreen extends ConsumerStatefulWidget {

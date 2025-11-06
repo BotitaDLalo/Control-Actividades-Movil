@@ -3,7 +3,6 @@ import 'package:aprende_mas/config/utils/packages.dart';
 import 'package:aprende_mas/models/agenda/event_model.dart';
 import 'package:aprende_mas/models/groups/group.dart';
 import 'package:aprende_mas/models/subjects/subjects.dart';
-import 'package:aprende_mas/providers/agenda/event_provider.dart';
 import 'package:aprende_mas/providers/groups/groups_provider.dart';
 import 'package:aprende_mas/providers/subjects/subjects_provider.dart';
 import 'package:aprende_mas/views/views.dart';
@@ -62,7 +61,7 @@ class EventDetailsStudentScreen extends ConsumerWidget {
     }
 
     return Scaffold(
-      appBar: AppBarScreens(),
+      appBar: const AppBarScreens(),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -76,7 +75,7 @@ class EventDetailsStudentScreen extends ConsumerWidget {
               height: 20,
             ),
 
-            Text(
+            const Text(
               'Inicia: ',
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
@@ -101,7 +100,7 @@ class EventDetailsStudentScreen extends ConsumerWidget {
               height: 20,
             ),
 
-            Text(
+            const Text(
               'Finaliza: ',
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
@@ -126,19 +125,19 @@ class EventDetailsStudentScreen extends ConsumerWidget {
               height: 20,
             ),
 
-            Text(
+            const Text(
               'Destinatario: ',
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             if (groupName != null) Text("Grupo: $groupName"),
             if (subjectName != null) Text("Materia: $subjectName"),
             if (groupName == null && subjectName == null)
-            Text("Este evento no está asignado a ningún grupo ni materia."),
+            const Text("Este evento no está asignado a ningún grupo ni materia."),
 
             const SizedBox(
               height: 20,
             ),
-            Text(
+            const Text(
               'Descripción: ',
               style: TextStyle(fontWeight: FontWeight.bold),
             ),

@@ -12,15 +12,10 @@ class GoogleSigninApiImpl implements GoogleSigninApi {
   Future handlerGoogleLogout() => _googleSignIn.disconnect();
 
   @override
-  Future<GoogleSignInAuthentication?> handlerGoogleSignIn() async {
+  Future<GoogleSignInAccount?> handlerGoogleSignIn() async {
     try {
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-      if (googleUser == null) {
-        return null;
-      }
-      final googleUserData = await googleUser.authentication;
-
-      return googleUserData;
+      return googleUser;
     } catch (e) {
       throw Exception(e);
     }

@@ -1,4 +1,3 @@
-import 'package:aprende_mas/config/data/data.dart';
 import 'package:aprende_mas/config/utils/app_theme.dart';
 import 'package:aprende_mas/config/utils/packages.dart';
 import 'package:aprende_mas/providers/providers.dart';

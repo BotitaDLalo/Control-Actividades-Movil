@@ -12,7 +12,7 @@ class EventDataSourceImpl implements EventDataSource {
   Future<List<Event>> getEvents() async {
     try {
       final id = await storageService.getId();
-      const uri = "/EventosAgenda/ObtenerEventos";
+      const uri = "/api/EventosAgenda/ObtenerEventos";
       final res = await dio.get(uri, queryParameters: {'docenteId': id});
       debugPrint("Respuesta del backend: ${res.data}");
 
@@ -36,7 +36,7 @@ class EventDataSourceImpl implements EventDataSource {
     List<int>? subjectIds,
   }) async {
     try {
-      const uri = "/EventosAgenda/CrearEventos";
+      const uri = "/api/EventosAgenda/CrearEventos";
       final String hexColor =
           color.value.toRadixString(16).substring(2).toUpperCase();
       final teacherId = await storageService.getId();
@@ -69,7 +69,7 @@ class EventDataSourceImpl implements EventDataSource {
       final String method = (eventId == null) ? 'POST' : 'PATCH';
       final url = (eventId == null)
           ? "/post"
-          : "/EventosAgenda/ActualizarEvento/$eventId";
+          : "/api/EventosAgenda/ActualizarEvento/$eventId";
 
       eventLike.remove('eventoId');
       final response = await dio.request(url,
@@ -91,7 +91,7 @@ class EventDataSourceImpl implements EventDataSource {
   Future<List<Event>> deleteEvent(int teacherId, int eventId) async {
     try {
       final teacherId = await storageService.getId();
-      const uri = "/EventosAgenda/EliminarEvento";
+      const uri = "/api/EventosAgenda/EliminarEvento";
 
       final response = await dio.delete(uri, queryParameters: {
         "docenteId": teacherId,
@@ -111,7 +111,7 @@ class EventDataSourceImpl implements EventDataSource {
   Future<List<Event>> getEventsStudent() async {
     try {
       final id = await storageService.getId();
-      const uri = "/EventosAgenda/ObtenerEventosAlumno";
+      const uri = "/api/EventosAgenda/ObtenerEventosAlumno";
       final res = await dio.get(uri, queryParameters: {'alumnoId': id});
       debugPrint("Respuesta del backend: ${res.data}");
 

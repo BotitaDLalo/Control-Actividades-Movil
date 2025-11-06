@@ -20,12 +20,12 @@ class ForgotPasswordScreen extends StatelessWidget {
               },
               icon: const Icon(Icons.arrow_back)),
         ),
-        body: SingleChildScrollView(
+        body: const SingleChildScrollView(
           // physics: const ClampingScrollPhysics(),
           child: Column(
             //crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const FormForgotPassword()
+              FormForgotPassword()
             ],
           ),
         ),

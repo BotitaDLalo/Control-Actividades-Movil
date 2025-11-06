@@ -16,57 +16,39 @@ class FormSingin extends ConsumerWidget {
     final signinForm = ref.watch(signinFormProvider);
     final signinFormNotifier = ref.read(signinFormProvider.notifier);
 
-    // hideSnackBar() {
-    //   ScaffoldMessenger.of(context).clearSnackBars();
-    // }
+    // Listener unificado para manejar los efectos secundarios del estado del formulario.
+    ref.listen(signinFormProvider, (previous, next) {
+      final wasPosting = previous?.isPosting ?? false;
 
-    // ref.listen(
-    //   authProvider,
-    //   (previous, next) {
-    //     if (next.errorMessage.isNotEmpty) {
-    //       if (next.errorHandlingStyle == ErrorHandlingStyle.snackBar) {
-    //         hideSnackBar();
-    //         errorMessage(context, next.errorMessage);
-    //       }
-    //     }
-    //   },
-    // );
+      // Muestra la pantalla de carga solo cuando se inicia el proceso de envío.
+      if (!wasPosting && next.isPosting) {
+        showLoadingScreen(context);
+      }
 
-    void goToConfirmationCodeScreen() {
-      Navigator.of(context).pop();
-      context.push('/confirmation-code-screen');
-    }
+      // Oculta la pantalla de carga cuando el envío ha terminado.
+      if (wasPosting && !next.isPosting) {
+        // Cierra el diálogo de carga. Usamos rootNavigator para evitar problemas con navegadores anidados.
+        Navigator.of(context, rootNavigator: true).pop();
 
-    closeLoadingScreen() {
-      Navigator.of(context).pop();
-    }
-
-    ref.listen(
-      signinFormProvider,
-      (previous, next) {
-        if (next.isFormPosted && !next.isPosting) {
-          goToConfirmationCodeScreen();
+        // Si el formulario se envió con éxito, navega a la pantalla de confirmación.
+        if (next.isFormPosted) {
+          context.push('/confirmation-code-screen');
         }
-      },
-    );
+      }
+    });
 
-    ref.listen(
-      signinFormProvider,
-      (previous, next) {
-        if (next.isFormNotPosted && !next.isPosting) {
-          closeLoadingScreen();
-        }
-      },
-    );
+    // Listener para mostrar errores provenientes del proveedor de autenticación.
+    ref.listen(authProvider, (previous, next) {
+      final errorMessage = next.errorMessage;
+      final oldErrorMessage = previous?.errorMessage ?? '';
 
-    ref.listen(
-      signinFormProvider,
-      (previous, next) {
-        if (next.isPosting) {
-          showLoadingScreen(context);
-        }
-      },
-    );
+      // Muestra el SnackBar solo si hay un mensaje de error nuevo y no vacío.
+      if (errorMessage.isNotEmpty && errorMessage != oldErrorMessage) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(errorMessage)),
+        );
+      }
+    });
 
     return Form(
       child: Padding(
@@ -153,14 +135,12 @@ class FormSingin extends ConsumerWidget {
               width: double.infinity,
               height: MediaQuery.of(context).size.height * 0.060,
               child: ButtonLogin(
-                text: 'Crear',
+                text: 'Crear cuenta', // Texto más descriptivo
                 textColor: Colors.white,
-                onPressed: () {
-                  if (signinForm.isPosting) {
-                    return;
-                  }
-                  signinFormNotifier.onFormSigninSubmit();
-                },
+                // Deshabilita el botón mientras se está procesando para evitar doble clic.
+                onPressed: signinForm.isPosting
+                    ? null
+                    : () => signinFormNotifier.onFormSigninSubmit(),
                 buttonStyle: AppTheme.buttonPrimary,
               ),
             ),

@@ -1,7 +1,6 @@
 import 'package:aprende_mas/config/utils/app_theme.dart';
 import 'package:aprende_mas/config/utils/packages.dart';
 import 'package:aprende_mas/models/models.dart';
-import 'package:aprende_mas/providers/groups/groups_provider.dart';
 import 'package:aprende_mas/providers/groups/students_group_provider.dart';
 import 'package:aprende_mas/views/widgets/widgets.dart';
 import 'package:aprende_mas/views/teacher/teacher.dart';

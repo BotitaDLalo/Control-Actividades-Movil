@@ -1,6 +1,5 @@
 import 'package:aprende_mas/config/utils/packages.dart';
 import 'package:aprende_mas/models/agenda/event_model.dart';
-import 'package:aprende_mas/providers/agenda/event_provider.dart';
 import 'package:aprende_mas/providers/agenda/event_state.dart';
 import 'package:aprende_mas/repositories/Interface_repos/agenda/event_repository.dart';
 import 'package:aprende_mas/views/widgets/calendar/event_calendar_data_source.dart';

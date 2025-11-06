@@ -1,8 +1,6 @@
 import 'package:aprende_mas/config/utils/packages.dart';
 import 'package:aprende_mas/models/models.dart';
-import 'package:aprende_mas/providers/subjects/students_subject_provider.dart';
 import 'package:aprende_mas/views/widgets/widgets.dart';
-import 'package:aprende_mas/providers/providers.dart';
 
 class StudentsGroupsSubjects extends ConsumerStatefulWidget {
   final List<StudentGroupSubject> lsStudents;

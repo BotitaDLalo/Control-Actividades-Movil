@@ -32,7 +32,7 @@ class ElementTile extends ConsumerWidget {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
             // color: const Color.fromARGB(10, 0, 0, 0),
             // border: Border.all(color: const Color.fromARGB(28, 0, 0, 0), width: 1.0),
             // borderRadius: BorderRadius.circular(12),

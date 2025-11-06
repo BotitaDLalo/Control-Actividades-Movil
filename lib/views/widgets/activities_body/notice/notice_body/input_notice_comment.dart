@@ -18,9 +18,9 @@ class InputNoticeComment extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Expanded(
+            const Expanded(
               child: TextField(
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   hintText: 'Añadir comentario',
                   border: InputBorder.none,
                   contentPadding: EdgeInsets.symmetric(horizontal: 20),

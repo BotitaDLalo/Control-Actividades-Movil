@@ -1,7 +1,6 @@
 import 'package:aprende_mas/config/utils/app_theme.dart';
 import 'package:aprende_mas/config/utils/packages.dart';
 import 'package:aprende_mas/providers/notices/notices_form_provider.dart';
-import 'package:aprende_mas/views/views.dart';
 
 class DataBody extends ConsumerWidget {
   final int noticeId;

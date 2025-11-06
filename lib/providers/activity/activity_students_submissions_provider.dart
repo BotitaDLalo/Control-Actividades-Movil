@@ -1,7 +1,6 @@
 import 'package:aprende_mas/config/utils/packages.dart';
 import 'package:aprende_mas/models/models.dart';
 import 'package:aprende_mas/repositories/Implement_repos/activity/activity_repository_impl.dart';
-import 'package:aprende_mas/repositories/Interface_repos/activity/activity_repository.dart';
 
 final activityStudentsSubmissionsProvider =
     FutureProvider.autoDispose.family<ActivityStudentSubmissionsData, int>(

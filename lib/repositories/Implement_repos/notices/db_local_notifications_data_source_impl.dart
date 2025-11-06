@@ -44,7 +44,7 @@ class DbLocalNotificationsDataSourceImpl implements DbLocalNotificationsDataSour
 
       print('AVISO EN DATA SOURCE');
       for (var n in lsNotice) {
-        print("Aviso: " + n.toString());
+        print("Aviso: $n");
       }
       await db.close();
       return lsNotice;

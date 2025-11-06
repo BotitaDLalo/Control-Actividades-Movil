@@ -1,4 +1,3 @@
-import 'package:aprende_mas/config/data/key_value_storage_service_impl.dart';
 import 'package:aprende_mas/config/utils/packages.dart';
 import 'package:aprende_mas/models/models.dart';
 import 'package:aprende_mas/views/widgets/activities_body/notice/notice_body/notice_body.dart';

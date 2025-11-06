@@ -28,10 +28,6 @@ class EventDetailsScreen extends ConsumerWidget {
       (event) => event.eventId == eventId,
     );
 
-    if (eventOnly == null) {
-      return Center(child: CircularProgressIndicator());
-    }
-
     final eventNotifier = ref.watch(eventProvider.notifier);
 
     final groupProvider = ref.watch(groupsProvider);
@@ -77,7 +73,7 @@ class EventDetailsScreen extends ConsumerWidget {
     }
 
     return Scaffold(
-      appBar: AppBarScreens(),
+      appBar: const AppBarScreens(),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -91,7 +87,7 @@ class EventDetailsScreen extends ConsumerWidget {
               height: 20,
             ),
 
-            Text(
+            const Text(
               'Inicia: ',
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
@@ -116,7 +112,7 @@ class EventDetailsScreen extends ConsumerWidget {
               height: 20,
             ),
 
-            Text(
+            const Text(
               'Finaliza: ',
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
@@ -141,19 +137,19 @@ class EventDetailsScreen extends ConsumerWidget {
               height: 20,
             ),
 
-            Text(
+            const Text(
               'Destinatario: ',
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             if (groupName != null) Text("Grupo: $groupName"),
             if (subjectName != null) Text("Materia: $subjectName"),
             if (groupName == null && subjectName == null)
-            Text("Este evento no está asignado a ningún grupo ni materia."),
+            const Text("Este evento no está asignado a ningún grupo ni materia."),
 
             const SizedBox(
               height: 20,
             ),
-            Text(
+            const Text(
               'Descripción: ',
               style: TextStyle(fontWeight: FontWeight.bold),
             ),

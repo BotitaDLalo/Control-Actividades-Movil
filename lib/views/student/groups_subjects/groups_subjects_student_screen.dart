@@ -1,7 +1,5 @@
 import 'package:aprende_mas/config/utils/packages.dart';
-import 'package:aprende_mas/views/student/student.dart';
 import 'package:aprende_mas/views/users/groups_subjects/groups_subjects_screen.dart';
-import 'package:aprende_mas/views/widgets/buttons/floating_action_button_custom.dart';
 import 'package:aprende_mas/views/widgets/structure/modal_bottom_sheet_custom.dart';
 
 class GroupsSubjectsStudentScreen extends ConsumerStatefulWidget {

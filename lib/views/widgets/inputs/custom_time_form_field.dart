@@ -114,7 +114,7 @@ class CustomTimeFormFieldState extends State<CustomTimeFormField> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       width: widget.width ?? double.infinity,
       child: GestureDetector(
         onTap: _handleTap,
@@ -142,7 +142,7 @@ class CustomTimeFormFieldState extends State<CustomTimeFormField> {
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
-              Icon(
+              const Icon(
                 Icons.keyboard_arrow_down,
                 color: Colors.black54,
               ),

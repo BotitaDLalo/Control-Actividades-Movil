@@ -1,7 +1,6 @@
 import 'package:aprende_mas/models/models.dart';
 import 'package:aprende_mas/config/utils/packages.dart';
 import 'package:aprende_mas/config/utils/catalog_names.dart';
-import 'package:aprende_mas/config/data/data.dart';
 import 'package:aprende_mas/providers/data/key_value_storage_service_providers.dart';
 
 class CustomFooterContainer extends ConsumerWidget {

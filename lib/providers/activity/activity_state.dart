@@ -1,4 +1,3 @@
-import 'package:aprende_mas/models/activities/activity/activity.dart';
 import 'package:aprende_mas/models/models.dart';
 
 class ActivityState {

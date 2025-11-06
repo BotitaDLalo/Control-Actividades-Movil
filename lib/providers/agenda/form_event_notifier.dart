@@ -1,5 +1,4 @@
 import 'package:aprende_mas/config/utils/packages.dart';
-import 'package:aprende_mas/models/agenda/event_model.dart';
 import 'package:aprende_mas/providers/agenda/form_event_state.dart';
 import 'package:aprende_mas/views/views.dart';
 import 'package:aprende_mas/views/widgets/inputs/color_input.dart';

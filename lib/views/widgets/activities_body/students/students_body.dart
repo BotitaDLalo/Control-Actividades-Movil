@@ -15,12 +15,12 @@ class StudentsBody extends ConsumerWidget {
         borderColor: Colors.blue,
         child: Row(
           children: [
-            SizedBox(width: 10,),
-            Icon(Icons.person),
-            SizedBox(width: 20,),
-            Text('Nombre del alumno'),
-            SizedBox(width: 10,),
-            IconButton(onPressed: () {}, icon: Icon(Icons.mail))
+            const SizedBox(width: 10,),
+            const Icon(Icons.person),
+            const SizedBox(width: 20,),
+            const Text('Nombre del alumno'),
+            const SizedBox(width: 10,),
+            IconButton(onPressed: () {}, icon: const Icon(Icons.mail))
           ],
         ),
       ),

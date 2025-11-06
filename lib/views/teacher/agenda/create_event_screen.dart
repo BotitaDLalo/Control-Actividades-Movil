@@ -10,11 +10,11 @@ class CreateEventScreen extends StatelessWidget {
       //  debugPrint('CreateActivitiesScreen: subjectId: $subjectId, nombreMateria: $nombreMateria');
     return GestureDetector(
       onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
-      child: Scaffold(
+      child: const Scaffold(
         body: SingleChildScrollView(
           child: Column(
             children: [
-              const Stack(
+              Stack(
                 children: [
                   HeaderTile(
                     svg: 'assets/icons/agregar-tarea.svg', 
@@ -30,7 +30,7 @@ class CreateEventScreen extends StatelessWidget {
                 ],
               ),
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: 20.0),
+                padding: EdgeInsets.symmetric(vertical: 20.0),
                 child: FormEvents()
               ),
             ],

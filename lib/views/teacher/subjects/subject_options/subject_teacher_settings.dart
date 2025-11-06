@@ -4,6 +4,6 @@ class SubjectTeacherSettings extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Scaffold();
+    return const Scaffold();
   }
 }

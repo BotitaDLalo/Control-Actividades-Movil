@@ -25,4 +25,8 @@ abstract class KeyValueStorageService {
   Future<bool> removeUserName();
   Future<bool> removeAuthType();
   Future<bool> removeEmail();
+
+  Future<void> saveGoogleIdToken<T>(T value);
+  Future<String> getGoogleIdToken();
+  Future<bool> removeGoogleIdToken();
 }

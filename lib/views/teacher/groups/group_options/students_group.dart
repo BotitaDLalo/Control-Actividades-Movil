@@ -1,5 +1,4 @@
 import 'package:aprende_mas/config/utils/packages.dart';
-import 'package:aprende_mas/providers/groups/groups_provider.dart';
 import 'package:aprende_mas/providers/groups/students_group_provider.dart';
 import 'package:aprende_mas/views/teacher/groups_subjects/students_groups_subjects.dart';
 

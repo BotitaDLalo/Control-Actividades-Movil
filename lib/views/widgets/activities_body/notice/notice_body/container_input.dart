@@ -10,8 +10,8 @@ class ContainerInput extends StatelessWidget {
       padding: const EdgeInsets.only(left: 12),
       child: Row(
         children: [
-          Icon(Icons.person, size: 30,),
-          SizedBox(width: 10,),
+          const Icon(Icons.person, size: 30,),
+          const SizedBox(width: 10,),
           InputNoticeComment(onPressed: () {})
         ],
       ),

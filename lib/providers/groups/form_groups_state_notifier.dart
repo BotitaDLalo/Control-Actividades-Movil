@@ -1,6 +1,5 @@
 import 'package:aprende_mas/config/utils/packages.dart';
 import 'package:aprende_mas/providers/groups/form_groups_state.dart';
-import 'package:aprende_mas/views/widgets/inputs/color_input.dart';
 import 'package:aprende_mas/views/widgets/inputs/inputs.dart';
 import '../../models/models.dart';
 

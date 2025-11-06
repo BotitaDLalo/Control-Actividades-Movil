@@ -128,11 +128,27 @@ class KeyValueStorageServiceImpl implements KeyValueStorageService {
 
   @override
   Future<bool> removeToken() async {
-    return await _removeKeyValue(cn.getKeyIdName);
+    //return await _removeKeyValue(cn.getKeyIdName);
+    return await _removeKeyValue(cn.getKeyTokenName);
   }
 
   @override
   Future<bool> removeUserName() async {
     return await _removeKeyValue(cn.getKeyUserName);
+  }
+
+  @override
+  Future<void> saveGoogleIdToken<T>(T value) async {
+    await _setKeyValue('google_id_token', value);
+  }
+
+  @override
+  Future<String> getGoogleIdToken() async {
+    return await _getValue<String>('google_id_token') ?? "";
+  }
+
+  @override
+  Future<bool> removeGoogleIdToken() async {
+    return await _removeKeyValue('google_id_token');
   }
 }

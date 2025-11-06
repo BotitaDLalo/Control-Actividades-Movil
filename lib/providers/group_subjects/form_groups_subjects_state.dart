@@ -1,6 +1,3 @@
-import 'package:aprende_mas/config/utils/packages.dart';
-import 'package:aprende_mas/models/models.dart';
-import 'package:aprende_mas/views/widgets/inputs/color_input.dart';
 import 'package:aprende_mas/views/widgets/inputs/inputs.dart';
 
 class FormGroupsSubjectsState {

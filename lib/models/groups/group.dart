@@ -1,6 +1,4 @@
-import 'dart:ui';
 import 'package:aprende_mas/config/utils/general_utils.dart';
-import 'package:aprende_mas/config/utils/app_theme.dart';
 import 'package:aprende_mas/models/models.dart';
 
 class Group {

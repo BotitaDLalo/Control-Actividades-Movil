@@ -15,4 +15,9 @@ comando para obtener SHA-1 y SHA-256:
 cd Android
 ./gradlew signingReport
 
-hola221
+DETALLES A RESOLVER. -
+- El Login funciona sin validar el Token (cambiar esto para que valide el token
+    importante para las notificaciones push de firebase)
+- El metodo de verificar Email no bloquea al usuario si no se valida correctamente
+    el email, esto debe cambiarse por que debe verificar el Email siempre.
+- 

@@ -102,9 +102,9 @@ class VerifyEmailSigninForm extends ConsumerWidget {
 
                 if (!formEmail.email.isValid) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: const Text("El correo no es válido"),
-                      duration: const Duration(seconds: 3),
+                    const SnackBar(
+                      content: Text("El correo no es válido"),
+                      duration: Duration(seconds: 3),
                     ),
                   );
                   return; // Detener la ejecución si el formulario no es válido

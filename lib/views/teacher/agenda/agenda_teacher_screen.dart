@@ -6,6 +6,6 @@ class AgendaTeacherScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CalendarBody();
+    return const CalendarBody();
   }
 }

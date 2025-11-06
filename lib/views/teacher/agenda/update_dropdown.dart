@@ -1,6 +1,5 @@
 import 'package:aprende_mas/config/utils/packages.dart';
 import 'package:aprende_mas/models/agenda/event_model.dart';
-import 'package:aprende_mas/providers/agenda/form_event_provider.dart';
 import 'package:aprende_mas/providers/agenda/form_update_event_provider.dart';
 import 'package:aprende_mas/providers/groups/groups_provider.dart';
 import 'package:aprende_mas/providers/subjects/subjects_provider.dart';

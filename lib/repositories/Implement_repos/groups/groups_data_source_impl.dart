@@ -1,6 +1,5 @@
 import 'package:aprende_mas/config/network/dio_client.dart';
 import 'package:aprende_mas/config/utils/catalog_names.dart';
-import 'package:aprende_mas/config/utils/packages.dart';
 import 'package:aprende_mas/models/models.dart';
 import 'package:aprende_mas/config/data/data.dart';
 import 'package:aprende_mas/repositories/Interface_repos/groups/groups_data_source.dart';
@@ -17,11 +16,11 @@ class GroupsDataSourceImpl implements GroupsDataSource {
       List<Map<String, dynamic>> resList = [];
 
       if (role == cn.getRoleTeacherName) {
-        const uri = "/Grupos/ObtenerGruposMateriasDocente";
+        const uri = "/api/Grupos/ObtenerGruposMateriasDocente";
         final res = await dio.get(uri, queryParameters: {'docenteId': id});
         resList = List<Map<String, dynamic>>.from(res.data);
       } else if (role == cn.getRoleStudentName) {
-        const uri = "/Grupos/ObtenerGruposMateriasAlumno";
+        const uri = "/api/Grupos/ObtenerGruposMateriasAlumno";
         final res = await dio.get(uri, queryParameters: {'alumnoId': id});
         resList = List<Map<String, dynamic>>.from(res.data);
       }
@@ -35,7 +34,7 @@ class GroupsDataSourceImpl implements GroupsDataSource {
   @override
   Future<List<GroupsCreated>> getCreatedGroups() async {
     try {
-      const uri = "/Grupos/ObtenerGruposCreados";
+      const uri = "/api/Grupos/ObtenerGruposCreados";
       final id = await storageService.getId();
       final res = await dio.get(uri, queryParameters: {'docenteid': id});
       final resList = List<Map<String, dynamic>>.from(res.data);
@@ -50,7 +49,7 @@ class GroupsDataSourceImpl implements GroupsDataSource {
   Future<List<Group>> createGroupSubjects(String groupName, String description,
        List<SubjectsRow> subjectsList) async {
     try {
-      const uri = "/Grupos/CrearGrupoMaterias";
+      const uri = "/api/Grupos/CrearGrupoMaterias";
       final id = await storageService.getId();
       final subList = subjectsList
           .map((subject) => subject.toJsonGroupsSubjects())
@@ -79,7 +78,7 @@ class GroupsDataSourceImpl implements GroupsDataSource {
   @override
   Future<List<Group>> createGroup(
       String nombreGrupo, String descripcion) async {
-    const uri = "/Grupos/CrearGrupo";
+    const uri = "/api/Grupos/CrearGrupo";
     final id = await storageService.getId();
     try {
       final res = await dio.post(uri, data: {
@@ -109,7 +108,7 @@ class GroupsDataSourceImpl implements GroupsDataSource {
   Future<Group> updateGroup(int groupId, String groupName,
       String descriptionGroup) async {
     try {
-      const uri = "/Grupos/ActualizarGrupo";
+      const uri = "/api/Grupos/ActualizarGrupo";
       final id = await storageService.getId();
       final res = await dio.put(uri, data: {
         "GrupoId": groupId,
@@ -132,7 +131,7 @@ class GroupsDataSourceImpl implements GroupsDataSource {
   @override
   Future<VerifyEmail> verifyEmail(String email) async {
     try {
-      const uri = "/Alumnos/VerificarAlumnoEmail";
+      const uri = "/api/Alumnos/VerificarAlumnoEmail";
       final res = await dio.post(uri, data: {"Email": email});
 
       if (res.statusCode == 200) {
@@ -149,7 +148,7 @@ class GroupsDataSourceImpl implements GroupsDataSource {
   Future<List<StudentGroupSubject>> addStudentsGroup(
       int groupId, List<String> emails) async {
     try {
-      const uri = "/Alumnos/RegistrarAlumnoGMDocente";
+      const uri = "/api/Alumnos/RegistrarAlumnoGMDocente";
 
       final res =
           await dio.post(uri, data: {"Emails": emails, "GrupoId": groupId});
@@ -169,7 +168,7 @@ class GroupsDataSourceImpl implements GroupsDataSource {
   @override
   Future<List<StudentGroupSubject>> getStudentsGroup(int subjectId) async {
     try {
-      const uri = "/Alumnos/ObtenerListaAlumnosGrupo";
+      const uri = "/api/Alumnos/ObtenerListaAlumnosGrupo";
       final res = await dio.post(uri, data: {"GrupoId": subjectId});
 
       if (res.statusCode == 200) {

@@ -38,7 +38,7 @@ class SubjectsRespositoryImpl implements SubjectsRepository {
 
   @override
   Future<List<Subject>> getSubjectsWithoutGroup() {
-    debugPrint("SubjectsRespositoryImpl: ${subjectsDataSource}");
+    debugPrint("SubjectsRespositoryImpl: $subjectsDataSource");
     return subjectsDataSource.getSubjectsWithoutGroup();
   }
 
