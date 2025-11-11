@@ -121,7 +121,7 @@ class AuthDataSourceImpl implements AuthDataSource {
 
   @override
   Future<AuthUser> loginGoogle() async {
-    const uri = "/GoogleSignin/IniciarSesionGoogle";
+    const uri = "/Login/IniciarSesionGoogle";
     final googleSigninApi = GoogleSigninApiImpl();
     try {
       final googleUserData = await googleSigninApi.handlerGoogleSignIn();
@@ -156,7 +156,7 @@ class AuthDataSourceImpl implements AuthDataSource {
       required String role,
       required String fcmToken}) async {
     try {
-      const uri = "/GoogleSignin/RegistrarDatosFaltantesGoogle";
+      const uri = "/Login/RegistrarDatosFaltantesGoogle";
       final idToken = await storageService.getToken();
 
       final res = await dio.post(uri, data: {
