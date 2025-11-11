@@ -128,11 +128,13 @@ class KeyValueStorageServiceImpl implements KeyValueStorageService {
 
   @override
   Future<bool> removeToken() async {
-    return await _removeKeyValue(cn.getKeyIdName);
+    return await _removeKeyValue(cn.getKeyTokenName);
   }
 
   @override
   Future<bool> removeUserName() async {
     return await _removeKeyValue(cn.getKeyUserName);
   }
+
+
 }
