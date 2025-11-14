@@ -43,26 +43,26 @@ class NoticeModel {
       ls
           .map(
             (e) => NoticeModel(
-              noticeId: e['avisoId'],
-              title: e['titulo'],
-              description: e['descripcion'],
+              noticeId: e['AvisoId'],
+              title: e['Titulo'],
+              description: e['Descripcion'],
               teacherFullName:
-                  "${e['apePaternoDocente'].toString()} ${e['apeMaternoDocente'].toString()} ${e['nombresDocente'].toString()}",
-              createdDate: formatDate(e['fechaCreacion'].toString()),
-              groupId: e['grupoId'],
-              subjectId: e['materiaId'],
+                  "${e['ApePaternoDocente'].toString()} ${e['ApeMaternoDocente'].toString()} ${e['NombresDocente'].toString()}",
+              createdDate: formatDate(e['FechaCreacion'].toString()),
+              groupId: e['GrupoId'],
+              subjectId: e['MateriaId'],
             ),
           )
           .toList();
 
   static NoticeModel jsonToEntityNotice(Map<String, dynamic> e) => NoticeModel(
-        noticeId: e['avisoId'],
-        title: e['titulo'],
-        description: e['descripcion'],
+        noticeId: e['AvisoId'],
+        title: e['Titulo'],
+        description: e['Descripcion'],
         teacherFullName:
-            "${e['apePaternoDocente'].toString()} ${e['apeMaternoDocente'].toString()} ${e['NombresDocente'].toString()}",
-        createdDate: formatDate(e['fechaCreacion'].toString()),
-        groupId: e['grupoId'] ?? 0,
-        subjectId: e['materiaId'] ?? 0,
+            "${e['ApePaternoDocente'].toString()} ${e['ApeMaternoDocente'].toString()} ${e['NombresDocente'].toString()}",
+        createdDate: formatDate(e['FechaCreacion'].toString()),
+        groupId: e['GrupoId'] ?? 0,
+        subjectId: e['MateriaId'] ?? 0,
       );
 }
