@@ -1,6 +1,6 @@
 import 'package:aprende_mas/config/utils/packages.dart';
 import 'package:aprende_mas/models/models.dart';
-import 'package:aprende_mas/repositories/Implement_repos/notices/db_local_notifications%7D_repository_impl.dart';
+import 'package:aprende_mas/repositories/Implement_repos/notices/db_local_notifications_repository_impl.dart';
 
 class FirebaseCM {
   static Future<String?> getFcmToken() async {
