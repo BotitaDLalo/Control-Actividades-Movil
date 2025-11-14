@@ -43,7 +43,9 @@ class FatButtonBackground extends StatelessWidget {
               svg,
               width: 100,
               height: 100,
-              color: Colors.white.withOpacity(0.2),
+              color: colorUno.computeLuminance() > 0.5
+                  ? Colors.black.withOpacity(0.2)
+                  : Colors.white.withOpacity(0.2),
             )
           )
         ],
@@ -70,6 +72,7 @@ class FatButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final Color textColor = colorUno.computeLuminance() > 0.5 ? Colors.black : Colors.white;
     return GestureDetector(
       onTap: onPressed,
       child: Stack(
@@ -87,14 +90,14 @@ class FatButton extends StatelessWidget {
                 svg,
                 width: 40,
                 height: 40,
-                color: Colors.white,
+                color: textColor,
               ),
               const SizedBox(width: 20,),
               Expanded(
-                child: Text(groupName, style: const TextStyle(color: Colors.white, fontSize: 18),)),
+                child: Text(groupName, style: TextStyle(color: textColor, fontSize: 18),)),
               IconButton(
                 onPressed: onPressed, 
-                icon: const Icon(Icons.chevron_right, color: Colors.white, size: 40,)
+                icon: Icon(Icons.chevron_right, color: textColor, size: 40,)
               ),
               const SizedBox(width: 30,),
             ],

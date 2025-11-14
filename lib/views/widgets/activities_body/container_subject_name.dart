@@ -35,7 +35,7 @@ class ContainerNameGroupSubjects extends StatelessWidget {
                   child: Text(
                     name,
                     style: const TextStyle(
-                        color: Colors.white,
+                        color: Colors.black,
                         fontSize: 26,
                         fontWeight: FontWeight.bold,
                         overflow: TextOverflow.ellipsis
@@ -48,13 +48,13 @@ class ContainerNameGroupSubjects extends StatelessWidget {
                           const Text(
                             'Código de clase: ',
                             style: TextStyle(
-                              color: Colors.white,
+                              color: Colors.black,
                             ),
                           ),
                           Text(
                             accessCode ?? "",
                             style: const TextStyle(
-                                color: Colors.white,
+                                color: Colors.black,
                                 fontWeight: FontWeight.bold),
                           )
                         ],
@@ -66,7 +66,7 @@ class ContainerNameGroupSubjects extends StatelessWidget {
             Row(
               children: [
                 const VerticalDivider(
-                  color: Colors.white, // Color del divider
+                  color: Colors.black, // Color del divider
                   thickness: 2, // Grosor del divider
                   width: 10, // Espacio antes y después del divider
                 ),
@@ -74,7 +74,7 @@ class ContainerNameGroupSubjects extends StatelessWidget {
                     onPressed: () {},
                     icon: const Icon(
                       Icons.settings,
-                      color: Colors.white,
+                      color: Colors.black,
                       size: 40,
                     ))
               ],

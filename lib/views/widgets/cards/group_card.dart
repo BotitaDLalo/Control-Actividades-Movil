@@ -61,6 +61,9 @@ class CustomExpansionTileState extends ConsumerState<GroupCard>
   @override
   Widget build(BuildContext context) {
     final keyValueStorageService = KeyValueStorageServiceImpl();
+    final Color textColor = widget.color.computeLuminance() > 0.5
+        ? Colors.black
+        : Colors.white;
 
     void pushGroupTeacherSettings(Group data) {
       context.push('/group-teacher-settings', extra: data);
@@ -82,8 +85,8 @@ class CustomExpansionTileState extends ConsumerState<GroupCard>
                     "assets/icons/grupo.svg",
                     height: 40,
                     width: 40,
-                    colorFilter: const ColorFilter.mode(
-                      Colors.white, // Cambia el color del SVG aquí
+                    colorFilter: ColorFilter.mode(
+                      textColor, // color según contraste
                       BlendMode.srcIn,
                     ),
                   ),
@@ -92,13 +95,14 @@ class CustomExpansionTileState extends ConsumerState<GroupCard>
                     child: Text(
                       widget.title,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(color: Colors.white),
+                      style: TextStyle(color: textColor),
                     ),
                   ),
                   trailing: GestureDetector(
-                    child: const Icon(
+                    child: Icon(
                       Icons.settings,
-                      color: Colors.white,
+                      // icon color adapted to background
+                      color: textColor,
                       size: 35,
                     ),
                     onTap: () async {

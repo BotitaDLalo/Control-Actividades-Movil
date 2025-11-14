@@ -18,7 +18,7 @@ class HeaderTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color colorWhite = Colors.white;
+    final Color textColor = colorUno.computeLuminance() > 0.5 ? Colors.black : Colors.white;
 
     return Stack(
       children: [
@@ -33,19 +33,19 @@ class HeaderTile extends StatelessWidget {
             width: 250,
             height: 250,
             svg, 
-            color: Colors.white.withOpacity(0.1) ,
+            color: textColor.withOpacity(0.1) ,
           ),
         ),
         Column(
           children: [
             const SizedBox(height: 120, width: double.infinity,),
-            Text(titulo, style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),),
+            Text(titulo, style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold, color: textColor),),
             const SizedBox(height: 10,),
             SvgPicture.asset(
             width: 70,
             height: 70,
             svg, 
-            color: Colors.white,
+            color: textColor,
           ),
           ],
         ),

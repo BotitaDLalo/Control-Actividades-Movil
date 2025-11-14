@@ -57,24 +57,18 @@ class AuthDataSourceImpl implements AuthDataSource {
       });
       // final user = UserMapper.userSiginJsonToEntity(res.data);
       final user = AuthUserMapper.userJsonToEntity(res.data);
-      debugPrint('Usuario registrado: ${user.email}');
 
       return user;
     } on DioException catch (e) {
       if (e.response?.statusCode == 400 &&
-          e.response?.data['errorCode'] == 1006) { 
+          e.response?.data['errorCode'] == 1006) {
         final message = e.response?.data['errorMessage'];
-        debugPrint(e.toString());
-        throw UserAlreadyExists(errorMessage: message);  
+        throw UserAlreadyExists(errorMessage: message);
       }
       if (e.type == DioExceptionType.connectionTimeout)
-        
         throw ConnectionTimeout();
-        debugPrint(e.toString());
       throw UncontrolledError();
-      
     } on UncontrolledError {
-      debugPrint('UncontrolledError caught in signin');
       throw UncontrolledError();
     }
   }
@@ -207,36 +201,27 @@ class AuthDataSourceImpl implements AuthDataSource {
 
       if (idToken!.isEmpty) {
         uri = "/Login/ValidarCodigoDocente";
-        debugPrint('Validando codigo sin idToken');
       } else {
         uri = "/Login/ValidarCodigoDocenteGoogle";
         body['IdToken'] = idToken;
-        debugPrint('Validando codigo con idToken');
       }
-      debugPrint('Cuerpo de la solicitud: $body');
+
       final res = await dio.post(uri, data: body);
       final user = AuthUserMapper.userJsonToEntity(res.data);
       return user;
     } on DioException catch (e) {
       if (e.response?.data['errorCode'] == 1004) {
-        debugPrint('Codigo invalido');
         throw InvalidAuthorizationCode();
       }
       if (e.response?.data['errorCode'] == 1005) {
-        debugPrint('Codigo expirado');
         throw ExpiredAuthorizationCode();
       }
-      
-      debugPrint(e.toString());
+
       if (e.type == DioExceptionType.connectionTimeout)
-        //debugPrint('Connection timeout');
         throw ConnectionTimeout();
-        debugPrint('Error no controlado en registerAuthorizationCodeUser');
       throw UncontrolledError();
     } catch (e) {
       debugPrint(e.toString());
-      debugPrint('Error no controlado en registerAuthorizationCodeUser');
-      
       throw UncontrolledError();
     }
   }
