@@ -8,14 +8,18 @@ final activityRepositoryProvider = Provider<ActivityRepositoryImpl>((ref) {
   return ActivityRepositoryImpl();
 });
 
+final activityOfflineRepositoryProvider = Provider<ActivityOfflineRepositoryImpl>(
+    (ref) => ActivityOfflineRepositoryImpl());
+
 final activityProvider =
     StateNotifierProvider<ActivityNotifier, ActivityState>((ref) {
+      
   final activityRepository = ref.watch(activityRepositoryProvider);
+  final activityOfflineRepository = ref.watch(activityOfflineRepositoryProvider);
 
-  final activityOfflineRepository = ActivityOfflineRepositoryImpl();
   return ActivityNotifier(
     activityOfflineRepository: activityOfflineRepository,
-      activityRepository: activityRepository,
-      // activityOfflineRepository: activityOfflineRepository
-      );
+    activityRepository: activityRepository,
+    // activityOfflineRepository: activityOfflineRepository
+  );
 });

@@ -7,7 +7,7 @@ class GroupsCreated {
   static List<GroupsCreated> groupsCreatedToEntityList(
       List<Map<String, dynamic>> groupsCreated) {
     List<GroupsCreated> lsGroups = groupsCreated.map((e) {
-      return GroupsCreated(groupId: e['grupoId'], groupName: e['nombreGrupo']);
+      return GroupsCreated(groupId: e['GrupoId'], groupName: e['NombreGrupo']);
     }).toList();
     return lsGroups;
   }

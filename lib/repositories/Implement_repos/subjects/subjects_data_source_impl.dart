@@ -17,12 +17,12 @@ class SubjectsDataSourceImpl implements SubjectsDataSource {
 
       if (role == cn.getRoleTeacherName) {
         const uri = "/Materias/ObtenerMateriasDocente";
-        final res = await dio.get(uri, queryParameters: {'docenteid': id});
+        final res = await dio.get(uri, queryParameters: {'docenteId': id});
         resList = List<Map<String, dynamic>>.from(res.data);
         debugPrint("SubjectsDataSourceImpl: ${res.data}");
       } else if (role == cn.getRoleStudentName) {
         const uri = "/Materias/ObtenerMateriasAlumno";
-        final res = await dio.get(uri, queryParameters: {'alumnoid': id});
+        final res = await dio.get(uri, queryParameters: {'alumnoId': id});
         resList = List<Map<String, dynamic>>.from(res.data);
       }
       
