@@ -10,8 +10,8 @@ class ActivityDataSourceImpl implements ActivityDataSource {
   @override
   Future<List<Activity>> getAllActivities(int materiaId) async {
     try {
-      final uri = "/Actividades/ObtenerActividadesPorMateria/$materiaId";
-      final response = await dio.get(uri);
+      const uri = "/Actividades/ObtenerActividadesPorMateria";
+      final response = await dio.get(uri, queryParameters: {"materiaId":materiaId});
 
       final List<Map<String, dynamic>> data =
           List<Map<String, dynamic>>.from(response.data);
