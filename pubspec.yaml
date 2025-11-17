@@ -46,3 +46,5 @@ flutter:
     - assets/icons/grupo.svg
     - assets/icons/logo_horizontal-26.svg
     - assets/icons/filtro.svg
+    - assets/icons/new_notice.svg
+    - assets/icons/add_activity.svg

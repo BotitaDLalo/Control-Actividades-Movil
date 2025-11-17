@@ -20,67 +20,103 @@ class ContainerNameGroupSubjects extends StatelessWidget {
     // }
 
     return CustomContainerStyle(
-      height: 90,
+      height: 220,
       width: double.infinity,
       color: color,
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Row(
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      child: Stack(
+        children: [
+          // Flecha de regresar dentro del container
+          Positioned(
+            top: 36,
+            left: 16,
+            child: IconButton(
+              onPressed: () => Navigator.of(context).maybePop(),
+              icon: const Icon(Icons.arrow_back, color: Colors.white, size: 32),
+              tooltip: 'Regresar',
+            ),
+          ),
+          // Iconos arriba derecha
+          Positioned(
+            top: 36,
+            right: 24,
+            child: Row(
               children: [
-                SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.65,
-                  child: Text(
-                    name,
-                    style: const TextStyle(
-                        color: Colors.black,
-                        fontSize: 26,
-                        fontWeight: FontWeight.bold,
-                        overflow: TextOverflow.ellipsis
-                        ),
-                  ),
+                Icon(Icons.calendar_today, color: Colors.white, size: 32),
+                const SizedBox(width: 16),
+                Icon(Icons.notifications, color: Colors.white, size: 32),
+                const SizedBox(width: 16),
+                CircleAvatar(
+                  radius: 20,
+                  backgroundColor: Colors.white,
+                  child: Icon(Icons.person, color: color, size: 28),
                 ),
-                accessCode != null
-                    ? Row(
-                        children: [
-                          const Text(
-                            'Código de clase: ',
-                            style: TextStyle(
-                              color: Colors.black,
-                            ),
-                          ),
-                          Text(
-                            accessCode ?? "",
-                            style: const TextStyle(
-                                color: Colors.black,
-                                fontWeight: FontWeight.bold),
-                          )
-                        ],
-                      )
-                    : const SizedBox()
               ],
             ),
-            const Spacer(),
-            Row(
+          ),
+          // Título y código abajo izquierda (siempre visible y alternativo si no hay código)
+          Positioned(
+            left: 24,
+            right: 100,
+            bottom: 24,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const VerticalDivider(
-                  color: Colors.black, // Color del divider
-                  thickness: 2, // Grosor del divider
-                  width: 10, // Espacio antes y después del divider
+                Text(
+                  name,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.visible,
                 ),
-                IconButton(
-                    onPressed: () {},
-                    icon: const Icon(
-                      Icons.settings,
-                      color: Colors.black,
-                      size: 40,
-                    ))
+                Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: Row(
+                    children: [
+                      const Text(
+                        'Código de clase: ',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                      Text(
+                        (accessCode != null && accessCode!.isNotEmpty)
+                          ? accessCode!
+                          : 'Sin código',
+                        style: TextStyle(
+                          color: (accessCode != null && accessCode!.isNotEmpty)
+                            ? Colors.white
+                            : Colors.white.withOpacity(0.6),
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
               ],
-            )
-          ],
-        ),
+            ),
+          ),
+          // Botón de ajustes circular abajo derecha
+          Positioned(
+            right: 24,
+            bottom: 24,
+            child: GestureDetector(
+              onTap: () {},
+              child: CircleAvatar(
+                radius: 26,
+                backgroundColor: Colors.white,
+                child: Icon(Icons.settings, color: color, size: 28),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

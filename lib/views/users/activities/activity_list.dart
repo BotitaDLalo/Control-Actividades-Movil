@@ -7,7 +7,8 @@ import 'package:aprende_mas/views/widgets/widgets.dart';
 
 class ActivityList extends ConsumerStatefulWidget {
   final int subjectId;
-  const ActivityList({super.key, required this.subjectId});
+  final Widget Function()? emptyBuilder;
+  const ActivityList({super.key, required this.subjectId, this.emptyBuilder});
 
   @override
   ConsumerState<ActivityList> createState() => _ActivityListState();
@@ -118,6 +119,9 @@ class _ActivityListState extends ConsumerState<ActivityList> {
       );
     }
 
+    if (lsActivities.isEmpty && widget.emptyBuilder != null) {
+      return widget.emptyBuilder!();
+    }
     return ListView.builder(
       itemCount: lsActivities.length,
       itemBuilder: (context, index) {

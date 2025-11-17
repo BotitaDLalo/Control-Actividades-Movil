@@ -4,6 +4,7 @@ import 'package:aprende_mas/providers/notices/future_notices_provider.dart';
 import 'package:aprende_mas/providers/notices/notices_form_provider.dart';
 import 'package:aprende_mas/views/widgets/buttons/floating_action_button_custom.dart';
 import 'package:aprende_mas/views/widgets/widgets.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class TeacherNoticeOptionsScreen extends ConsumerStatefulWidget {
   final int groupId;
@@ -54,26 +55,50 @@ class _NoticeOptionsScreenState
           icon: Icons.add,
         ),
         body: futureNoticesls.when(
-          data: (data) => SingleChildScrollView(
-            child: Column(
-                children: data
-                    .map(
-                      (e) => Column(
-                        children: [
-                          NoticeBody(
-                              optionsIsVisible: true,
-                              noticeId: e.noticeId ?? 0,
-                              teacherName: e.teacherFullName ?? "",
-                              createdDate: e.createdDate.toString(),
-                              title: e.title,
-                              content: e.description),
-                          SizedBox(
-                              height: MediaQuery.of(context).size.height * 0.02)
-                        ],
-                      ),
-                    )
-                    .toList()),
-          ),
+          data: (data) => data.isEmpty
+              ? Center(
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 60.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SizedBox(
+                          height: 180,
+                          child: SvgPicture.asset(
+                            'assets/icons/new_notice.svg',
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        const Text(
+                          'Aquí podrás publicar anuncios,\nrecordatorios o enlaces\nimportantes para tus estudiantes.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontSize: 16),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              : SingleChildScrollView(
+                  child: Column(
+                      children: data
+                          .map(
+                            (e) => Column(
+                              children: [
+                                NoticeBody(
+                                    optionsIsVisible: true,
+                                    noticeId: e.noticeId ?? 0,
+                                    teacherName: e.teacherFullName ?? "",
+                                    createdDate: e.createdDate.toString(),
+                                    title: e.title,
+                                    content: e.description),
+                                SizedBox(
+                                    height: MediaQuery.of(context).size.height * 0.02)
+                              ],
+                            ),
+                          )
+                          .toList()),
+                ),
           error: (error, stackTrace) => Text(error.toString()),
           loading: () => const Center(child: CircularProgressIndicator()),
         ));

@@ -1,3 +1,4 @@
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:aprende_mas/config/utils/packages.dart';
 import 'package:aprende_mas/views/widgets/buttons/floating_action_button_custom.dart';
 import 'activity_list.dart';
@@ -94,7 +95,32 @@ class _ActivityOptionState extends ConsumerState<ActivityOptionScreen> {
             //     subjectId: widget.subjectId, subjectName: widget.subjectName),
             const SizedBox(height: 10),
             Expanded(
-              child: ActivityList(subjectId: widget.subjectId),
+              child: ActivityList(
+                subjectId: widget.subjectId,
+                emptyBuilder: () => Center(
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 60.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SizedBox(
+                          height: 180,
+                          child: SvgPicture.asset(
+                            'assets/icons/add_activity.svg',
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        const Text(
+                          'Aquí podrás crear actividades,\nproyectos o evaluaciones para tus estudiantes',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontSize: 16),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
             ),
             const SizedBox(height: 40),
           ],

@@ -8,7 +8,8 @@ const List<Color> _colorThemes = [
   Color.fromARGB(100, 0, 0, 0), //$Negro palido 3
   Color.fromARGB(150, 0, 0, 0), //$Negro palido 4
   Color.fromARGB(140, 141, 141, 141), //$ Gris 5
-  Color(0xFFCDDC39) //# Principal verde limón
+  Color.fromARGB(255, 33, 150, 243) //# Principal blue
+ // Color(0xFF31D492) //# Principal verde turquesa
 ];
 
 class AppTheme {

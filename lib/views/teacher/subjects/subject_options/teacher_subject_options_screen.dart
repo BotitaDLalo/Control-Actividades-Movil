@@ -97,19 +97,16 @@ class _ActividadesScreenState
         clearScreen();
       },
       child: Scaffold(
-        // removemos la AppBar global para que el header personalizado se muestre
-        // dentro del body y podamos controlar mejor su apariencia
-        body: SafeArea(
-          top: true,
+        body: MediaQuery.removePadding(
+          context: context,
+          removeTop: true,
           child: Column(
             children: [
-              // Header personalizado
               ContainerNameGroupSubjects(
                 name: widget.subjectName,
                 accessCode: widget.codeAccess,
-                color: AppTheme.mainColor,
+                color: const Color(0xFF31D492),
               ),
-              // opciones y contenido
               TeacherSubjectOptions(
                 lsSubjectOptions: lsSubjectOptions,
                 onOptionSelected: onOptionSelected,
