@@ -1,14 +1,10 @@
-import 'package:aprende_mas/views/widgets/cards/subject_card_activities.dart';
-import 'package:aprende_mas/views/widgets/cards/subject_card_header.dart';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:aprende_mas/config/utils/catalog_names.dart';
 import 'package:aprende_mas/providers/data/key_value_storage_service_providers.dart';
 import 'package:aprende_mas/models/models.dart';
 import 'package:aprende_mas/config/utils/packages.dart';
-
-import '../../../models/models.dart';
-import 'subject_card_footer.dart';
 
 class SubjectCard extends ConsumerWidget {
   final int? groupId;
@@ -17,6 +13,8 @@ class SubjectCard extends ConsumerWidget {
   final String description;
   final String accessCode;
   final List<Activity>? actividades;
+  final double widthFactor;
+  final double heightFactor;
 
   const SubjectCard({
     super.key,
@@ -26,6 +24,8 @@ class SubjectCard extends ConsumerWidget {
     required this.description,
     required this.accessCode,
     required this.actividades,
+    this.widthFactor = 0.5,
+    this.heightFactor = 0.15,
   });
 
   // Genera un degradado agradable determinístico a partir del subjectId
@@ -40,9 +40,9 @@ class SubjectCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final gradient = _makeGradient(subjectId);
 
-    // Mantengo las medidas responsivas similares al original
-    final width = MediaQuery.of(context).size.width * 0.70;
-    final height = MediaQuery.of(context).size.height * 0.24;
+    // Ahora calculamos dimensiones en función del espacio disponible usando LayoutBuilder.
+    // Si el padre no proporciona un ancho finito (por ejemplo, en una lista horizontal),
+    // se usa MediaQuery como fallback.
 
     final cn = ref.watch(catalogNamesProvider);
     final role = ref.watch(roleFutureProvider).maybeWhen(
@@ -59,98 +59,127 @@ class SubjectCard extends ConsumerWidget {
     }
 
     
-    return GestureDetector(
+    // Selección determinística de watermark (usa recursos existentes en assets/icons)
+    const watermarkIcons = [
+      //'assets/icons/grupo.svg',
+      'assets/icons/logo_horizontal-26.svg',
+      //'assets/icons/filtro.svg',
+    ];
+    final watermark = watermarkIcons[subjectId % watermarkIcons.length];
+
+    return LayoutBuilder(builder: (context, constraints) {
+      final availableWidth = constraints.maxWidth.isFinite
+          ? constraints.maxWidth
+          : MediaQuery.of(context).size.width;
+      final width = availableWidth * widthFactor;
+      final height = MediaQuery.of(context).size.height * heightFactor;
+
+      return GestureDetector(
       onTap: () {
         final data = Subject(
-          groupId: groupId,
-          materiaId: subjectId,
-          nombreMateria: nombreMateria,
-          codigoAcceso: accessCode,
-          descripcion: description);
-      if (role == cn.getRoleTeacherName) {
-        teacherSubjectOptions(data);
-      } else if (role == cn.getRoleStudentName) {
-        studentSubjectOptions(data);
-      }
+            groupId: groupId,
+            materiaId: subjectId,
+            nombreMateria: nombreMateria,
+            codigoAcceso: accessCode,
+            descripcion: description);
+        if (role == cn.getRoleTeacherName) {
+          teacherSubjectOptions(data);
+        } else if (role == cn.getRoleStudentName) {
+          studentSubjectOptions(data);
+        }
       },
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 7.0, vertical: 8.0),
+        margin: const EdgeInsets.symmetric(horizontal: 7.0, vertical: 9.0),
         width: width,
         height: height,
         decoration: BoxDecoration(
           gradient: gradient,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.12), blurRadius: 12, offset: const Offset(0, 6))],
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+                color: Colors.black.withOpacity(0.12),
+                blurRadius: 12,
+                offset: const Offset(0, 6))
+          ],
         ),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(20),
           child: Material(
             color: Colors.transparent,
-            child: Column(
+            child: Stack(
               children: [
-                // Mantengo tu CustomHeaderContainer (lógica intacta)
-                // Lo envolvemos en un container con fondo semitransparente para lectura
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                  
-                  
-                  
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                    // quitar color o poner transparente
-                    color: Colors.transparent,
-                    child: Text(
-                      nombreMateria,
-                      textAlign: TextAlign.left,
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+                // Watermark grande en la esquina inferior derecha (no haga overflow)
+                Positioned(
+                  right: -70,
+                  bottom: -30,
+                  child: Opacity(
+                    opacity: 0.12,
+                    child: SvgPicture.asset(
+                      watermark,
+                      // Limitamos el tamaño para evitar overflow en tarjetas bajas
+                      width: min(width * 0.9, height * 1.4),
+                      height: min(width * 0.9, height * 1.4),
+                      color: Colors.white,
                     ),
                   ),
-      
                 ),
-      
-                /*
-                // Contenedor central para las actividades: uso Expanded para que footer se quede fijo abajo
-                Expanded(
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                    // fondo ligeramente translúcido para dar contraste con el header/footer
-                    color: Colors.white.withOpacity(0.06),
-                    child: actividades == null || actividades!.isEmpty
-                        ? Center(
-                            child: Text(
-                              'Sin actividades',
-                              style: TextStyle(color: Colors.white.withOpacity(0.9)),
-                            ),
-                          )
-                        : ListView.builder(
-                            // replico tu limitación a 3 elementos si existían antes
-                            itemCount: actividades!.take(3).length,
-                            physics: const ClampingScrollPhysics(),
-                            itemBuilder: (context, index) {
-                              final actividad = actividades![index];
-                              // Mantengo el widget que antes usabas para renderizar actividades
-                              return Padding(
-                                padding: const EdgeInsets.only(bottom: 8.0),
-                                child: CustomActivitiesContainer(
-                                  actividades: actividad,
-                                ),
-                              );
-                            },
+
+                // Contenido principal
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Título grande a la izquierda
+                      Text(
+                        nombreMateria,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 6),
+                      // Descripción pequeña
+                      Text(
+                        description,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(color: Colors.white.withOpacity(0.9), fontSize: 13),
+                      ),
+                      const Spacer(),
+                      // Row inferior: MORE y posible número de actividades
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          /*
+                          Text(
+                            'MORE',
+                            style: TextStyle(
+                                color: Colors.white.withOpacity(0.9),
+                                fontWeight: FontWeight.w600),
                           ),
+                          */
+                          if (actividades != null && actividades!.isNotEmpty)
+                            Text(
+                              '${actividades!.length} actividades',
+                              style: TextStyle(
+                                color: Colors.white.withOpacity(0.85),
+                                fontSize: 15,
+                              ),
+                            ),
+                        ],
+                      )
+                    ],
                   ),
                 ),
-                */
-      
-                // Divider sutil
-                Container(height: 1, color: Colors.white.withOpacity(0.12)),
-                
               ],
             ),
           ),
         ),
       ),
     );
+    });
   }
 }

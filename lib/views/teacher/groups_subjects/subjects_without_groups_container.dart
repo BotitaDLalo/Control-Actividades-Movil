@@ -27,11 +27,14 @@ class _SubjectsWithoutGroupsState
         return Padding(
           padding: const EdgeInsets.all(8.0),
           child: SubjectCard(
-              subjectId: subject.materiaId,
-              nombreMateria: subject.nombreMateria,
-              description: subject.descripcion ?? "",
-              accessCode: subject.codigoAcceso ?? "",
-              actividades: subject.actividades),
+            subjectId: subject.materiaId,
+            nombreMateria: subject.nombreMateria,
+            description: subject.descripcion ?? "",
+            accessCode: subject.codigoAcceso ?? "",
+            actividades: subject.actividades,
+            widthFactor: 0.96,
+            heightFactor: 0.14,
+          ),
         );
       },
     );

@@ -1,5 +1,6 @@
 import 'package:aprende_mas/config/utils/packages.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 const List<Color> _colorThemes = [
   Color.fromARGB(255, 255, 255, 255), //$White 0
@@ -113,7 +114,15 @@ class AppTheme {
       );
 
   ThemeData theme() {
-    return ThemeData(
-        textTheme: textThemes, scaffoldBackgroundColor: _colorThemes[0]);
+    // Aplicar la tipografía Inter a toda la aplicación, respetando los estilos
+    final base = ThemeData(scaffoldBackgroundColor: _colorThemes[0]);
+    return base.copyWith(
+      textTheme: GoogleFonts.interTextTheme(textThemes),
+      primaryTextTheme: GoogleFonts.interTextTheme(base.primaryTextTheme),
+      // también aplicamos a los textos de widgets elevados y botones donde corresponda
+      appBarTheme: AppBarTheme(
+        titleTextStyle: GoogleFonts.inter(textStyle: textThemes.titleLarge),
+      ),
+    );
   }
 }

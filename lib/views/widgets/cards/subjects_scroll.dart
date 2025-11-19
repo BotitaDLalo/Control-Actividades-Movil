@@ -22,6 +22,8 @@ class SubjectScroll extends ConsumerWidget {
               accessCode: materia.codigoAcceso,
               description: materia.descripcion ?? "",
               actividades: materia.actividades,
+              widthFactor: 0.60,
+              heightFactor: 0.18,
             )
         ],
       ),
