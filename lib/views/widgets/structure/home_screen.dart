@@ -41,26 +41,70 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     return Scaffold(
       endDrawer: SizedBox(
-        width: 250,
+        width: 280,
         child: Drawer(
           child: ListView(
             padding: EdgeInsets.zero,
             children: <Widget>[
-              const SizedBox(height: 80),
-              // ListTile(
-              //   leading: const Icon(
-              //     Icons.account_circle,
-              //     size: 30,
-              //   ),
-              //   title: const Text(
-              //     'Cuenta',
-              //     style: TextStyle(fontSize: 20),
-              //   ),
-              //   onTap: () {
-              //     // Acción al tocar el ítem
-              //   },
-              // ),
-              // const SizedBox(height: 10),
+              // Header con gradiente, avatar y datos del usuario
+              Container(
+                height: 180,
+                width: double.infinity,
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Color.fromARGB(255, 53, 167, 239),
+                      Color.fromARGB(255, 39, 231, 225),
+                    ],
+                  ),
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: 76,
+                      height: 76,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.12),
+                            blurRadius: 6,
+                            offset: const Offset(0, 2),
+                          )
+                        ],
+                      ),
+                      child: const Icon(
+                        Icons.person,
+                        size: 40,
+                        color: Color.fromARGB(255, 5, 164, 204),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      auth.authUser?.userName ?? '',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      auth.authUser?.role ?? '',
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 6),
+              // Opciones del drawer
               ListTile(
                 leading: const Icon(
                   Icons.exit_to_app,
@@ -81,8 +125,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       appBar: AppBarHome(
         title: element.title,
       ),
-      body: Center(
-        child: element.widget,
+      // Espacio superior entre el AppBar y el contenido
+      body: Padding(
+        padding: const EdgeInsets.only(top: 0),
+        child: Center(
+          child: element.widget,
+        ),
       ),
       bottomNavigationBar: CustomNavbar(
         selectedIndex: ref.watch(itemTappedProvider),

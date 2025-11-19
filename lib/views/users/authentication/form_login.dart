@@ -3,7 +3,7 @@ import 'package:aprende_mas/config/utils/app_theme.dart';
 import 'package:aprende_mas/config/utils/packages.dart';
 import 'package:aprende_mas/providers/providers.dart';
 import 'package:aprende_mas/views/views.dart';
-import 'package:aprende_mas/views/widgets/buttons/button_login.dart';
+
 
 class FormLogin extends ConsumerStatefulWidget {
   const FormLogin({super.key});
@@ -69,7 +69,7 @@ class FormLoginState extends ConsumerState<FormLogin> {
                   ? loginForm.password.errorMessage
                   : null,
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
@@ -92,8 +92,14 @@ class FormLoginState extends ConsumerState<FormLogin> {
             SizedBox(
                 width: double.infinity,
                 height: MediaQuery.of(context).size.height * 0.060,
-                child: ButtonLogin(
-                  text: 'Iniciar Sesión',
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color.fromARGB(255, 15, 88, 147),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
                   onPressed: () {
                     if (loginForm.isPosting) {
                       return;
@@ -110,8 +116,7 @@ class FormLoginState extends ConsumerState<FormLogin> {
                           .onRequestPermissions();
                     }
                   },
-                  buttonStyle: AppTheme.buttonPrimary,
-                  textColor: Colors.white,
+                  child: const Text('Iniciar Sesión'),
                 )),
             const SizedBox(
               height: 16,
@@ -119,14 +124,20 @@ class FormLoginState extends ConsumerState<FormLogin> {
             SizedBox(
                 width: double.infinity,
                 height: MediaQuery.of(context).size.height * 0.060,
-                child: ButtonLogin(
-                  text: 'Registrarse',
-                  textColor: Colors.black,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color.fromARGB(255, 12, 56, 87),
+                    foregroundColor: const Color.fromARGB(255, 234, 235, 236),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    side: BorderSide(color: Colors.blue[800]!),
+                  ),
                   onPressed: () {
                     loginFormNotifier.resetStateForm();
                     context.push('/verify-email-signin-screen');
                   },
-                  buttonStyle: AppTheme.buttonSecondary,
+                  child: const Text('Registrarse'),
                 )),
 
             //TODO: BOTON DE REGISTRARSE
@@ -160,8 +171,12 @@ class FormLoginState extends ConsumerState<FormLogin> {
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size(double.infinity, 50),
-                backgroundColor: Colors.white,
+                backgroundColor: const Color.fromARGB(255, 108, 234, 200),
                 foregroundColor: Colors.black,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                  side: BorderSide(color: Colors.grey[400]!),
+                ),
               ),
               icon: const FaIcon(
                 FontAwesomeIcons.google,

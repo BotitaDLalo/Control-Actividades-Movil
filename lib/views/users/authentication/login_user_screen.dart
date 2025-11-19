@@ -55,14 +55,33 @@ class LoginUserScreen extends ConsumerWidget {
       child: Stack(
         children: [
           Scaffold(
+            backgroundColor: const Color.fromARGB(255, 255, 255, 255),
             appBar: AppBar(
-              backgroundColor: Colors.white,
+              backgroundColor: const Color.fromARGB(0, 35, 234, 184),
+              elevation: 0,
             ),
-            body: const Center(
+            body: Center(
               child: SingleChildScrollView(
-                physics: ClampingScrollPhysics(),
+                physics: const ClampingScrollPhysics(),
                 child: Column(
-                  children: [FormLogin()],
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: 150,
+                      height: 150,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.image,
+                        size: 80,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                    const SizedBox(height: 30),
+                    const FormLogin(),
+                  ],
                 ),
               ),
             ),
