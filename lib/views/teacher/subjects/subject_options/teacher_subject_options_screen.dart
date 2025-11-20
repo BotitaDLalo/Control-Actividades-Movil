@@ -58,7 +58,7 @@ class _ActividadesScreenState
           optionId: 1,
           isVisible: widget.groupId == null ? true : false,
           optionText: 'Avisos',
-          widgetOption: TeacherNoticeOptionsScreen(subjectId: widget.subjectId,)),
+          widgetOption: TeacherNoticeOptionsScreen(subjectId: widget.subjectId,subjectName: widget.subjectName)),
       GroupSubjectWidgetOption(
           optionId: 2,
           isVisible: true,
