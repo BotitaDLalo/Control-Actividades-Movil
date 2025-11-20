@@ -4,6 +4,7 @@ import 'package:aprende_mas/providers/providers.dart';
 import 'package:aprende_mas/views/widgets/alerts/custom_alert_dialog.dart';
 import 'package:aprende_mas/models/models.dart';
 import 'package:aprende_mas/views/widgets/widgets.dart';
+import 'package:intl/intl.dart';
 
 class ActivityList extends ConsumerStatefulWidget {
   final int subjectId;
@@ -33,6 +34,10 @@ class _ActivityListState extends ConsumerState<ActivityList> {
           data: (role) => role,
           orElse: () => "",
         );
+    final inputFormatter = DateFormat('dd-MM-yyyy HH:mm:ss'); 
+
+      // 2. Formateador de SALIDA: El formato en español que deseas mostrar (24 de Noviembre a las 12:00 am)
+    final outputFormatter = DateFormat('dd \'de\' MMMM \'a las\' hh:mm a', 'es');
 
     final actls = ref.watch(activityProvider).lsActivities;
     final lsActivities = ref
@@ -122,40 +127,66 @@ class _ActivityListState extends ConsumerState<ActivityList> {
     if (lsActivities.isEmpty && widget.emptyBuilder != null) {
       return widget.emptyBuilder!();
     }
-    return ListView.builder(
-      itemCount: lsActivities.length,
-      itemBuilder: (context, index) {
-        final activity = lsActivities[index];
-        return GestureDetector(
-          onLongPress: () async {
-            if (role == cn.getRoleTeacherName) {
-              showModalBottomActivityOptions(activity.activityId!);
-            }
-          },
-          child: ElementTile(
-              icon: Icons.assignment,
-              iconSize: 28,
-              iconColor: Colors.white,
-              title: activity.nombreActividad,
-              subtitle: activity.fechaLimite.toString(),
-              onTapFunction: () async {
-                final activityData = Activity(
-                    activityId: activity.activityId,
-                    nombreActividad: activity.nombreActividad,
-                    descripcion: activity.descripcion,
-                    tipoActividadId: activity.tipoActividadId,
-                    fechaCreacion: activity.fechaCreacion,
-                    fechaLimite: activity.fechaLimite,
-                    materiaId: activity.materiaId,
-                    puntaje: activity.puntaje);
-                if (role == cn.getRoleTeacherName) {
-                  teacherActivityStudentsSubmissions(activityData);
-                } else if (role == cn.getRoleStudentName) {
-                  studentActivitySubmissions(activityData);
-                }
-              }),
-        );
-      },
-    );
+    
+// En activity_list.dart
+return ListView.builder(
+  itemCount: lsActivities.length,
+  itemBuilder: (context, index) {
+    final activity = lsActivities[index];
+    
+    // --- CORRECCIÓN DEL ERROR DE FORMATO ---
+    String formattedDate = activity.fechaLimite.toString();
+
+    try {
+        // A. Convertir la cadena original (ej: "24-11-2025 12:00:00") a un DateTime
+        final DateTime dateToFormat = inputFormatter.parse(activity.fechaLimite.toString()); 
+
+        // B. Formatear el objeto DateTime al nuevo formato de salida
+        formattedDate = outputFormatter.format(dateToFormat); 
+    } catch (e) {
+        // En caso de error, usamos la fecha original o un mensaje de error.
+        print('Error al parsear o formatear la fecha: $e'); 
+        // Si el parsing falla, usamos la cadena original como fallback
+        formattedDate = activity.fechaLimite.toString(); 
+    }
+    // ------------------------------------
+    
+    return ElementTile(
+        icon: Icons.assignment,
+        iconSize: 28,
+        iconColor: Colors.white,
+        title: activity.nombreActividad,
+        
+        // Usamos la fecha correctamente formateada
+        subtitle: formattedDate, 
+        
+        trailingWidget: role == cn.getRoleTeacherName
+            ? IconButton(
+                icon: const Icon(Icons.more_vert),
+                color: Colors.grey,
+                onPressed: () {
+                  showModalBottomActivityOptions(activity.activityId!);
+                },
+              )
+            : null,
+            
+        onTapFunction: () async {
+          final activityData = Activity(
+              activityId: activity.activityId,
+              nombreActividad: activity.nombreActividad,
+              descripcion: activity.descripcion,
+              tipoActividadId: activity.tipoActividadId,
+              fechaCreacion: activity.fechaCreacion,
+              fechaLimite: activity.fechaLimite,
+              materiaId: activity.materiaId,
+              puntaje: activity.puntaje);
+          if (role == cn.getRoleTeacherName) {
+            teacherActivityStudentsSubmissions(activityData);
+          } else if (role == cn.getRoleStudentName) {
+            studentActivitySubmissions(activityData);
+          }
+        });
+  },
+);
   }
 }

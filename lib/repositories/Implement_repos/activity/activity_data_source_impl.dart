@@ -44,16 +44,34 @@ class ActivityDataSourceImpl implements ActivityDataSource {
     }
   }
 
-  @override
-  Future<Activity> updateActivity(
-    int activityId,
-    String nombreActividad,
-    String descripcion,
-    DateTime fechaLimite,
-  ) {
-    // TODO: implement updateActivity
-    throw UnimplementedError();
+@override
+Future<Activity> updateActivity(
+  int activityId,
+  String nombreActividad,
+  String descripcion,
+  DateTime fechaLimite,
+) async {
+  try {
+    const uri = "/Actividades/ActualizarActividad";
+
+    final response = await dio.put(uri, data: {
+      "ActividadId": activityId,
+      "NombreActividad": nombreActividad,
+      "Descripcion": descripcion,
+      "FechaLimite": fechaLimite.toIso8601String(),
+    });
+
+    debugPrint("Update response: ${response.data}");
+
+    final updatedActivity = ActivityMapper.jsonToEntity(response.data);
+
+    return updatedActivity;
+  } catch (e) {
+    debugPrint("Error updateActivity: $e");
+    throw Exception("ActivityDataSourceImpl error al actualizar actividad: $e");
   }
+}
+
 
   @override
   Future<List<Submission>> sendSubmission(int activityId, String answer) async {
@@ -177,7 +195,7 @@ class ActivityDataSourceImpl implements ActivityDataSource {
   @override
   Future<void> deleteActivity(int activityId) async {
     try {
-      const uri = "/Actividades/EliminarActividad/";
+      const uri = "/Actividades/EliminarActividad?id=";
       await dio.delete(uri + activityId.toString());
     } catch (e) {
       throw UncontrolledError();
