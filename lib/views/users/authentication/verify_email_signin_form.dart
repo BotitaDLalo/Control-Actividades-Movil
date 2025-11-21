@@ -67,17 +67,21 @@ class VerifyEmailSigninForm extends ConsumerWidget {
       padding: const EdgeInsets.all(20),
       child: Column(
         children: [
+          /*
           const Text(
             '¿Cual es tu correo?',
             style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
+          */
           const SizedBox(height: 20),
           CustomTextFormField(
-            icon: const Icon(
-              Icons.alternate_email,
-              size: 25,
-            ),
-            label: 'Correo',
+            icon: SvgPicture.asset(
+                'assets/icons/email.svg',
+                width: 10,
+                height: 10,
+                color: const Color.fromARGB(255, 12, 129, 231),
+              ),
+            label: '  Correo',
             keyboardType: TextInputType.emailAddress,
             onChanged: formEmailNotifier.onEmailChanged,
             // errorMessage:
@@ -86,13 +90,26 @@ class VerifyEmailSigninForm extends ConsumerWidget {
           const SizedBox(
             height: 65,
           ),
+          
+          // Nuevo boton personalizado
           SizedBox(
-            width: double.infinity,
-            height: MediaQuery.of(context).size.height * 0.060,
-            child: ButtonLogin(
-              text: 'Verificar',
-              textColor: Colors.white,
-              onPressed: () async {
+                //width: double.infinity,
+                width: MediaQuery.of(context).size.width * 0.5,
+                height: MediaQuery.of(context).size.height * 0.080,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color.fromARGB(255, 27, 158, 223),
+                    foregroundColor: const Color.fromARGB(255, 255, 255, 255),
+                    textStyle: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                    side: BorderSide(color: const Color.fromARGB(255, 14, 155, 226)),
+                  ),
+                  onPressed: () async {
                 // if (formEmail.isPosting) {
                 //   return;
                 // }
@@ -121,9 +138,10 @@ class VerifyEmailSigninForm extends ConsumerWidget {
                   );
                 }
               },
-              buttonStyle: AppTheme.buttonPrimary,
-            ),
-          )
+                  child: const Text('Verificar'),
+                )),
+
+
         ],
       ),
     ));

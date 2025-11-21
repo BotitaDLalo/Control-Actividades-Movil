@@ -44,11 +44,13 @@ class FormLoginState extends ConsumerState<FormLogin> {
         child: Column(
           children: [
             CustomTextFormField(
-              icon: const Icon(
-                Icons.alternate_email,
-                size: 30,
+              icon: SvgPicture.asset(
+                'assets/icons/email.svg',
+                width: 20,
+                height: 20,
+                color: const Color.fromARGB(255, 12, 129, 231),
               ),
-              label: 'Correo',
+              label: '  Correo',
               textEditingController: loginFormNotifier.emailController,
               keyboardType: TextInputType.emailAddress,
               onChanged: loginFormNotifier.onEmailChanged,
@@ -57,11 +59,13 @@ class FormLoginState extends ConsumerState<FormLogin> {
             ),
             const SizedBox(height: 20),
             CustomTextFormField(
-              icon: const Icon(
-                Icons.password_rounded,
-                size: 30,
+              icon: SvgPicture.asset(
+                'assets/icons/password1.svg',
+                width: 10,
+                height: 10,
+                color: const Color.fromARGB(255, 12, 129, 231),
               ),
-              label: 'Contraseña',
+              label: '  Contraseña',
               textEditingController: loginFormNotifier.passwordController,
               obscureText: true,
               onChanged: loginFormNotifier.onPasswordChanged,
@@ -193,9 +197,10 @@ class FormLoginState extends ConsumerState<FormLogin> {
                 ),
               ),
               /*
-              icon: const FaIcon(
-                FontAwesomeIcons.google,
-                size: 25,
+              icon: SvgPicture.asset(
+                'assets/icons/icon_google.svg',
+                width: 25,
+                height: 25,
               ),
               */
               onPressed: () {

@@ -73,9 +73,11 @@ class LoginUserScreen extends ConsumerWidget {
                         color: const Color.fromARGB(73, 33, 200, 251),
                         shape: BoxShape.circle,
                       ),
-                      child: Icon(
-                        Icons.person,
-                        size: 80,
+                      // Aqui ira el logo de la app posteriormente
+                      child: SvgPicture.asset(
+                        'assets/icons/user1.svg',
+                        width: 50,
+                        height: 50,
                         color: const Color.fromARGB(255, 18, 146, 245),
                       ),
                     ),

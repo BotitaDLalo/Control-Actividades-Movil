@@ -73,17 +73,21 @@ class FormSingin extends ConsumerWidget {
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
+            /*
             const Text(
               'Crear cuenta',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
+            */
             const SizedBox(height: 20),
             CustomTextFormField(
-              icon: const Icon(
-                Icons.person,
-                size: 25,
+              icon: SvgPicture.asset(
+                'assets/icons/user2.svg',
+                width: 20,
+                height: 20,
+                color: const Color.fromARGB(255, 12, 129, 231),
               ),
-              label: "Nombres",
+              label: "  Nombres",
               onChanged: signinFormNotifier.onNameChanged,
               errorMessage:
                   signinForm.isFormPosted ? signinForm.name.errorMessage : null,
@@ -95,9 +99,11 @@ class FormSingin extends ConsumerWidget {
               children: [
                 Expanded(
                   child: CustomTextFormField(
-                    icon: const Icon(
-                      Icons.person,
-                      size: 25,
+                    icon: SvgPicture.asset(
+                      'assets/icons/user2.svg',
+                      width: 20,
+                      height: 20,
+                      color: const Color.fromARGB(255, 12, 129, 231),
                     ),
                     label: "Apellido Paterno",
                     onChanged: signinFormNotifier.onLastNameChanged,
@@ -108,9 +114,11 @@ class FormSingin extends ConsumerWidget {
                 ),
                 Expanded(
                   child: CustomTextFormField(
-                    icon: const Icon(
-                      Icons.person,
-                      size: 25,
+                    icon: SvgPicture.asset(
+                      'assets/icons/user2.svg',
+                      width: 20,
+                      height: 20,
+                      color: const Color.fromARGB(255, 12, 129, 231),
                     ),
                     label: "Apellido Materno",
                     onChanged: signinFormNotifier.onSecondLastNameChanged,
@@ -120,11 +128,13 @@ class FormSingin extends ConsumerWidget {
             ),
             const SizedBox(height: 20),
             CustomTextFormField(
-              icon: const Icon(
-                Icons.password,
-                size: 25,
+              icon: SvgPicture.asset(
+                'assets/icons/password1.svg',
+                width: 10,
+                height: 10,
+                color: const Color.fromARGB(255, 12, 129, 231),
               ),
-              label: 'Contraseña',
+              label: '  Contraseña',
               obscureText: true,
               onChanged: signinFormNotifier.onPasswordChanged,
               errorMessage: signinForm.isFormPosted
@@ -135,11 +145,13 @@ class FormSingin extends ConsumerWidget {
               height: 20,
             ),
             CustomDropdown(
-              icon: const Icon(
-                Icons.group,
-                size: 25,
+              icon: SvgPicture.asset(
+                'assets/icons/usercheck1.svg',
+                width: 20,
+                height: 20,
+                color: const Color.fromARGB(255, 12, 129, 231),
               ),
-              label: 'Elige tu rol',
+              label: '  Elige tu rol',
               items: users,
               onChanged: (p0) {
                 signinFormNotifier.onRoleChanged(p0);
@@ -150,8 +162,9 @@ class FormSingin extends ConsumerWidget {
               height: 65,
             ),
             SizedBox(
-              width: double.infinity,
-              height: MediaQuery.of(context).size.height * 0.060,
+              //width: double.infinity,
+              width: MediaQuery.of(context).size.width * 0.5,
+              height: MediaQuery.of(context).size.height * 0.080,
               child: ButtonLogin(
                 text: 'Crear',
                 textColor: Colors.white,

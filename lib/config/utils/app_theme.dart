@@ -23,7 +23,7 @@ class AppTheme {
   static final Color cardHeader = _colorThemes[5];
 
   static final Color pickedColor = _colorThemes[0];
-  static final BorderRadius borderRadius = BorderRadius.circular(10);
+  static final BorderRadius borderRadius = BorderRadius.circular(30);
 
 //#Color picker availableColors
   static final List<Color> availableColors = [
@@ -72,8 +72,8 @@ class AppTheme {
 
 //#Buttons styles
   static final ButtonStyle buttonPrimary = ElevatedButton.styleFrom(
-    backgroundColor: const Color(0xFF0d6efd),
-    // textStyle: const TextStyle(fontSize: 16),
+    backgroundColor: const Color.fromARGB(255, 15, 126, 217),
+    //textStyle: const TextStyle(fontSize: 16),
     fixedSize: const Size.fromHeight(45),
     shape: RoundedRectangleBorder(
       borderRadius: borderRadius, // border radius

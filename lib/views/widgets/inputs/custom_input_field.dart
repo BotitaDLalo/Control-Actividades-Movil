@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 class CustomInputField extends StatelessWidget {
+  final Widget? icon;
   final String? label;
   final String? hint;
   final String? errorMessage;
@@ -17,6 +18,7 @@ class CustomInputField extends StatelessWidget {
 
   const CustomInputField({
     super.key,
+    this.icon,
     this.label,
     this.hint,
     this.errorMessage,
@@ -47,18 +49,18 @@ class CustomInputField extends StatelessWidget {
           ? TextCapitalization.sentences
           : TextCapitalization.none,
       style: const TextStyle(fontSize: 20, color: Colors.black),
-      decoration: InputDecoration(
+        decoration: InputDecoration(
+        prefixIcon: icon,
         floatingLabelStyle: const TextStyle(
-            color: Colors.black, fontWeight: FontWeight.bold, fontSize: 18),
-        // Dejar que el tema global maneje los bordes y colores
+          color: Colors.black, fontWeight: FontWeight.bold, fontSize: 18),
         isDense: true,
         label: label != null ? Text(label!) : null,
         hintText: hint,
         errorText: errorMessage,
         focusColor: colors.primaryColor,
         contentPadding: EdgeInsets.symmetric(
-            horizontal: 8, vertical: customHeight ?? 15),
-      ),
+          horizontal: 8, vertical: customHeight ?? 15),
+        ),
     );
   }
 }

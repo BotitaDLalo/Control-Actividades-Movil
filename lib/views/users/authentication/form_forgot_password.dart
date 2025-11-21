@@ -23,14 +23,21 @@ class FormForgotPassword extends ConsumerWidget {
         padding: const EdgeInsets.all(20.0),
         child: Column(
           children: [
+            /*
             const Text(
               '¿Olvidaste tu contraseña?',
               style: TextStyle(fontSize: 24),
             ),
+            */
             const SizedBox(height: 20),
             CustomTextFormField(
-              icon: const Icon(Icons.alternate_email,size: 25,),
-              label: 'Correo',
+              icon: SvgPicture.asset(
+                'assets/icons/email.svg',
+                width: 20,
+                height: 20,
+                color: const Color.fromARGB(255, 12, 129, 231),
+              ),
+              label: '  Correo',
               textEditingController: forgotPasswordNotifier.emailController,
               keyboardType: TextInputType.emailAddress,
               onChanged: forgotPasswordNotifier.onEmailChanged,
@@ -42,11 +49,13 @@ class FormForgotPassword extends ConsumerWidget {
               height: 65,
             ),
             SizedBox(
-              width: double.infinity,
-              height: MediaQuery.of(context).size.height * 0.060,
+              //width: double.infinity,
+              width: MediaQuery.of(context).size.width * 0.5,
+              height: MediaQuery.of(context).size.height * 0.080,
               child: ButtonLogin(
-                  buttonStyle: AppTheme.buttonPrimary,
-                  textColor: Colors.white,
+                  //buttonStyle: AppTheme.buttonPrimary,
+                  
+                  textColor: const Color.fromARGB(255, 6, 6, 6),
                   text: "Enviar",
                   onPressed: () async {
                     final bool? result =
