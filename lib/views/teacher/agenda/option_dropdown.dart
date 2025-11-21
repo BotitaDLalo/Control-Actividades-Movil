@@ -75,12 +75,10 @@ class _OptionDropdownFormState extends ConsumerState<OptionDropdownForm> {
           flex: 2,
           child: DropdownButtonFormField<String>(
             decoration: InputDecoration(
-              labelText: 'Tipo',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
+                labelText: 'Tipo',
+                // use global theme (underline) instead of forcing outline
+                isDense: true,
               ),
-              isDense: true,
-            ),
             items: ['Grupo', 'Materia']
                 .map((type) => DropdownMenuItem(
                       value: type,
@@ -103,9 +101,6 @@ class _OptionDropdownFormState extends ConsumerState<OptionDropdownForm> {
               labelText: _selectedType == null
                   ? 'Seleccione un tipo primero'
                   : 'Seleccione ${_selectedType!.toLowerCase()}',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
               isDense: true,
             ),
             items: _options.isEmpty

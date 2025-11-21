@@ -27,8 +27,8 @@ class AppBarHome extends ConsumerWidget implements PreferredSizeWidget {
       elevation: 0,
       toolbarHeight: headerHeight,
       flexibleSpace: const HeaderBackground(
-        colorUno: Color.fromARGB(255, 53, 167, 239),
-        colorDos: Color.fromARGB(255, 53, 217, 239),
+        colorUno: Color.fromARGB(255, 8, 110, 154),
+        colorDos: Color.fromARGB(255, 29, 183, 247),
       ),
       title: Padding(
         padding: const EdgeInsets.only(top: 20),

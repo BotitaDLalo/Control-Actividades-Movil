@@ -115,9 +115,6 @@ void initState() {
           child: DropdownButtonFormField<String>(
             decoration: InputDecoration(
               labelText: 'Tipo',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
               isDense: true,
             ),
             items: const [
@@ -134,9 +131,6 @@ void initState() {
           child: DropdownButtonFormField<int>(
             decoration: InputDecoration(
               labelText: _isGroup ? 'Grupo' : 'Materia',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
               isDense: true,
             ),
             items: options,

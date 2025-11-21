@@ -55,8 +55,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      Color.fromARGB(255, 53, 167, 239),
-                      Color.fromARGB(255, 39, 231, 225),
+                      Color.fromARGB(255, 3, 95, 153),
+                      Color.fromARGB(255, 29, 183, 247),
                     ],
                   ),
                 ),

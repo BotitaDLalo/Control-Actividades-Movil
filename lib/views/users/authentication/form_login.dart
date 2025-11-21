@@ -40,13 +40,13 @@ class FormLoginState extends ConsumerState<FormLogin> {
 
     return Form(
       child: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(15),
         child: Column(
           children: [
             CustomTextFormField(
               icon: const Icon(
                 Icons.alternate_email,
-                size: 25,
+                size: 30,
               ),
               label: 'Correo',
               textEditingController: loginFormNotifier.emailController,
@@ -59,7 +59,7 @@ class FormLoginState extends ConsumerState<FormLogin> {
             CustomTextFormField(
               icon: const Icon(
                 Icons.password_rounded,
-                size: 25,
+                size: 30,
               ),
               label: 'Contraseña',
               textEditingController: loginFormNotifier.passwordController,
@@ -86,18 +86,23 @@ class FormLoginState extends ConsumerState<FormLogin> {
             ),
 
             const SizedBox(
-              height: 25,
+              height: 20,
             ),
 
             SizedBox(
-                width: double.infinity,
-                height: MediaQuery.of(context).size.height * 0.060,
+                //width: double.infinity,
+                width: MediaQuery.of(context).size.width * 0.7,
+                height: MediaQuery.of(context).size.height * 0.110,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color.fromARGB(255, 15, 88, 147),
-                    foregroundColor: Colors.white,
+                    backgroundColor: const Color.fromARGB(255, 20, 158, 218),
+                    foregroundColor: const Color.fromARGB(255, 255, 255, 255),
+                    textStyle: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BorderRadius.circular(40),
                     ),
                   ),
                   onPressed: () {
@@ -119,19 +124,24 @@ class FormLoginState extends ConsumerState<FormLogin> {
                   child: const Text('Iniciar Sesión'),
                 )),
             const SizedBox(
-              height: 16,
+              height: 18,
             ),
             SizedBox(
-                width: double.infinity,
-                height: MediaQuery.of(context).size.height * 0.060,
+                //width: double.infinity,
+                width: MediaQuery.of(context).size.width * 0.5,
+                height: MediaQuery.of(context).size.height * 0.080,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color.fromARGB(255, 12, 56, 87),
-                    foregroundColor: const Color.fromARGB(255, 234, 235, 236),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
+                    backgroundColor: const Color.fromARGB(255, 8, 108, 158),
+                    foregroundColor: const Color.fromARGB(255, 255, 255, 255),
+                    textStyle: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
                     ),
-                    side: BorderSide(color: Colors.blue[800]!),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                    side: BorderSide(color: const Color.fromARGB(255, 14, 155, 226)),
                   ),
                   onPressed: () {
                     loginFormNotifier.resetStateForm();
@@ -141,7 +151,7 @@ class FormLoginState extends ConsumerState<FormLogin> {
                 )),
 
             //TODO: BOTON DE REGISTRARSE
-            const SizedBox(height: 50),
+            const SizedBox(height: 35),
 
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 25),
@@ -166,22 +176,28 @@ class FormLoginState extends ConsumerState<FormLogin> {
               ),
             ),
             const SizedBox(
-              height: 15,
+              height: 10,
             ),
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size(double.infinity, 50),
-                backgroundColor: const Color.fromARGB(255, 108, 234, 200),
-                foregroundColor: Colors.black,
+                backgroundColor: const Color.fromARGB(255, 7, 160, 160),
+                foregroundColor: const Color.fromARGB(255, 255, 255, 255),
+                textStyle: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20),
                   side: BorderSide(color: Colors.grey[400]!),
                 ),
               ),
+              /*
               icon: const FaIcon(
                 FontAwesomeIcons.google,
                 size: 25,
               ),
+              */
               onPressed: () {
                 loginFormNotifier.onGoogleSubmit();
               },

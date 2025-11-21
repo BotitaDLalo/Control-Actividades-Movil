@@ -123,6 +123,36 @@ class AppTheme {
       appBarTheme: AppBarTheme(
         titleTextStyle: GoogleFonts.inter(textStyle: textThemes.titleLarge),
       ),
+      // Estilo global para todos los campos de texto: línea inferior (underline)
+      inputDecorationTheme: InputDecorationTheme(
+        
+        filled: false,
+        isDense: true,
+        contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+        floatingLabelBehavior: FloatingLabelBehavior.auto,
+        labelStyle: TextStyle(color: Colors.grey[700]),
+        hintStyle: TextStyle(color: Colors.grey[500]),
+        prefixIconColor: mainColor,
+        suffixIconColor: Colors.grey[600],
+        // Línea inferior por defecto
+        border: UnderlineInputBorder(
+          borderSide: BorderSide(color: Colors.grey.withOpacity(0.35)),
+        ),
+        enabledBorder: UnderlineInputBorder(
+          borderSide: BorderSide(color: Colors.grey.withOpacity(0.35)),
+        ),
+        focusedBorder: UnderlineInputBorder(
+          borderSide: BorderSide(color: mainColor, width: 2),
+        ),
+        errorBorder: UnderlineInputBorder(
+          borderSide: BorderSide(color: Colors.red.withOpacity(0.9)),
+        ),
+        focusedErrorBorder: UnderlineInputBorder(
+          borderSide: BorderSide(color: Colors.red.withOpacity(0.9), width: 2),
+        ),
+      ),
+      // Cursor y selección para campos de texto
+      textSelectionTheme: TextSelectionThemeData(cursorColor: mainColor),
     );
   }
 }

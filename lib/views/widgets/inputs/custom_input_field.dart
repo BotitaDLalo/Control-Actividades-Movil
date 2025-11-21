@@ -50,22 +50,7 @@ class CustomInputField extends StatelessWidget {
       decoration: InputDecoration(
         floatingLabelStyle: const TextStyle(
             color: Colors.black, fontWeight: FontWeight.bold, fontSize: 18),
-        enabledBorder: OutlineInputBorder(
-          borderSide: const BorderSide(color: Color.fromARGB(100, 0, 0, 0)),
-          borderRadius: BorderRadius.circular(15),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderSide: const BorderSide(color: Color.fromARGB(255, 0, 0, 0)),
-          borderRadius: BorderRadius.circular(15),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.red.shade800),
-          borderRadius: BorderRadius.circular(15),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.red.shade800),
-          borderRadius: BorderRadius.circular(15),
-        ),
+        // Dejar que el tema global maneje los bordes y colores
         isDense: true,
         label: label != null ? Text(label!) : null,
         hintText: hint,

@@ -44,20 +44,7 @@ class CustomDropdown extends StatelessWidget {
         prefixIcon: icon,
         floatingLabelStyle: const TextStyle(
             color: Colors.black, fontWeight: FontWeight.bold, fontSize: 18),
-        enabledBorder: const OutlineInputBorder(
-          borderSide: BorderSide(color: Color.fromARGB(100, 0, 0, 0)),
-        ),
-        focusedBorder: const OutlineInputBorder(
-          borderSide: BorderSide(color: Color.fromARGB(255, 0, 0, 0)),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.red.shade800),
-          // borderRadius: BorderRadius.circular(15),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.red.shade800),
-          // borderRadius: BorderRadius.circular(15),
-        ),
+        // No forzar bordes: respetar el InputDecorationTheme global
         isDense: true,
         label: label != null ? Text(label!) : null,
         hintText: hint,

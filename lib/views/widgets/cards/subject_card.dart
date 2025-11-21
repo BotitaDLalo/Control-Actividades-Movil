@@ -62,8 +62,8 @@ class SubjectCard extends ConsumerWidget {
     // Selección determinística de watermark (usa recursos existentes en assets/icons)
     const watermarkIcons = [
       //'assets/icons/grupo.svg',
-      'assets/icons/logo_horizontal-26.svg',
-      //'assets/icons/filtro.svg',
+      'assets/icons/book1.svg',
+      //'assets/icons/school.svg',
     ];
     final watermark = watermarkIcons[subjectId % watermarkIcons.length];
 
@@ -110,15 +110,15 @@ class SubjectCard extends ConsumerWidget {
               children: [
                 // Watermark grande en la esquina inferior derecha (no haga overflow)
                 Positioned(
-                  right: -70,
-                  bottom: -30,
+                  right: -00,
+                  bottom: -00,
                   child: Opacity(
                     opacity: 0.12,
                     child: SvgPicture.asset(
                       watermark,
                       // Limitamos el tamaño para evitar overflow en tarjetas bajas
-                      width: min(width * 0.9, height * 1.4),
-                      height: min(width * 0.9, height * 1.4),
+                      width: min(width * 0.8, height * 1.0),
+                      height: min(width * 0.5, height * 1.0),
                       color: Colors.white,
                     ),
                   ),
