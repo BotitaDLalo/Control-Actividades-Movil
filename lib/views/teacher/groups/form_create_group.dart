@@ -120,11 +120,7 @@ class FormCreateGroup extends ConsumerWidget {
         children: [
           Container(
             alignment: const Alignment(-0.8, 1),
-            child: Text(
-              'Crear grupo',
-              style: Theme.of(context).textTheme.titleLarge,
-              // style: TextStyle(color: formCreateGroup.pickerColor),
-            ),
+            
           ),
           const SizedBox(height: 10),
           CustomTextFormField(

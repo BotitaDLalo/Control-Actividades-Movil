@@ -50,7 +50,7 @@ class _FormEventsState extends ConsumerState<FormEvents> {
 
     return Form(
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 40),
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 25),
         child: Column(children: [
           CustomTextFormField(
             enableLineBreak: true,
@@ -59,7 +59,7 @@ class _FormEventsState extends ConsumerState<FormEvents> {
             onChanged: formCreatedEventNotifier.onTitleChanged,
           ),
           const SizedBox(
-            height: 20,
+            height: 0,
           ),
           CustomTextFormField(
             capitalizeFirstLetter: true,
@@ -67,7 +67,7 @@ class _FormEventsState extends ConsumerState<FormEvents> {
             onChanged: formCreatedEventNotifier.onDescriptionChanged,
           ),
           const SizedBox(
-            height: 20,
+            height: 30,
           ),
           const Text(
             'Inicia',

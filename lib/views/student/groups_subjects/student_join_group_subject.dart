@@ -1,9 +1,9 @@
-import 'package:aprende_mas/config/utils/app_theme.dart';
 import 'package:aprende_mas/config/utils/packages.dart';
 import 'package:aprende_mas/providers/group_subjects/form_groups_subjects_provider.dart';
 import 'package:aprende_mas/providers/group_subjects/groups_subjects_provider.dart';
 import 'package:aprende_mas/views/views.dart';
 import 'package:aprende_mas/views/widgets/buttons/button_login.dart';
+import 'package:aprende_mas/views/widgets/structure/app_bar_home.dart';
 
 class StudentJoinGroupSubject extends ConsumerWidget {
   const StudentJoinGroupSubject({super.key});
@@ -51,17 +51,31 @@ class StudentJoinGroupSubject extends ConsumerWidget {
       child: Stack(
         children: [
           Scaffold(
-            appBar: AppBar(),
+            appBar: AppBarHome(
+              title: 'Ingresa código de clase',
+              showSettings: false,
+              titleFontSize: 21,
+              leading: IconButton(
+                onPressed: () {
+                  FocusScope.of(context).unfocus();
+                  context.pop();
+                },
+                icon: const Icon(Icons.arrow_back),
+                color: Colors.white,
+              ),
+            ),
             body: SingleChildScrollView(
               child: Column(
                 children: [
+                  /*
                   const Text(
-                    'Ingresa código de clase',
+                    'Ingresa el código de clase',
                     style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                   ),
+                  */
                   Form(
                       child: Padding(
-                    padding: const EdgeInsets.all(20),
+                    padding: const EdgeInsets.all(15),
                     child: Column(
                       children: [
                         CustomTextFormField(
@@ -78,7 +92,7 @@ class StudentJoinGroupSubject extends ConsumerWidget {
             ),
             bottomSheet: SizedBox(
                 width: double.infinity,
-                height: MediaQuery.of(context).size.height * 0.060,
+                height: MediaQuery.of(context).size.height * 0.080,
                 child: ButtonLogin(
                   text: 'Ingresar',
                   onPressed: () {
@@ -87,7 +101,15 @@ class StudentJoinGroupSubject extends ConsumerWidget {
                         .read(formStudentJoinClassProvider.notifier)
                         .onFormSubmit();
                   },
-                  buttonStyle: AppTheme.buttonPrimary,
+                  buttonStyle: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF0FA4E0),
+                    foregroundColor: Colors.white,
+                    elevation: 5,
+                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 10),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                  ),
                   textColor: Colors.white,
                 )),
           )

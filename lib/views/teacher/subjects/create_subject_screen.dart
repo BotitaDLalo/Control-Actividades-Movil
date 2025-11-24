@@ -8,6 +8,9 @@ class CreateSubjectsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, ref) {
-    return const FormScreen(form: FormCreateSubject());
+    return const FormScreen(
+      form: FormCreateSubject(),
+      title: 'Crear materia',
+    );
   }
 }

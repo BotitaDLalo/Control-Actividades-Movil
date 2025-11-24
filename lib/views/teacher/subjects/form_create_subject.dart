@@ -58,7 +58,8 @@ class FormCreateSubjectState extends ConsumerState<FormCreateSubject> {
 
     Widget groupsItems(int groupId, String nameGroup) {
       return Card(
-        color: Colors.white,
+        color: const Color.fromARGB(255, 167, 226, 254),
+        elevation: 2,
         child: ListTile(
           key: ValueKey(groupId),
           onTap: () {
@@ -66,8 +67,11 @@ class FormCreateSubjectState extends ConsumerState<FormCreateSubject> {
           },
           title: Text(
             nameGroup,
-            style:
-                Theme.of(context).textTheme.labelLarge?.copyWith(fontSize: 18),
+            style: const TextStyle(
+              color: Color.fromARGB(221, 0, 0, 0),
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           trailing: formCreateSubject.isSelectedGroup[groupId] ?? false
               ? Icon(Icons.check_circle, color: AppTheme.isSelectedGroup)
@@ -90,10 +94,6 @@ class FormCreateSubjectState extends ConsumerState<FormCreateSubject> {
           children: [
             Container(
               alignment: const Alignment(-0.8, 1),
-              child: Text(
-                'Crear materia',
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
             ),
             const SizedBox(
               height: 10,
@@ -167,7 +167,7 @@ class FormCreateSubjectState extends ConsumerState<FormCreateSubject> {
                   alignment: const Alignment(-0.8, 1),
                   child: Text(
                     'Grupos creados',
-                    style: Theme.of(context).textTheme.titleLarge,
+                    //style: Theme.of(context).textTheme.titleLarge,
                     // style: TextStyle(color: formCreateGroup.pickerColor),
                   ),
                 ),

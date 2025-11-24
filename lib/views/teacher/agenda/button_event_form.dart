@@ -13,6 +13,10 @@ class ButtonEventForm extends StatelessWidget {
         style: ElevatedButton.styleFrom(
           backgroundColor: const Color(0xFF0FA4E0),
           foregroundColor: Colors.white,
+          textStyle: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
           elevation: 6,
           padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(40)),
