@@ -40,24 +40,24 @@ class FormLoginState extends ConsumerState<FormLogin> {
 
     return Form(
       child: Padding(
-        padding: const EdgeInsets.all(15),
+        padding: const EdgeInsets.all(10),
         child: Column(
-          children: [
+          children: [ 
             CustomTextFormField(
               icon: SvgPicture.asset(
                 'assets/icons/email.svg',
-                width: 20,
-                height: 20,
+                width: 10,
+                height: 10,
                 color: const Color.fromARGB(255, 12, 129, 231),
               ),
-              label: '  Correo',
+              label: 'Correo',
               textEditingController: loginFormNotifier.emailController,
               keyboardType: TextInputType.emailAddress,
               onChanged: loginFormNotifier.onEmailChanged,
               errorMessage:
                   loginForm.isFormPosted ? loginForm.email.errorMessage : null,
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 5),
             CustomTextFormField(
               icon: SvgPicture.asset(
                 'assets/icons/password1.svg',
@@ -65,7 +65,7 @@ class FormLoginState extends ConsumerState<FormLogin> {
                 height: 10,
                 color: const Color.fromARGB(255, 12, 129, 231),
               ),
-              label: '  Contraseña',
+              label: 'Contraseña',
               textEditingController: loginFormNotifier.passwordController,
               obscureText: true,
               onChanged: loginFormNotifier.onPasswordChanged,
@@ -94,19 +94,19 @@ class FormLoginState extends ConsumerState<FormLogin> {
             ),
 
             SizedBox(
-                //width: double.infinity,
-                width: MediaQuery.of(context).size.width * 0.7,
-                height: MediaQuery.of(context).size.height * 0.110,
+                width: double.infinity,
+                //width: MediaQuery.of(context).size.width * 0.9,
+                height: MediaQuery.of(context).size.height * 0.100,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color.fromARGB(255, 20, 158, 218),
                     foregroundColor: const Color.fromARGB(255, 255, 255, 255),
                     textStyle: const TextStyle(
-                      fontSize: 20,
+                      fontSize: 18, // Aumenta el tamaño de letra a 20
                       fontWeight: FontWeight.bold,
                     ),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(40),
+                      borderRadius: BorderRadius.circular(25),
                     ),
                   ),
                   onPressed: () {
@@ -131,8 +131,8 @@ class FormLoginState extends ConsumerState<FormLogin> {
               height: 18,
             ),
             SizedBox(
-                //width: double.infinity,
-                width: MediaQuery.of(context).size.width * 0.5,
+                width: double.infinity,
+                //width: MediaQuery.of(context).size.width * 0.9,
                 height: MediaQuery.of(context).size.height * 0.080,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
@@ -143,7 +143,7 @@ class FormLoginState extends ConsumerState<FormLogin> {
                       fontWeight: FontWeight.bold,
                     ),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
+                      borderRadius: BorderRadius.circular(25),
                     ),
                     side: BorderSide(color: const Color.fromARGB(255, 14, 155, 226)),
                   ),
@@ -185,14 +185,14 @@ class FormLoginState extends ConsumerState<FormLogin> {
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size(double.infinity, 50),
-                backgroundColor: const Color.fromARGB(255, 7, 160, 160),
+                backgroundColor: const Color.fromARGB(255, 7, 142, 160),
                 foregroundColor: const Color.fromARGB(255, 255, 255, 255),
                 textStyle: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(15),
                   side: BorderSide(color: Colors.grey[400]!),
                 ),
               ),

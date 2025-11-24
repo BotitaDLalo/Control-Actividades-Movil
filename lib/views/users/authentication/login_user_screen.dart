@@ -55,7 +55,7 @@ class LoginUserScreen extends ConsumerWidget {
       child: Stack(
         children: [
           Scaffold(
-            backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+            backgroundColor: const Color.fromARGB(255, 241, 249, 253),
             appBar: AppBar(
               backgroundColor: const Color.fromARGB(0, 35, 234, 184),
               elevation: 0,
@@ -67,21 +67,23 @@ class LoginUserScreen extends ConsumerWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Container(
-                      width: 150,
-                      height: 150,
+                      width: 200,
+                      height: 200,
+                      /*
                       decoration: BoxDecoration(
                         color: const Color.fromARGB(73, 33, 200, 251),
                         shape: BoxShape.circle,
                       ),
+                      */
                       // Aqui ira el logo de la app posteriormente
                       child: SvgPicture.asset(
-                        'assets/icons/user1.svg',
-                        width: 50,
-                        height: 50,
-                        color: const Color.fromARGB(255, 18, 146, 245),
+                        'assets/icons/logo1.svg',
+                        width: 100,
+                        height: 100,
+                        //color: const Color.fromARGB(255, 18, 146, 245),
                       ),
                     ),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 0),
                     const FormLogin(),
                   ],
                 ),

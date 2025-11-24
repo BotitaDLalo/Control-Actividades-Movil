@@ -153,6 +153,26 @@ class AppTheme {
       ),
       // Cursor y selección para campos de texto
       textSelectionTheme: TextSelectionThemeData(cursorColor: mainColor),
+      // Hacer que los ElevatedButton usen por defecto el estilo de buttonPrimary
+      elevatedButtonTheme: ElevatedButtonThemeData(style: buttonPrimary),
+      // También proporcionar estilos coherentes para TextButton y OutlinedButton
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          foregroundColor: Colors.white,
+          backgroundColor: const Color.fromARGB(255, 15, 126, 217),
+          shape: RoundedRectangleBorder(borderRadius: borderRadius),
+          minimumSize: const Size.fromHeight(45),
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: _colorThemes[2],
+          backgroundColor: _colorThemes[0],
+          side: BorderSide(color: _colorThemes[3]),
+          shape: RoundedRectangleBorder(borderRadius: borderRadius),
+          minimumSize: const Size.fromHeight(45),
+        ),
+      ),
     );
   }
 }

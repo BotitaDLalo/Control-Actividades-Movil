@@ -10,12 +10,20 @@ class ButtonLogin extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final defaultStyle = ElevatedButton.styleFrom(
+      backgroundColor: const Color(0xFF0FA4E0),
+      foregroundColor: Colors.white,
+      elevation: 6,
+      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(40)),
+    );
+
     return ElevatedButton(
-        style: buttonStyle,
+        style: buttonStyle ?? defaultStyle,
         onPressed: onPressed,
         child: Text(
           text ?? "",
-          style: TextStyle(color: textColor, fontSize: 18),
+          style: TextStyle(color: textColor ?? Colors.white, fontSize: 19, fontWeight: FontWeight.bold),
         ));
   }
 }

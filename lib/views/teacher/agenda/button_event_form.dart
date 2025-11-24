@@ -11,10 +11,11 @@ class ButtonEventForm extends StatelessWidget {
   Widget build(BuildContext context) {
     return FilledButton(
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.blue,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20), // border radius
-          ),
+          backgroundColor: const Color(0xFF0FA4E0),
+          foregroundColor: Colors.white,
+          elevation: 6,
+          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(40)),
         ),
         onPressed: onPressed,
         child: Text(buttonName));

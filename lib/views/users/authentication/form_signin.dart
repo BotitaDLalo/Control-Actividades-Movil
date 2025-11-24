@@ -162,19 +162,27 @@ class FormSingin extends ConsumerWidget {
               height: 65,
             ),
             SizedBox(
-              //width: double.infinity,
               width: MediaQuery.of(context).size.width * 0.5,
               height: MediaQuery.of(context).size.height * 0.080,
               child: ButtonLogin(
-                text: 'Crear',
-                textColor: Colors.white,
+                  buttonStyle: ElevatedButton.styleFrom(
+                    backgroundColor: const Color.fromARGB(255, 20, 158, 218),
+                    foregroundColor: Colors.white,
+                    elevation: 6,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(40),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
+                  ),
+                  textColor: Colors.white,
+                  text: "Enviar",
                 onPressed: () {
                   if (signinForm.isPosting) {
                     return;
                   }
                   signinFormNotifier.onFormSigninSubmit();
                 },
-                buttonStyle: AppTheme.buttonPrimary,
+                //buttonStyle: AppTheme.buttonPrimary,
               ),
             ),
           ],
