@@ -6,6 +6,7 @@ import 'package:aprende_mas/models/models.dart';
 import 'package:aprende_mas/views/widgets/widgets.dart';
 import 'package:intl/intl.dart';
 
+
 class ActivityList extends ConsumerStatefulWidget {
   final int subjectId;
   final Widget Function()? emptyBuilder;
@@ -36,7 +37,6 @@ class _ActivityListState extends ConsumerState<ActivityList> {
         );
     final inputFormatter = DateFormat('dd-MM-yyyy HH:mm:ss'); 
 
-      // 2. Formateador de SALIDA: El formato en español que deseas mostrar (24 de Noviembre a las 12:00 am)
     final outputFormatter = DateFormat('dd \'de\' MMMM \'a las\' hh:mm a', 'es');
 
     final actls = ref.watch(activityProvider).lsActivities;
@@ -87,7 +87,8 @@ class _ActivityListState extends ConsumerState<ActivityList> {
       );
     }
 
-    void showModalBottomActivityOptions(int activityId) {
+// AHORA RECIBE EL OBJETO ACTIVITY COMPLETO
+    void showModalBottomActivityOptions(Activity activity) {
       showModalBottomSheet(
         context: context,
         shape: const RoundedRectangleBorder(
@@ -106,7 +107,10 @@ class _ActivityListState extends ConsumerState<ActivityList> {
                   leading: const Icon(Icons.edit),
                   title: const Text('Editar'),
                   onTap: () {
-                    Navigator.pop(context);
+                    Navigator.pop(context); // Cierra el modal
+                    
+                    // Navega a la pantalla de formulario pasando la actividad actual
+                    context.push('/create-activities', extra: activity); 
                   },
                 ),
                 ListTile(
@@ -114,7 +118,7 @@ class _ActivityListState extends ConsumerState<ActivityList> {
                   title: const Text('Eliminar'),
                   onTap: () {
                     Navigator.of(context).pop();
-                    showDialogDeleteConfirmation(activityId);
+                    showDialogDeleteConfirmation(activity.activityId!);
                   },
                 ),
               ],
@@ -165,7 +169,7 @@ return ListView.builder(
                 icon: const Icon(Icons.more_vert),
                 color: Colors.grey,
                 onPressed: () {
-                  showModalBottomActivityOptions(activity.activityId!);
+                  showModalBottomActivityOptions(activity);
                 },
               )
             : null,

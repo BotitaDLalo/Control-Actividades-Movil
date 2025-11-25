@@ -1,97 +1,45 @@
-import 'package:aprende_mas/config/utils/packages.dart';
-import 'package:aprende_mas/providers/activity/activty_form_provider.dart';
-import 'package:aprende_mas/views/teacher/activities/options/create_activies/button_ai.dart';
-import 'package:aprende_mas/views/teacher/activities/options/create_activies/form_activities.dart';
-import 'package:aprende_mas/views/widgets/widgets.dart';
+import 'package:flutter/material.dart';
+import 'package:aprende_mas/views/teacher/activities/options/create_activies/form_activities.dart'; // Asegúrate de importar tu formulario
+import 'package:aprende_mas/models/models.dart'; // Asegúrate de importar el modelo Activity
 
-class CreateActivitiesScreen extends ConsumerWidget {
+class CreateActivitiesScreen extends StatelessWidget {
   final int subjectId;
   final String nombreMateria;
+  // 1. AGREGAR ESTA VARIABLE
+  final Activity? activity; 
 
-  const CreateActivitiesScreen({super.key, required this.subjectId, required this.nombreMateria});
+  const CreateActivitiesScreen({
+    super.key,
+    required this.subjectId,
+    required this.nombreMateria,
+    // 2. AGREGAR AL CONSTRUCTOR
+    this.activity, 
+  });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final activityCreated = ref.read(activityFormProvider.notifier);
-
-    return GestureDetector(
-      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
-      child: Scaffold(
-        body: SingleChildScrollView(
-          child: Column(
-            children: [
-              const Stack(
-                children: [
-                  HeaderTile(
-                    svg: 'assets/icons/agregar-tarea.svg', 
-                    titulo: 'Crear Actividades',
-                    // colorUno: Color(0xff536cf6),
-                    // colorDos: Color(0xff66A9F2),
-                  ),
-                  Positioned(
-                    left: 10,
-                    top: 40,
-                    child: ButtonClose(),
-                  ),
-                ],
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 20.0),
-                child: FormActivities(subjectId: subjectId, nombreMateria: nombreMateria,)
-              ),
-            ],
-          ),
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        // Cambiamos el título dinámicamente dependiendo si es editar o crear
+        title: Text(activity == null ? 'Crear Actividad' : 'Editar Actividad'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios),
+          onPressed: () => Navigator.of(context).pop(),
         ),
-        floatingActionButton: ButtonAI(
-          tituloController: activityCreated.nombreController,
-          descripcionController: activityCreated.descripcionController,
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            // Aquí llamas a tu formulario
+            FormActivities(
+              subjectId: subjectId,
+              nombreMateria: nombreMateria,
+              // 3. PASAR LA ACTIVIDAD AL FORMULARIO
+              activity: activity, 
+            ),
+          ],
         ),
       ),
     );
   }
 }
-
-
-
-// class CreateActivitiesScreen extends StatelessWidget {
-//   final int subjectId;
-//   final String nombreMateria;
-
-//   const CreateActivitiesScreen({super.key, required this.subjectId, required this.nombreMateria});
-
-//   @override
-//   Widget build(BuildContext context) {
-//       //  debugPrint('CreateActivitiesScreen: subjectId: $subjectId, nombreMateria: $nombreMateria');
-//     return GestureDetector(
-//       onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
-//       child: Scaffold(
-//         body: SingleChildScrollView(
-//           child: Column(
-//             children: [
-//               const Stack(
-//                 children: [
-//                   HeaderTile(
-//                     svg: 'assets/icons/agregar-tarea.svg', 
-//                     titulo: 'Crear Actividades',
-//                     // colorUno: Color(0xff536cf6),
-//                     // colorDos: Color(0xff66A9F2),
-//                   ),
-//                   Positioned(
-//                     left: 10,
-//                     top: 40,
-//                     child: ButtonClose(),
-//                   ),
-//                 ],
-//               ),
-//               Padding(
-//                 padding: const EdgeInsets.symmetric(vertical: 20.0),
-//                 child: FormActivities(subjectId: subjectId, nombreMateria: nombreMateria,)
-//               ),
-//             ],
-//           ),
-//         ),
-//         floatingActionButton: ButtonAI(),
-//       ),
-//     );
-//   }
-// }

@@ -2,14 +2,24 @@ import 'package:aprende_mas/config/utils/packages.dart';
 import 'package:aprende_mas/models/models.dart';
 import 'package:aprende_mas/providers/activity/activity_form_state.dart';
 import 'package:aprende_mas/views/widgets/inputs/generic_input.dart';
-// import 'package:aprende_mas/views/widgets/inputs/time_input.dart';
 
 class ActivityFormNotifier extends StateNotifier<ActivityFormState> {
   final Function(Map<String, dynamic> activityLike)? activityCallback;
+ // En la parte superior de la clase ActivityFormNotifier
+  final Function(
+      int activityId, 
+      String nombre, 
+      String descripcion, 
+      DateTime fechaLimite, 
+      int puntaje,   // <--- Agregamos int puntaje
+      int materiaId  // <--- Agregamos int materiaId
+  )? updateActivityCallback;
+  
   final Function(int, String) sendSubmissionCallback;
   final Function(int, String) sendSubmissionOfflineCallback;
   final Function({required int submissionId, required int grade})
       submissionGradingCallback;
+  
   final TextEditingController nombreController;
   final TextEditingController descripcionController;
   final TextEditingController fechaController;
@@ -18,11 +28,12 @@ class ActivityFormNotifier extends StateNotifier<ActivityFormState> {
   final TextEditingController puntajeController;
 
   ActivityFormNotifier(
-      {
-      required this.activityCallback,
+      {required this.activityCallback,
       required this.sendSubmissionCallback,
       required this.sendSubmissionOfflineCallback,
-      required this.submissionGradingCallback})
+      required this.submissionGradingCallback,
+      this.updateActivityCallback, // Agregar al constructor
+      })
       : fechaController = TextEditingController(),
         horaController = TextEditingController(),
         nombreController = TextEditingController(),
@@ -40,7 +51,7 @@ class ActivityFormNotifier extends StateNotifier<ActivityFormState> {
         state.descripcion,
         state.horaLimite,
         state.fechaLimite,
-        state.puntaje
+        //state.puntaje
       ]),
     );
   }
@@ -55,7 +66,7 @@ class ActivityFormNotifier extends StateNotifier<ActivityFormState> {
         newDescripcion,
         state.horaLimite,
         state.fechaLimite,
-        state.puntaje
+        //state.puntaje
       ]),
     );
   }
@@ -64,13 +75,13 @@ class ActivityFormNotifier extends StateNotifier<ActivityFormState> {
   onFechaLimiteChanged(String value) {
     final newFechaLimite = GenericInput.dirty(value);
     state = state.copyWith(
-      fechaLimite: newFechaLimite, // Corregido: Asigna a 'fechaLimite'
+      fechaLimite: newFechaLimite,
       isValid: Formz.validate([
         state.nombre,
         state.descripcion,
         state.horaLimite,
-        newFechaLimite, // Valida correctamente 'fechaLimite'
-        state.puntaje
+        newFechaLimite,
+        //state.puntaje
       ]),
     );
   }
@@ -79,33 +90,50 @@ class ActivityFormNotifier extends StateNotifier<ActivityFormState> {
   onHoraLimiteChanged(String value) {
     final newHoraLimite = GenericInput.dirty(value);
     state = state.copyWith(
-      horaLimite: newHoraLimite, // Corregido: Asigna a 'horaLimite'
+      horaLimite: newHoraLimite,
       isValid: Formz.validate([
         state.nombre,
         state.descripcion,
         state.fechaLimite,
-        newHoraLimite, // Valida correctamente 'horaLimite'
-        state.puntaje
+        newHoraLimite,
+        //state.puntaje
       ]),
     );
   }
 
-  onPuntajeChanged(String value) {
-    int? parsedValue = int.tryParse(value);
-    final newPuntaje = GenericInput.dirty(
-      parsedValue != null ? parsedValue.toString() : '',
-    );
+// En activity_form_notifier.dart (alrededor de la línea 119)
+
+onPuntajeChanged(String value) {
+    
+    // 🔴 NUEVA LÓGICA: Si el valor está vacío, lo consideramos 'pure' (válido sin error)
+    if (value.isEmpty) { 
+        state = state.copyWith(
+            puntaje: const GenericInput.pure(), // <--- ESTO ES CRUCIAL
+            isValid: Formz.validate([
+                state.nombre,
+                state.descripcion,
+                state.fechaLimite,
+                state.horaLimite,
+                // Asegúrate de que puntaje NO esté aquí
+            ]),
+        );
+        return; 
+    }
+
+    // Lógica para cuando el campo SÍ tiene valor
+    final newPuntaje = GenericInput.dirty(value);
+    
     state = state.copyWith(
-      puntaje: newPuntaje,
-      isValid: Formz.validate([
-        state.nombre,
-        state.descripcion,
-        state.fechaLimite,
-        state.horaLimite,
-        newPuntaje,
-      ]),
+        puntaje: newPuntaje,
+        isValid: Formz.validate([
+            state.nombre,
+            state.descripcion,
+            state.fechaLimite,
+            state.horaLimite,
+            // Asegúrate de que newPuntaje NO esté aquí
+        ]),
     );
-  }
+}
 
   DateTime? _getFechaHoraConcatenada() {
     try {
@@ -144,61 +172,119 @@ class ActivityFormNotifier extends StateNotifier<ActivityFormState> {
     }
   }
 
-//& No recibe la descripcion,
-  Future<void> onFormSubmit(int subjectId, String nombreMateria) async {
-    // Verificar que no haya una petición en curso
+  // 2. NUEVO MÉTODO: Limpiar formulario (usado al entrar en modo Creación)
+  void clearForm() {
+    resetStateForm();
+  }
+
+// En activity_form_notifier.dart (Línea 150)
+
+Future<void> onFormUpdate(int subjectId, String nombreMateria, int activityId) async {
     if (state.isPosting) return;
 
     _touchEveryField();
 
-    // Concatenar fecha y hora
+    final fechaHoraConcatenada = _getFechaHoraConcatenada();
+    if (fechaHoraConcatenada == null) {
+      throw Exception("onFormUpdate Error: Fecha u hora inválida.");
+    }
+
+    // 🔴 LÓGICA DE PUNTAJE OPCIONAL: Si el campo está vacío, usa 100.
+    final int puntajeToSend = state.puntaje.value.isEmpty
+        ? 100
+        // Si no está vacío, asume que es un número válido (por el tryParse de onPuntajeChanged)
+        : int.tryParse(state.puntaje.value) ?? 100;
+        
+    // 🔴 ELIMINAR ESTO: Ya no se valida que puntajeInt no sea null
+    // final puntajeInt = int.tryParse(state.puntaje.value);
+    // if (puntajeInt == null) {
+    //   throw Exception("onFormUpdate Error: Puntaje inválido.");
+    // }
+
+    if (!state.isValid) return;
+
+    state = state.copyWith(isPosting: true);
+
+    try {
+      if (updateActivityCallback != null) {
+        // Llamar al callback de actualización (AHORA CON 6 ARGUMENTOS)
+        await updateActivityCallback!(
+          activityId,
+          state.nombre.value,
+          state.descripcion.value,
+          fechaHoraConcatenada,
+          puntajeToSend, // <--- Usamos el valor calculado (100 por defecto o el ingresado)
+          subjectId,     // <--- MateriaId/SubjectId
+        );
+        
+        state = state.copyWith(isFormPosted: true);
+      } else {
+        throw Exception("updateActivityCallback no está definido en el provider");
+      }
+
+    } catch (e) {
+      // ...
+    } finally {
+      // ...
+    }
+}
+
+// En activity_form_notifier.dart
+
+Future<void> onFormSubmit(int subjectId, String nombreMateria) async {
+    if (state.isPosting) return;
+
+    _touchEveryField();
+
     final fechaHoraConcatenada = _getFechaHoraConcatenada();
     if (fechaHoraConcatenada == null) {
       throw Exception("onFormSubmit Error: Fecha u hora inválida.");
     }
 
-    final puntajeInt = int.tryParse(state.puntaje.value);
-    if (puntajeInt == null) {
-      throw Exception("onFormSubmit Error: Puntaje inválido.");
-    }
+    // Lógica de Puntaje: 100 por defecto si está vacío
+    final int puntajeToSend = state.puntaje.value.isEmpty
+        ? 100
+        : int.tryParse(state.puntaje.value) ?? 100;
 
-    // Validar el formulario
-    if (!state.isValid) return;
+    // Si la validación de Formz falla (por nombre, descripción, fecha, etc.), salimos
+    if (!state.isValid) return; 
 
-    // Marcar el inicio de la petición
     state = state.copyWith(isPosting: true);
 
     final activityLike = {
       "nombreActividad": state.nombre.value,
       "descripcion": state.descripcion.value,
       "fechaLimite": fechaHoraConcatenada.toIso8601String(),
-      "puntaje": state.puntaje.value,
+      "puntaje": puntajeToSend,
       "materiaId": subjectId
     };
 
     try {
-      // Llamar al callback y obtener el resultado
-      bool res = await activityCallback!(activityLike);
-
-      // Actualizar el estado según el resultado
-      state = state.copyWith(isFormPosted: res);
-    } catch (e) {
-      throw Exception("Error durante la petición: $e");
-    } finally {
-      // Marcar el fin de la petición y resetear el formulario si fue exitoso
-      state = state.copyWith(isPosting: false);
-      if (state.isFormPosted) {
-        resetStateForm();
+      // 🎯 VERIFICACIÓN CRÍTICA: Aquí se llama a ActivityNotifier.createdActivity
+      if (activityCallback == null) {
+          throw Exception("Activity creation callback (activityCallback) is null");
       }
-    }
-  }
+      
+      await activityCallback!(activityLike); // ⬅️ ESTA ES LA LÍNEA QUE CREA LA ACTIVIDAD
 
-  _touchEveryField() {
+      // Si la llamada al backend fue exitosa, marcamos como enviado
+      state = state.copyWith(isFormPosted: true); 
+
+    } catch (e) {
+      debugPrint("Error al intentar crear actividad: $e");
+      // Es importante relanzar el error para que la interfaz sepa que falló
+      throw Exception("Error al crear actividad: $e");
+    } finally {
+      state = state.copyWith(isPosting: false);
+    }
+}
+
+_touchEveryField() {
     final nombre = GenericInput.dirty(state.nombre.value);
     final descripcion = GenericInput.dirty(state.descripcion.value);
     final fechaLimite = GenericInput.dirty(state.fechaLimite.value);
     final horaLimite = GenericInput.dirty(state.horaLimite.value);
-    final puntaje = GenericInput.dirty(state.puntaje.value);
+    final puntaje = GenericInput.dirty(state.puntaje.value); // Se mantiene para marcar como 'dirty'
 
     state = state.copyWith(
         isFormPosted: true,
@@ -208,8 +294,9 @@ class ActivityFormNotifier extends StateNotifier<ActivityFormState> {
         horaLimite: horaLimite,
         puntaje: puntaje,
         isValid: Formz.validate(
-            [nombre, descripcion, fechaLimite, horaLimite, puntaje]));
-  }
+            [nombre, descripcion, fechaLimite, horaLimite] // <--- SE ELIMINA 'puntaje' DE LA VALIDACIÓN
+        ));
+}
 
   void resetStateForm() {
     nombreController.clear();

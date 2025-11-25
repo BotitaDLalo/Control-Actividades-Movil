@@ -1,6 +1,7 @@
 import 'package:aprende_mas/config/utils/app_theme.dart';
 import 'package:aprende_mas/config/utils/packages.dart';
 import 'package:aprende_mas/views/widgets/buttons/button_form.dart';
+import 'package:aprende_mas/views/widgets/buttons/custom_rounded_button.dart';
 
 class CustomAlertDialog extends ConsumerWidget {
   final String message;
@@ -17,7 +18,7 @@ class CustomAlertDialog extends ConsumerWidget {
     required this.buttonCancelName,
     required this.buttonContinueName,
     required this.onPressedContinue,
-    required this.onPressedCancel
+    required this.onPressedCancel,
   });
 
   @override
@@ -32,9 +33,8 @@ class CustomAlertDialog extends ConsumerWidget {
           fontWeight: FontWeight.bold,
         ),
       ),
-      content: SizedBox(
-        height: MediaQuery.of(context).size.height * 0.15,
-        width: MediaQuery.of(context).size.width * 0.15,
+      // Corrección para desbordamiento vertical (Overflow)
+      content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -49,14 +49,24 @@ class CustomAlertDialog extends ConsumerWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                ButtonForm(
-                    buttonName: buttonCancelName,
+                // Botón CANCELAR (Secundario/Neutro)
+                CustomRoundedButton(
+                    text: buttonCancelName, // 'Cancelar'
                     onPressed: onPressedCancel,
-                    style: AppTheme.buttonSecondary),
-                ButtonForm(
-                    buttonName: buttonContinueName,
+                    // Estilo de botón secundario
+                    backgroundColor: Colors.white, 
+                    textColor: const Color(0xFF283043),
+                    borderRadius: 10,
+                ),
+                // Botón CONTINUAR/ELIMINAR (Destructivo)
+                CustomRoundedButton(
+                    text: buttonContinueName, // 'Eliminar'
                     onPressed: onPressedContinue,
-                    style: AppTheme.buttonPrimary)
+                    // Estilo de botón destructivo (ROJO)
+                    backgroundColor: const Color(0xFF283043),
+                    textColor: Colors.white,
+                    borderRadius: 10,
+                )
               ],
             )
           ],

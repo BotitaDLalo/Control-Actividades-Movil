@@ -133,12 +133,31 @@ final goRouterProvider = Provider((ref) {
       GoRoute(
         path: '/create-activities',
         builder: (context, state) {
-          final subjectData = state.extra as Subject;
-          debugPrint(
-              'Route /create-activity: subjectId: ${subjectData.materiaId}, nombreMateria: ${subjectData.nombreMateria}');
+          int subjectId = 0;
+          String subjectName = '';
+          Activity? activityToEdit;
+
+          // CASO 1: CREAR (Viene de la lista de materias, recibimos un Subject)
+          if (state.extra is Subject) {
+            final subjectData = state.extra as Subject;
+            subjectId = subjectData.materiaId;
+            subjectName = subjectData.nombreMateria;
+          } 
+          // CASO 2: EDITAR (Viene de la lista de actividades, recibimos una Activity)
+          else if (state.extra is Activity) {
+            final activityData = state.extra as Activity;
+            activityToEdit = activityData;
+            subjectId = activityData.materiaId;
+            // Nota: Como el modelo Activity no suele tener el nombre de la materia, 
+            // lo dejamos vacío o ponemos un texto genérico.
+            subjectName = ''; 
+          }
+
           return CreateActivitiesScreen(
-              subjectId: subjectData.materiaId,
-              nombreMateria: subjectData.nombreMateria);
+            subjectId: subjectId,
+            nombreMateria: subjectName,
+            activity: activityToEdit, 
+          );
         },
       ),
       GoRoute(

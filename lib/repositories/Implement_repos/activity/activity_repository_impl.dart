@@ -17,11 +17,23 @@ class ActivityRepositoryImpl implements ActivityRepository {
     return activities;
   }
 
-  @override
-  Future<Activity> updateActivity(int activityId, String nombreActividad,
-      String descripcion, DateTime fechaLimite) {
-    // TODO: implement updateActivity
-    throw UnimplementedError();
+@override
+  Future<Activity> updateActivity(
+      int activityId, 
+      String nombreActividad,
+      String descripcion, 
+      DateTime fechaLimite, 
+      int puntaje,   // <--- NUEVO
+      int materiaId  // <--- NUEVO
+  ) {
+    return activityDataSource.updateActivity(
+        activityId, 
+        nombreActividad, 
+        descripcion, 
+        fechaLimite, 
+        puntaje,    // <--- Pasamos puntaje
+        materiaId   // <--- Pasamos materiaId
+    );
   }
 
   @override
