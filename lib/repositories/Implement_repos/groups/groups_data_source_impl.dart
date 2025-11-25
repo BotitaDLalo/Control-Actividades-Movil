@@ -183,4 +183,31 @@ class GroupsDataSourceImpl implements GroupsDataSource {
       throw Exception(e);
     }
   }
+
+  @override
+  Future<bool> removeStudentFromGroup({
+    required int groupId, 
+    required int studentId
+  }) async {
+    try {
+      // Esta es la ruta que acabamos de crear en C#
+      const uri = "/api/Alumnos/EliminarAlumnoGrupo"; 
+
+      final res = await dio.post(
+        uri, 
+        data: {
+          "GrupoId": groupId,
+          "AlumnoId": studentId,
+        }
+      );
+
+      if (res.statusCode == 200) {
+        return true;
+      }
+      return false;
+    } catch (e) {
+      debugPrint('Error en GroupsDataSourceImpl: $e');
+      throw Exception(e);
+    }
+  }
 }

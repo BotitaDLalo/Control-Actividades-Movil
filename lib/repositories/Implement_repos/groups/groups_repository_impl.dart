@@ -59,4 +59,15 @@ class GroupsRepositoryImpl implements GroupsRepository {
   Future<List<StudentGroupSubject>> getStudentsGroup(int subjectId) {
     return groupsDataSource.getStudentsGroup(subjectId);
   }
+@override
+  Future<bool> removeStudentFromGroup({
+    required int groupId, 
+    required int studentId
+  }) {
+    return groupsDataSource.removeStudentFromGroup(
+      groupId: groupId, 
+      studentId: studentId
+    );
+  }
+
 }

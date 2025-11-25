@@ -8,7 +8,8 @@ class StudentsGroupsSubjects extends ConsumerStatefulWidget {
   final List<StudentGroupSubject> lsStudents;
   final VoidCallback? voidCallback;
   final void Function(
-      {required String username,
+      {required int studentId,
+      required String username,
       required String name,
       required String lastName,
       required String lastName2})? studentOptionsFunction;
@@ -66,6 +67,7 @@ class _StudentsGroupsSubjectsState
               child: ListView.builder(
                   itemCount: lsStudents.length,
                   itemBuilder: (context, index) {
+                    final studentId = lsStudents[index].alumnoId;
                     final username = lsStudents[index].username;
                     final lastname = lsStudents[index].lastName;
                     final lastname2 = lsStudents[index].lastName2;
@@ -80,6 +82,7 @@ class _StudentsGroupsSubjectsState
                       trailingColor: Colors.black,
                       trailingVoidCallback: () {
                         widget.studentOptionsFunction!(
+                            studentId: studentId,
                             username: username,
                             lastName: lastname,
                             lastName2: lastname2,

@@ -145,4 +145,46 @@ class SubjectsDataSourceImpl implements SubjectsDataSource {
       throw Exception(e);
     }
   }
+
+  @override
+  Future<bool> removeStudent({
+    required int subjectId, 
+    required int studentId
+  }) async {
+    try {
+      // 💡 URI HIPOÉTÉTICA para eliminar un alumno de una materia
+      // Puedes ajustarla según tu API. Usaremos un POST similar a tus otros métodos,
+      // pero idealmente deberías usar DELETE.
+      const uri = "/Alumnos/EliminarAlumnoMateria"; // O /Materias/{subjectId}/Alumnos/{studentId}
+
+      final res = await dio.post(
+        uri, 
+        data: {
+          "MateriaId": subjectId,
+          "AlumnoId": studentId,
+          // Si necesitas el ID del docente, puedes obtenerlo aquí también:
+          // "DocenteId": await storageService.getId(), 
+        }
+      );
+
+      // Evaluar la respuesta del servidor
+      // Asumimos que un código 200 indica éxito
+      if (res.statusCode == 200) {
+        // La API debe devolver una respuesta que indique éxito, 
+        // a menudo simplemente devuelve un 200 o un booleano en el cuerpo.
+        // Si el cuerpo de la respuesta es un booleano:
+        // return res.data as bool; 
+
+        // Si solo el código 200 indica éxito:
+        return true; 
+      }
+      
+      return false;
+      
+    } catch (e) {
+      // Si hay un error de conexión, timeout o error 5xx del servidor
+      debugPrint('Error en SubjectsDataSourceImpl.removeStudent: $e');
+      throw Exception(e);
+    }
+  }
 }

@@ -83,7 +83,43 @@ class StudentsSubjectStateNotifier extends StateNotifier<StudentsSubjectState> {
         .copyWith(lsStudentsSubject: [...lsStudentsSubject, ...lsStudents]);
   }
 
+
+// 🎯 IMPLEMENTACIÓN DE LA LÓGICA DE ELIMINACIÓN DE ALUMNO
+  Future<bool> removeStudentFromSubject({
+    required int subjectId,
+    required int studentId,
+  }) async {
+    try {
+      // 1. Llamar al repositorio para realizar la eliminación en el backend
+      final success = await subjectsRepository.removeStudent(
+        subjectId: subjectId,
+        studentId: studentId,
+      );
+
+      if (success) {
+        // 2. 🚨 ACTUALIZAR EL ESTADO (Principio de Inmutabilidad)
+        // Se asume que StudentGroupSubject tiene una propiedad 'id' o 'studentId' para comparar.
+          final updatedList = state.lsStudentsSubject
+            .where((student) => student.alumnoId != studentId) // ¡SOLUCIÓN!
+            .toList();
+
+        // 3. Reemplazar el estado con la nueva lista sin el estudiante
+        state = state.copyWith(
+          lsStudentsSubject: updatedList,
+        );
+        
+        return true;
+      }
+      return false;
+    } catch (e) {
+      debugPrint('Error al eliminar alumno: $e');
+      return false;
+    }
+  }
+
   void clearSubjectTeacherOptionsLs() {
     state = state.copyWith(lsEmails: [], lsStudentsSubject: []);
   }
+
+  
 }

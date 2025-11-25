@@ -15,75 +15,65 @@ class StudentsSubject extends ConsumerStatefulWidget {
 class _StudentsSubjectState extends ConsumerState<StudentsSubject> {
   @override
   Widget build(BuildContext context) {
+    // La lista de estudiantes es vigilada (watched) para actualizar la UI si cambia.
     final lsStudents = ref.watch(studentsSubjectProvider).lsStudentsSubject;
 
     void showStudentOptions(
-        {required String username,
+        // 🎉 AÑADIDO: El ID del alumno es crucial para la eliminación.
+        {required int studentId, 
+        required String username,
         required String name,
         required String lastName,
-        required lastName2}) {
-      showModalBottomSheet(
-        context: context,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(
-            top: Radius.circular(16),
-          ),
-        ),
-        builder: (context) {
-          return Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                ListTile(
-                  leading: const Icon(Icons.person_remove_alt_1),
-                  title: const Text('Eliminar alumno'),
-                  onTap: () {
-                    showDialog(
-                      context: context,
-                      builder: (context) => AlertDialog(
-                        title: const Text(
-                          '¿Deseas eliminar el alumno?',
-                          style: TextStyle(
-                              fontWeight: FontWeight.w500, fontSize: 20),
-                        ),
-                        content: ListTile(
-                          leading: IconButton(
-                            onPressed: () {},
-                            icon: const Icon(Icons.person),
-                            iconSize: 30,
-                          ),
-                          title: Text(username),
-                          subtitle: Text("$name $lastName $lastName2"),
-                        ),
-                        contentPadding: const EdgeInsets.all(10),
-                        actions: [
-                          TextButton(
-                              onPressed: () {
+        required String lastName2}) { // Corregido: tipo String para lastName2
+      
+      // 1. Cerramos el ModalBottomSheet antes de mostrar el AlertDialog.
+      // Opcional, pero ayuda a simplificar la navegación después.
+      //Navigator.pop(context); 
+
+        showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                    // ... (Title, Content, etc.)
+                    actions: [
+                        TextButton(
+                            onPressed: () {
                                 Navigator.pop(context);
-                              },
-                              child: const Text('Cancelar')),
-                          TextButton(
-                              onPressed: () {
-                                //TODO: Eliminar el alumno de la materia
-                              },
-                              child: const Text('Eliminar'))
-                        ],
-                      ),
-                    );
-                  },
+                            },
+                            child: const Text('Cancelar')
+                        ),
+                        TextButton(
+                            onPressed: () async {
+                                // ❌ La eliminación del bottom sheet antes de este punto causó la eliminación del estado.
+                                
+                                // 🎯 CORRECCIÓN CLAVE: Verificar si el widget sigue activo
+                                if (!context.mounted) return; 
+
+                                // Leer el Notifier de forma segura
+                                final subjectNotifier = ref.read(studentsSubjectProvider.notifier);
+
+                                // Realizar la operación asíncrona (API call)
+                                await subjectNotifier.removeStudentFromSubject(
+                                    subjectId: widget.id, 
+                                    studentId: studentId, 
+                                );
+
+                                // 🎯 Verificar de nuevo antes de usar context/Navigator después del await
+                                if (context.mounted) {
+                                    // Cerrar el diálogo de confirmación
+                                    Navigator.pop(context);
+                                }
+                            },
+                            child: const Text('Eliminar')
+                        )
+                    ],
                 ),
-              ],
-            ),
-          );
-        },
-      );
+            );
     }
 
     return StudentsGroupsSubjects(
       lsStudents: lsStudents,
-      studentOptionsFunction: showStudentOptions,
+      // NOTA: Recuerda que StudentsGroupsSubjects debe pasar studentId a showStudentOptions
+      studentOptionsFunction: showStudentOptions, 
     );
   }
 }
