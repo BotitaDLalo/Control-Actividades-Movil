@@ -82,7 +82,7 @@ Widget build(BuildContext context, WidgetRef ref) {
             subtitle: Text(
               subtitle,
               style: const TextStyle(
-                  fontSize: 14,
+                  fontSize: 16,
                   color: Colors.grey,
                   overflow: TextOverflow.ellipsis),
             ),

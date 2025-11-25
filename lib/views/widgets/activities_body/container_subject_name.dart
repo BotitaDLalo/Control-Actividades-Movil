@@ -65,7 +65,7 @@ class ContainerNameGroupSubjects extends StatelessWidget {
                   name,
                   style: const TextStyle(
                     color: Colors.white,
-                    fontSize: 20,
+                    fontSize: 24,
                     fontWeight: FontWeight.bold,
                   ),
                   maxLines: 2,
@@ -79,7 +79,7 @@ class ContainerNameGroupSubjects extends StatelessWidget {
                         'Código de clase: ',
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: 14,
+                          fontSize: 18,
                           fontWeight: FontWeight.w400,
                         ),
                       ),
@@ -91,7 +91,7 @@ class ContainerNameGroupSubjects extends StatelessWidget {
                           color: (accessCode != null && accessCode!.isNotEmpty)
                             ? Colors.white
                             : Colors.white.withOpacity(0.6),
-                          fontSize: 14,
+                          fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),
                         maxLines: 1,

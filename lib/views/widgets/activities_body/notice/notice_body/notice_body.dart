@@ -31,9 +31,8 @@ class NoticeBody extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),   
-        border: Border.all(
-          color: const Color(0xFF999494),                     
-          width: 1.3,                              
+        border: Border.all(color: Colors.grey.shade300, 
+        width: 1.0                      
         ),
       ),
       child: Column(

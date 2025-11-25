@@ -19,7 +19,7 @@ class NoticeDescription extends StatelessWidget {
           title, 
            style: const TextStyle(
             fontWeight: FontWeight.bold,
-             fontSize: 15, 
+             fontSize: 18, 
              height: 1.4, 
              color: Colors.black87,
            ),
@@ -29,7 +29,7 @@ class NoticeDescription extends StatelessWidget {
         Text(
           content, 
           style: const TextStyle(
-            fontSize: 15, 
+            fontSize: 16, 
             height: 1.4, 
             color: Colors.black87,
           ),
