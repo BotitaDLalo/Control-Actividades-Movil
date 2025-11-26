@@ -130,36 +130,48 @@ final goRouterProvider = Provider((ref) {
           );
         },
       ),
-      GoRoute(
-        path: '/create-activities',
-        builder: (context, state) {
-          int subjectId = 0;
-          String subjectName = '';
-          Activity? activityToEdit;
+// Tu código del router (modificado)
 
-          // CASO 1: CREAR (Viene de la lista de materias, recibimos un Subject)
-          if (state.extra is Subject) {
-            final subjectData = state.extra as Subject;
-            subjectId = subjectData.materiaId;
-            subjectName = subjectData.nombreMateria;
-          } 
-          // CASO 2: EDITAR (Viene de la lista de actividades, recibimos una Activity)
-          else if (state.extra is Activity) {
-            final activityData = state.extra as Activity;
-            activityToEdit = activityData;
-            subjectId = activityData.materiaId;
-            // Nota: Como el modelo Activity no suele tener el nombre de la materia, 
-            // lo dejamos vacío o ponemos un texto genérico.
-            subjectName = ''; 
-          }
+GoRoute(
+  path: '/create-activities',
+  builder: (context, state) {
+    int subjectId = 0;
+    String subjectName = '';
+    Activity? activityToEdit;
 
-          return CreateActivitiesScreen(
-            subjectId: subjectId,
-            nombreMateria: subjectName,
-            activity: activityToEdit, 
-          );
-        },
-      ),
+    // CASO 1 & 2: CREAR O EDITAR (Ambos vienen ahora como Subject)
+    if (state.extra is Subject) {
+      final subjectData = state.extra as Subject;
+      
+      subjectId = subjectData.materiaId;
+      subjectName = subjectData.nombreMateria;
+      
+      // 🎯 NUEVA LÓGICA DE EDICIÓN
+      // Si el objeto Subject trae la propiedad 'activity' llena, estamos editando.
+      if (subjectData.activity != null) {
+          activityToEdit = subjectData.activity;
+      }
+      
+    } 
+    // NOTA: EL 'else if (state.extra is Activity)' AHORA ES OBSOLETO, 
+    // PERO PUEDES DEJARLO COMO RESPALDO PARA NAVEGACIÓN LEGACY.
+
+    // ... dejar el resto del código como está para manejar rutas antiguas si es necesario.
+    else if (state.extra is Activity) {
+        final activityData = state.extra as Activity;
+        activityToEdit = activityData;
+        subjectId = activityData.materiaId;
+        subjectName = ''; // No se puede obtener aquí, pero funciona con el fallback.
+    }
+
+
+    return CreateActivitiesScreen(
+      subjectId: subjectId,
+      nombreMateria: subjectName,
+      activity: activityToEdit, 
+    );
+  },
+),
       GoRoute(
         path: '/student-subject-options',
         builder: (context, state) {

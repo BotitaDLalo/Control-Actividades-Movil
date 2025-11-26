@@ -9,8 +9,9 @@ import 'package:intl/intl.dart';
 
 class ActivityList extends ConsumerStatefulWidget {
   final int subjectId;
+  final String nombreMateria;
   final Widget Function()? emptyBuilder;
-  const ActivityList({super.key, required this.subjectId, this.emptyBuilder});
+  const ActivityList({super.key, required this.subjectId, required this.nombreMateria, this.emptyBuilder});
 
   @override
   ConsumerState<ActivityList> createState() => _ActivityListState();
@@ -109,8 +110,16 @@ class _ActivityListState extends ConsumerState<ActivityList> {
                   onTap: () {
                     Navigator.pop(context); // Cierra el modal
                     
-                    // Navega a la pantalla de formulario pasando la actividad actual
-                    context.push('/create-activities', extra: activity); 
+                    // 🎯 CORRECCIÓN: Creamos un objeto Subject para que el router lo entienda
+                    final subjectDataWithActivity = Subject(
+                      // Utilizamos el objeto Activity para pasar el activityToEdit
+                      activity: activity, // 👈 Asumimos que tu modelo Subject acepta Activity? activity
+                      materiaId: widget.subjectId,
+                      nombreMateria: widget.nombreMateria, // 👈 Nombre de la materia
+                    );
+
+                    // Enviamos el objeto Subject, que el router ya entiende
+                    context.push('/create-activities', extra: subjectDataWithActivity);
                   },
                 ),
                 ListTile(

@@ -142,6 +142,7 @@ class _ActivityOptionState extends ConsumerState<ActivityOptionScreen> {
                         )
                       : ActivityList(
                           subjectId: widget.subjectId,
+                          nombreMateria: widget.subjectName
                         ),
                 ),
                 const SizedBox(height: 40),
