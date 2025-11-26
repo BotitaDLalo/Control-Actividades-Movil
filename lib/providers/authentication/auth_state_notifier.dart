@@ -330,80 +330,117 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
     await authUserOffline.insertUser(
         user.userId, user.userName, user.email, user.activeDueDate, user.role);
 
-    //& Guardar los grupos, materias y actividades offline
-    await groupsOffline.saveGroupSubjects(lsGroups);
+    //& Guardar los grupos, materias y actividades offline (paralelizado)
+    await Future.wait([
+      groupsOffline.saveGroupSubjects(lsGroups),
+      subjectsOffline.saveSubjectsWithoutGroup(lsSubjectsWithoutGroup),
+    ]);
 
-    await subjectsOffline.saveSubjectsWithoutGroup(lsSubjectsWithoutGroup);
+    //& set para groups y subjects (no son async, ejecutar en paralelo lógico)
+    setGroupsSubjectsState(lsGroups);
+    setSubjectsWithoutGroupState(lsSubjectsWithoutGroup);
 
-    //& set para groups y subjects y activities state
-    await setGroupsSubjectsState(lsGroups);
-    await setSubjectsWithoutGroupState(lsSubjectsWithoutGroup);
+    //& Recolectar todas las actividades y entregables para cargar en paralelo
+    List<Future<void>> allFutures = [];
 
-    //& set para activity state grupos y materias
+    //& set para activity state grupos y materias (paralelizado)
     for (var group in lsGroups) {
       for (var subj in group.materias ?? []) {
         final subject = subj as Subject;
         final subjectId = subject.materiaId;
 
-        //& Actualizamos el state de actividades
-        await getAllActivitiesCallback(subjectId);
-        for (var act in subj.actividades ?? []) {
-          final activity = act as Activity;
-          final activityId = activity.activityId;
-          //TODO: METODO PARA GUARDAR ENTREGABLES OFFLINE (tbAlumnoActividades, tbEntregable)
+        //& Cargar actividades en paralelo
+        allFutures.add(
+          getAllActivitiesCallback(subjectId).then((_) async {
+            //& Cargar entregables en paralelo para cada actividad
+            List<Future<void>> submissionFutures = [];
+            for (var act in subj.actividades ?? []) {
+              final activity = act as Activity;
+              final activityId = activity.activityId;
 
-          //& Guardar entregables offline set para submissions state
-          List<Submission> lsSubmissions =
-              await getSubmissionsCallback(activityId!);
-          await activityOffline.saveSubmissions(lsSubmissions, activityId);
-        }
+              submissionFutures.add(
+                getSubmissionsCallback(activityId!).then((submissions) async {
+                  await activityOffline.saveSubmissions(submissions, activityId);
+                }),
+              );
+            }
+            await Future.wait(submissionFutures);
+          }),
+        );
       }
     }
 
-    //& set para activity state materias sin grupo
+    //& set para activity state materias sin grupo (paralelizado)
     for (var subject in lsSubjectsWithoutGroup) {
       final subjectId = subject.materiaId;
 
-      await getAllActivitiesCallback(subjectId);
-      for (var act in subject.actividades ?? []) {
-        final activity = act as Activity;
-        final activityId = activity.activityId;
+      allFutures.add(
+        getAllActivitiesCallback(subjectId).then((_) async {
+          List<Future<void>> submissionFutures = [];
+          for (var act in subject.actividades ?? []) {
+            final activity = act as Activity;
+            final activityId = activity.activityId;
 
-        List<Submission> lsSubmissions =
-            await getSubmissionsCallback(activityId!);
-        await activityOffline.saveSubmissions(lsSubmissions, activityId);
-      }
+            submissionFutures.add(
+              getSubmissionsCallback(activityId!).then((submissions) async {
+                await activityOffline.saveSubmissions(submissions, activityId);
+              }),
+            );
+          }
+          await Future.wait(submissionFutures);
+        }),
+      );
     }
+
+    //& Ejecutar todas las operaciones en paralelo
+    await Future.wait(allFutures);
   }
 
   Future<void> _updateUserState(
       List<Group> lsGroups, List<Subject> lsSubjectsWithoutGroup) async {
     //& set para groups y subject
-    await setGroupsSubjectsState(lsGroups);
-    await setSubjectsWithoutGroupState(lsSubjectsWithoutGroup);
+    setGroupsSubjectsState(lsGroups);
+    setSubjectsWithoutGroupState(lsSubjectsWithoutGroup);
+
+    //& Recolectar todas las operaciones para ejecutar en paralelo
+    List<Future<void>> allFutures = [];
 
     for (var group in lsGroups) {
       for (var sub in group.materias ?? []) {
         final subject = sub as Subject;
         final subjectId = subject.materiaId;
-        await getAllActivitiesCallback(subjectId);
-        for (var act in sub.actividades ?? []) {
-          final activity = act as Activity;
-          final activityId = activity.activityId;
-          await getSubmissionsCallback(activityId!);
-        }
+        
+        allFutures.add(
+          getAllActivitiesCallback(subjectId).then((_) async {
+            List<Future<void>> submissionFutures = [];
+            for (var act in sub.actividades ?? []) {
+              final activity = act as Activity;
+              final activityId = activity.activityId;
+              submissionFutures.add(getSubmissionsCallback(activityId!));
+            }
+            await Future.wait(submissionFutures);
+          }),
+        );
       }
     }
 
     for (var subject in lsSubjectsWithoutGroup) {
       final subjectId = subject.materiaId;
-      await getAllActivitiesCallback(subjectId);
-      for (var act in subject.actividades ?? []) {
-        final activity = act as Activity;
-        final activityId = activity.activityId;
-        await getSubmissionsCallback(activityId!);
-      }
+      
+      allFutures.add(
+        getAllActivitiesCallback(subjectId).then((_) async {
+          List<Future<void>> submissionFutures = [];
+          for (var act in subject.actividades ?? []) {
+            final activity = act as Activity;
+            final activityId = activity.activityId;
+            submissionFutures.add(getSubmissionsCallback(activityId!));
+          }
+          await Future.wait(submissionFutures);
+        }),
+      );
     }
+
+    await Future.wait(allFutures);
   }
 
   Future<void> _submissionsPending(
@@ -517,36 +554,48 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
   Future<void> _updateUserStateOffline(
       List<Group> lsGroups, List<Subject> lsSubjectsWithoutGroup) async {
     //& set para groups y subject
-    await setGroupsSubjectsState(lsGroups);
-    await setSubjectsWithoutGroupState(lsSubjectsWithoutGroup);
+    setGroupsSubjectsState(lsGroups);
+    setSubjectsWithoutGroupState(lsSubjectsWithoutGroup);
+
+    //& Recolectar todas las operaciones para ejecutar en paralelo
+    List<Future<void>> allFutures = [];
 
     for (var group in lsGroups) {
       for (var sub in group.materias ?? []) {
         final subject = sub as Subject;
         final subjectId = subject.materiaId;
-        // await getAllActivitiesCallback(subjectId);
-        await getAllActivitiesOfflineCallback(subjectId);
-        for (var act in sub.actividades ?? []) {
-          final activity = act as Activity;
-          final activityId = activity.activityId;
-          // await getSubmissionsCallback(activityId);
-          await getSubmissionsOfflineCallback(activityId!);
-        }
+        
+        allFutures.add(
+          getAllActivitiesOfflineCallback(subjectId).then((_) async {
+            List<Future<void>> submissionFutures = [];
+            for (var act in sub.actividades ?? []) {
+              final activity = act as Activity;
+              final activityId = activity.activityId;
+              submissionFutures.add(getSubmissionsOfflineCallback(activityId!));
+            }
+            await Future.wait(submissionFutures);
+          }),
+        );
       }
     }
 
     for (var subject in lsSubjectsWithoutGroup) {
       final subjectId = subject.materiaId;
-      // await getAllActivitiesCallback(subjectId);
-      await getAllActivitiesOfflineCallback(subjectId);
-      for (var act in subject.actividades ?? []) {
-        final activity = act as Activity;
-        final activityId = activity.activityId;
-        // await getSubmissionsCallback(activityId);
-
-        await getSubmissionsOfflineCallback(activityId!);
-      }
+      
+      allFutures.add(
+        getAllActivitiesOfflineCallback(subjectId).then((_) async {
+          List<Future<void>> submissionFutures = [];
+          for (var act in subject.actividades ?? []) {
+            final activity = act as Activity;
+            final activityId = activity.activityId;
+            submissionFutures.add(getSubmissionsOfflineCallback(activityId!));
+          }
+          await Future.wait(submissionFutures);
+        }),
+      );
     }
+
+    await Future.wait(allFutures);
   }
 
   //# LOGIN GOOGLE USER
@@ -666,41 +715,58 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
   void _setUserDataGoogleState(
       List<Group> lsGroups, List<Subject> lsSubjectsWithoutGroup) async {
     //& set para groups y subjects y activities state
-    await setGroupsSubjectsState(lsGroups);
-    await setSubjectsWithoutGroupState(lsSubjectsWithoutGroup);
+    setGroupsSubjectsState(lsGroups);
+    setSubjectsWithoutGroupState(lsSubjectsWithoutGroup);
 
-    //& set para activity state
+    //& Recolectar todas las actividades y entregables para cargar en paralelo
+    List<Future<void>> allFutures = [];
+
+    //& set para activity state (paralelizado)
     for (var group in lsGroups) {
       for (var subj in group.materias ?? []) {
         final subject = subj as Subject;
         final subjectId = subject.materiaId;
 
-        //& Actualizamos el state de actividades
-        await getAllActivitiesCallback(subjectId);
-        for (var act in subj.actividades ?? []) {
-          final activity = act as Activity;
-          final activityId = activity.activityId;
-          //TODO: METODO PARA GUARDAR ENTREGABLES OFFLINE (tbAlumnoActividades, tbEntregable)
+        //& Actualizamos el state de actividades en paralelo
+        allFutures.add(
+          getAllActivitiesCallback(subjectId).then((_) async {
+            List<Future<void>> submissionFutures = [];
+            for (var act in subj.actividades ?? []) {
+              final activity = act as Activity;
+              final activityId = activity.activityId;
 
-          //& Guardar entregables offline set para submissions state
-          await getSubmissionsCallback(activityId!);
-          // await activityOffline.saveSubmissions(lsSubmissions, activityId);
-        }
+              submissionFutures.add(
+                getSubmissionsCallback(activityId!),
+              );
+            }
+            await Future.wait(submissionFutures);
+          }),
+        );
       }
     }
 
-    //& set para activity state materias sin grupo
+    //& set para activity state materias sin grupo (paralelizado)
     for (var subject in lsSubjectsWithoutGroup) {
       final subjectId = subject.materiaId;
 
-      await getAllActivitiesCallback(subjectId);
-      for (var act in subject.actividades ?? []) {
-        final activity = act as Activity;
-        final activityId = activity.activityId;
+      allFutures.add(
+        getAllActivitiesCallback(subjectId).then((_) async {
+          List<Future<void>> submissionFutures = [];
+          for (var act in subject.actividades ?? []) {
+            final activity = act as Activity;
+            final activityId = activity.activityId;
 
-        await getSubmissionsCallback(activityId!);
-      }
+            submissionFutures.add(
+              getSubmissionsCallback(activityId!),
+            );
+          }
+          await Future.wait(submissionFutures);
+        }),
+      );
     }
+
+    //& Ejecutar todas las operaciones en paralelo
+    await Future.wait(allFutures);
   }
 
   Future<void> logoutGoogle([String? errorMessage]) async {

@@ -6,7 +6,6 @@ import 'package:aprende_mas/config/services/services.dart';
 import 'package:aprende_mas/models/models.dart';
 import 'package:aprende_mas/providers/providers.dart';
 import 'package:flutter/services.dart';
-import 'package:intl/intl.dart';
 
 void main() async {
   await Environment.initEnvironment();
@@ -14,10 +13,6 @@ void main() async {
   SystemChrome.setPreferredOrientations(
       [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
   await FirebaseCMConfiguration.initializeFCM();
-  
-  // Configurar localización en español para Syncfusion
-  Intl.defaultLocale = 'es_ES';
-  
   runApp(const ProviderScope(child: MainApp()));
 }
 

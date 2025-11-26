@@ -145,14 +145,21 @@ class CustomExpansionTileState extends ConsumerState<GroupCard>
                         ),
                         Padding(
                           padding: const EdgeInsets.only(right: 12.0),
-                          child: RotationTransition(
-                            turns: Tween(begin: 0.0, end: 0.5).animate(CurvedAnimation(
-                                parent: _controller, curve: Curves.easeInOut)),
-                            child: const Icon(
-                              Icons.expand_more,
-                              size: 30,
+                          child: IconButton(
+                            icon: const Icon(
+                              Icons.more_vert,
+                              size: 28,
                               color: Color.fromARGB(221, 255, 255, 255),
                             ),
+                            onPressed: () {
+                              final Group groupData = Group(
+                                grupoId: widget.id,
+                                nombreGrupo: widget.title,
+                                descripcion: widget.description,
+                                codigoAcceso: widget.accessCode,
+                              );
+                              pushGroupTeacherSettings(groupData);
+                            },
                           ),
                         ),
                       ],
