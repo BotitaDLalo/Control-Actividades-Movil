@@ -2,6 +2,7 @@ import 'package:aprende_mas/config/utils/packages.dart';
 import 'package:aprende_mas/models/groups/group.dart';
 import 'package:aprende_mas/config/utils/utils.dart';
 import 'package:aprende_mas/config/data/data.dart';
+import 'package:aprende_mas/providers/groups/groups_provider.dart';
 
 class GroupCard extends ConsumerStatefulWidget {
   final int id;
@@ -52,6 +53,29 @@ class CustomExpansionTileState extends ConsumerState<GroupCard>
     });
   }
 
+  void _showDeleteConfirmation(BuildContext context, Group groupData) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Eliminar grupo'),
+        content: const Text('¿Estás seguro de que deseas eliminar este grupo? Esta acción no se puede deshacer.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              ref.read(groupsProvider.notifier).deleteGroup(groupData.grupoId!);
+            },
+            child: const Text('Eliminar'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   void dispose() {
     _controller.dispose();
@@ -93,90 +117,119 @@ class CustomExpansionTileState extends ConsumerState<GroupCard>
               width: 2,
             ),
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Header
-              Material(
-                color: const Color.fromARGB(0, 220, 14, 203),
-                child: InkWell(
-                  onTap: _toggleExpand,
-                  borderRadius: BorderRadius.circular(19),
-                  child: SizedBox(
-                    height: MediaQuery.of(context).size.height * 0.1,
-                    child: Row(
-                      children: [
-                        const SizedBox(width: 12),
-                        CircleAvatar(
-                          radius: 20,
-                          backgroundColor: Colors.white,
-                          child: Text(
-                            widget.title.isNotEmpty ? widget.title[0].toUpperCase() : '?',
-                            style: const TextStyle(
-                                color: Color.fromARGB(255, 5, 164, 204), fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                widget.title,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                  color: Color.fromARGB(255, 255, 255, 255),
-                                  fontSize: 21,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                widget.description,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                  color: Color.fromARGB(253, 183, 242, 251),
-                                  fontSize: 15,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(right: 12.0),
-                          child: IconButton(
-                            icon: const Icon(
-                              Icons.more_vert,
-                              size: 28,
-                              color: Color.fromARGB(221, 255, 255, 255),
-                            ),
-                            onPressed: () {
-                              final Group groupData = Group(
-                                grupoId: widget.id,
-                                nombreGrupo: widget.title,
-                                descripcion: widget.description,
-                                codigoAcceso: widget.accessCode,
-                              );
-                              pushGroupTeacherSettings(groupData);
-                            },
-                          ),
-                        ),
-                      ],
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(_isExpanded ? 15 : 20),
+            child: Material(
+              color: Colors.transparent,
+              child: Stack(
+                children: [
+                  // Watermark en la esquina inferior izquierda
+                  Positioned(
+                    right: 20,
+                    bottom: -10,
+                    child: Opacity(
+                      opacity: 0.30,
+                      child: SvgPicture.asset(
+                        'assets/icons/grupo2.svg',
+                        width: 100,
+                        height: 100,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
-                ),
-              ),
+                  // Contenido
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Header
+                      Material(
+                        color: const Color.fromARGB(0, 220, 14, 203),
+                        child: InkWell(
+                          onTap: _toggleExpand,
+                          borderRadius: BorderRadius.circular(19),
+                          child: SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.1,
+                            child: Row(
+                              children: [
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        widget.title,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                          color: Color.fromARGB(255, 255, 255, 255),
+                                          fontSize: 21,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        widget.description,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                          color: Color.fromARGB(253, 183, 242, 251),
+                                          fontSize: 15,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.only(right: 12.0),
+                                  child: PopupMenuButton<String>(
+                                    icon: const Icon(
+                                      Icons.more_vert,
+                                      size: 28,
+                                      color: Color.fromARGB(221, 255, 255, 255),
+                                    ),
+                                    onSelected: (value) {
+                                      final Group groupData = Group(
+                                        grupoId: widget.id,
+                                        nombreGrupo: widget.title,
+                                        descripcion: widget.description,
+                                        codigoAcceso: widget.accessCode,
+                                      );
+                                      if (value == 'edit') {
+                                        pushGroupTeacherSettings(groupData);
+                                      } else if (value == 'delete') {
+                                        _showDeleteConfirmation(context, groupData);
+                                      }
+                                    },
+                                    itemBuilder: (context) => [
+                                      const PopupMenuItem(
+                                        value: 'edit',
+                                        child: Text('Editar'),
+                                      ),
+                                      const PopupMenuItem(
+                                        value: 'delete',
+                                        child: Text('Eliminar'),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
 
-              // Linea que divide el encabezado del contenido en la card desplegada
-              if (_isExpanded) ...[
-                const Divider(height: 1, color: Color.fromARGB(255, 255, 255, 255)),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(children: widget.children),
-                ),
-              ],
-            ],
+                      // Linea que divide el encabezado del contenido en la card desplegada
+                      if (_isExpanded) ...[
+                        const Divider(height: 1, color: Color.fromARGB(255, 255, 255, 255)),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Column(children: widget.children),
+                        ),
+                      ],
+                    ],
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
       ),
