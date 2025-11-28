@@ -25,9 +25,8 @@ class SubjectsRespositoryImpl implements SubjectsRepository {
   }
 
   @override
-  Future<void> deleteSubject() {
-    // TODO: implement deleteSubject
-    throw UnimplementedError();
+  Future<bool> deleteSubject(int subjectId) {
+    return subjectsDataSource.deleteSubject(subjectId);
   }
 
   @override

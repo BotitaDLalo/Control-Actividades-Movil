@@ -10,7 +10,7 @@ abstract class SubjectsDataSource {
   Future<List<Subject>> createSubjectWithoutGroup(
       String subjectName, String description, Color colorCode);
 
-  Future<void> deleteSubject();
+  Future<bool> deleteSubject(int subjectId);
 
   Future<void> updateSubject();
 

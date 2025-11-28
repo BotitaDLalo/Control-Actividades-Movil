@@ -97,6 +97,31 @@ class SubjectsStateNotifier extends StateNotifier<SubjectsState> {
     }
   }
 
+  Future<bool> deleteSubject(int subjectId) async {
+    try {
+      debugPrint("🗑️ Iniciando eliminación de materia ID: $subjectId");
+      bool success = await subjectsRepository.deleteSubject(subjectId);
+      if (success) {
+        debugPrint("✅ Materia eliminada del backend, actualizando state");
+        _deleteSubjectFromState(subjectId);
+        debugPrint("✅ Materia removida del state local");
+        return true;
+      } else {
+        debugPrint("❌ El backend reportó fallo en eliminación de materia");
+        return false;
+      }
+    } catch (e) {
+      debugPrint("❌ Error inesperado al eliminar materia: $e");
+      return false;
+    }
+  }
+
+  void _deleteSubjectFromState(int subjectId) {
+    List<Subject> lsSubjects = List.from(state.lsSubjects);
+    lsSubjects.removeWhere((subject) => subject.materiaId == subjectId);
+    state = state.copyWith(lsSubjects: lsSubjects);
+  }
+
   void clearSubjectsState() {
     state = SubjectsState();
   }

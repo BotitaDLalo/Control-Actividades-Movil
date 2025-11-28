@@ -34,8 +34,8 @@ class GroupsRepositoryImpl implements GroupsRepository {
   }
 
   @override
-  Future<void> deleteGroup(int teacherId, int groupId) {
-    return groupsDataSource.deleteGroup(teacherId, groupId);
+  Future<bool> deleteGroup(int groupId) {
+    return groupsDataSource.deleteGroup(groupId);
   }
 
   @override

@@ -100,9 +100,19 @@ class GroupsDataSourceImpl implements GroupsDataSource {
   }
 
   @override
-  Future<void> deleteGroup(int teacherId, int groupId) {
-    // TODO: implement updateGroup
-    throw UnimplementedError();
+  Future<bool> deleteGroup(int groupId) async {
+    try {
+      const uri = "/Grupos/DeleteGroup";
+      final fullUri = "$uri/$groupId";
+      debugPrint("🔍 DELETE URL: $fullUri (groupId: $groupId)");
+      final response = await dio.delete(fullUri);
+      debugPrint("🔍 Response status: ${response.statusCode}");
+      debugPrint("🔍 Response data: ${response.data}");
+      return response.statusCode == 200;
+    } catch (e) {
+      debugPrint("❌ Error en deleteGroup: $e");
+      return false;
+    }
   }
 
   @override

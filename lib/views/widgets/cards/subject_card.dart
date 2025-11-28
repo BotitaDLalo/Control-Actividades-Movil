@@ -5,6 +5,7 @@ import 'package:aprende_mas/config/utils/catalog_names.dart';
 import 'package:aprende_mas/providers/data/key_value_storage_service_providers.dart';
 import 'package:aprende_mas/models/models.dart';
 import 'package:aprende_mas/config/utils/packages.dart';
+import 'package:aprende_mas/providers/subjects/subjects_provider.dart';
 
 class SubjectCard extends ConsumerWidget {
   final int? groupId;
@@ -58,7 +59,35 @@ class SubjectCard extends ConsumerWidget {
       context.push('/student-subject-options', extra: data);
     }
 
-    
+    void _showDeleteConfirmation(BuildContext context, Subject subjectData) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Eliminar materia'),
+          content: const Text('¿Estás seguro de que deseas eliminar esta materia? Esta acción no se puede deshacer.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancelar'),
+            ),
+            TextButton(
+              onPressed: () async {
+                Navigator.of(context).pop();
+                bool success = await ref.read(subjectsProvider.notifier).deleteSubject(subjectData.materiaId!);
+                if (!success) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('No se eliminó la materia')),
+                  );
+                }
+              },
+              child: const Text('Eliminar'),
+            ),
+          ],
+        ),
+      );
+    }
+
+
     // Selección determinística de watermark (usa recursos existentes en assets/icons)
     const watermarkIcons = [
       //'assets/icons/grupo.svg',
@@ -121,6 +150,46 @@ class SubjectCard extends ConsumerWidget {
                       height: min(width * 0.5, height * 1.0),
                       color: Colors.white,
                     ),
+                  ),
+                ),
+
+                // Menú de opciones en la esquina superior derecha
+                Positioned(
+                  top: 8,
+                  right: 8,
+                  child: PopupMenuButton<String>(
+                    icon: const Icon(
+                      Icons.more_vert,
+                      size: 20,
+                      color: Colors.white,
+                    ),
+                    onSelected: (value) {
+                      final data = Subject(
+                          groupId: groupId,
+                          materiaId: subjectId,
+                          nombreMateria: nombreMateria,
+                          codigoAcceso: accessCode,
+                          descripcion: description);
+                      if (value == 'options') {
+                        if (role == cn.getRoleTeacherName) {
+                          teacherSubjectOptions(data);
+                        } else if (role == cn.getRoleStudentName) {
+                          studentSubjectOptions(data);
+                        }
+                      } else if (value == 'delete') {
+                        _showDeleteConfirmation(context, data);
+                      }
+                    },
+                    itemBuilder: (context) => [
+                      const PopupMenuItem(
+                        value: 'options',
+                        child: Text('Opciones'),
+                      ),
+                      const PopupMenuItem(
+                        value: 'delete',
+                        child: Text('Eliminar'),
+                      ),
+                    ],
                   ),
                 ),
 

@@ -3,6 +3,8 @@ import 'package:aprende_mas/models/groups/group.dart';
 import 'package:aprende_mas/config/utils/utils.dart';
 import 'package:aprende_mas/config/data/data.dart';
 import 'package:aprende_mas/providers/groups/groups_provider.dart';
+import 'package:aprende_mas/providers/data/key_value_storage_service_providers.dart';
+import 'package:aprende_mas/config/utils/catalog_names.dart';
 
 class GroupCard extends ConsumerStatefulWidget {
   final int id;
@@ -54,27 +56,32 @@ class CustomExpansionTileState extends ConsumerState<GroupCard>
   }
 
   void _showDeleteConfirmation(BuildContext context, Group groupData) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Eliminar grupo'),
-        content: const Text('¿Estás seguro de que deseas eliminar este grupo? Esta acción no se puede deshacer.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancelar'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              ref.read(groupsProvider.notifier).deleteGroup(groupData.grupoId!);
-            },
-            child: const Text('Eliminar'),
-          ),
-        ],
-      ),
-    );
-  }
+     showDialog(
+       context: context,
+       builder: (context) => AlertDialog(
+         title: const Text('Eliminar grupo'),
+         content: const Text('¿Estás seguro de que deseas eliminar este grupo? Esta acción no se puede deshacer.'),
+         actions: [
+           TextButton(
+             onPressed: () => Navigator.of(context).pop(),
+             child: const Text('Cancelar'),
+           ),
+           TextButton(
+             onPressed: () async {
+               Navigator.of(context).pop();
+               bool success = await ref.read(groupsProvider.notifier).deleteGroup(groupData.grupoId!);
+               if (!success) {
+                 ScaffoldMessenger.of(context).showSnackBar(
+                   const SnackBar(content: Text('No se eliminó el grupo')),
+                 );
+               }
+             },
+             child: const Text('Eliminar'),
+           ),
+         ],
+       ),
+     );
+   }
 
   @override
   void dispose() {
@@ -85,6 +92,11 @@ class CustomExpansionTileState extends ConsumerState<GroupCard>
   @override
   Widget build(BuildContext context) {
     final keyValueStorageService = KeyValueStorageServiceImpl();
+    final cn = ref.watch(catalogNamesProvider);
+    final role = ref.watch(roleFutureProvider).maybeWhen(
+      data: (data) => data,
+      orElse: () => "",
+    );
 
     void pushGroupTeacherSettings(Group data) {
       context.push('/group-teacher-settings', extra: data);
@@ -178,39 +190,42 @@ class CustomExpansionTileState extends ConsumerState<GroupCard>
                                     ],
                                   ),
                                 ),
-                                Padding(
-                                  padding: const EdgeInsets.only(right: 12.0),
-                                  child: PopupMenuButton<String>(
-                                    icon: const Icon(
-                                      Icons.more_vert,
-                                      size: 28,
-                                      color: Color.fromARGB(221, 255, 255, 255),
+                                if (role == cn.getRoleTeacherName)
+                                  Padding(
+                                    padding: const EdgeInsets.only(right: 12.0),
+                                    child: PopupMenuButton<String>(
+                                      icon: const Icon(
+                                        Icons.more_vert,
+                                        size: 28,
+                                        color: Color.fromARGB(221, 255, 255, 255),
+                                      ),
+                                      onSelected: (value) {
+                                        final Group groupData = Group(
+                                          grupoId: widget.id,
+                                          nombreGrupo: widget.title,
+                                          descripcion: widget.description,
+                                          codigoAcceso: widget.accessCode,
+                                        );
+                                        if (value == 'edit') {
+                                          pushGroupTeacherSettings(groupData);
+                                        } else if (value == 'delete') {
+                                          _showDeleteConfirmation(context, groupData);
+                                        }
+                                      },
+                                      itemBuilder: (context) => [
+                                        const PopupMenuItem(
+                                          value: 'edit',
+                                          child: Text('Editar'),
+                                        ),
+                                        const PopupMenuItem(
+                                          value: 'delete',
+                                          child: Text('Eliminar'),
+                                        ),
+                                      ],
                                     ),
-                                    onSelected: (value) {
-                                      final Group groupData = Group(
-                                        grupoId: widget.id,
-                                        nombreGrupo: widget.title,
-                                        descripcion: widget.description,
-                                        codigoAcceso: widget.accessCode,
-                                      );
-                                      if (value == 'edit') {
-                                        pushGroupTeacherSettings(groupData);
-                                      } else if (value == 'delete') {
-                                        _showDeleteConfirmation(context, groupData);
-                                      }
-                                    },
-                                    itemBuilder: (context) => [
-                                      const PopupMenuItem(
-                                        value: 'edit',
-                                        child: Text('Editar'),
-                                      ),
-                                      const PopupMenuItem(
-                                        value: 'delete',
-                                        child: Text('Eliminar'),
-                                      ),
-                                    ],
-                                  ),
-                                ),
+                                  )
+                                else
+                                  const SizedBox(width: 12),
                               ],
                             ),
                           ),

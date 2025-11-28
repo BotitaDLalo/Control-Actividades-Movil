@@ -77,9 +77,27 @@ class SubjectsDataSourceImpl implements SubjectsDataSource {
   }
 
   @override
-  Future<void> deleteSubject() {
-    // TODO: implement deleteSubject
-    throw UnimplementedError();
+  Future<bool> deleteSubject(int subjectId) async {
+    try {
+      const uri = "/Materias/DeleteSubject";
+      final fullUri = "$uri/$subjectId";
+      debugPrint("🔍 Intentando eliminar materia con ID: $subjectId");
+      debugPrint("🔍 URL: $fullUri");
+      final response = await dio.delete(fullUri);
+      debugPrint("🔍 Status Code: ${response.statusCode}");
+      debugPrint("🔍 Response Data: ${response.data}");
+
+      if (response.statusCode == 200) {
+        debugPrint("✅ Materia eliminada exitosamente");
+        return true;
+      } else {
+        debugPrint("❌ Error del servidor: ${response.statusCode} - ${response.data}");
+        return false;
+      }
+    } catch (e) {
+      debugPrint("❌ Error de conexión al eliminar materia: $e");
+      return false;
+    }
   }
 
   @override

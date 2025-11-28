@@ -12,7 +12,7 @@ abstract class GroupsDataSource {
   Future<List<Group>> createGroupSubjects(String groupName, String description,
        List<SubjectsRow> subjectsList);
 
-  Future<void> deleteGroup(int teacherId, int groupId);
+  Future<bool> deleteGroup(int groupId);
 
   Future<Group> updateGroup(
       int groupId, String groupName, String descriptionGroup);
