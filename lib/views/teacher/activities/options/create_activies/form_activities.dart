@@ -152,6 +152,7 @@ class _FormActivitiesState extends ConsumerState<FormActivities> {
                     controller: activityNotifier.fechaController,
                     label: 'Fecha Límite',
                     hint: 'Fecha',
+                    isDateField: true,
                     errorMessage: activityForm.isFormPosted
                         ? activityForm.fechaLimite.errorMessage
                         : null,
@@ -228,6 +229,7 @@ class _FormActivitiesState extends ConsumerState<FormActivities> {
                     
                     final activityForm = ref.read(activityFormProvider);
                     if (activityForm.isFormPosted) {
+                      ref.invalidate(activitiesBySubjectProvider(widget.subjectId));
                        goRouterPop();
                     }
                   }),

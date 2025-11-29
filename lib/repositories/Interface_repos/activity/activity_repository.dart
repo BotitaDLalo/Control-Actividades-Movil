@@ -20,4 +20,6 @@ abstract class ActivityRepository {
   Future<ActivityStudentSubmissionsData> getStudentSubmissions(int activityId);
 
   Future<bool> submissionGrading(int submissionId, int grade);
+  
+  Future<List<Activity>> getActivitiesBySubject(int materiaId);
 }

@@ -72,4 +72,12 @@ class ActivityRepositoryImpl implements ActivityRepository {
     return activityDataSource.deleteActivity(activityId);
   }
   
+  @override
+Future<List<Activity>> getActivitiesBySubject(int materiaId) async {
+  // 🎯 El método getAllActivities que ya tienes parece estar diseñado
+  // para consultar actividades por materiaId. Lo reutilizamos.
+  final activities = await activityDataSource.getAllActivities(materiaId);
+  return activities;
+}
+
 }
