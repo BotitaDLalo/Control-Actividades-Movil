@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'data_body.dart';
 import 'notice_description.dart';
 import 'package:aprende_mas/config/utils/packages.dart';
+import 'package:aprende_mas/models/models.dart'; // Asegúrate de tener NoticeModel aquí
 
 class NoticeBody extends StatelessWidget {
   final bool optionsIsVisible;
@@ -25,23 +26,32 @@ class NoticeBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // 🚨 CREAMOS EL MODELO A PARTIR DE LOS PARÁMETROS:
+    final NoticeModel noticeData = NoticeModel(
+      noticeId: noticeId,
+      teacherFullName: teacherName,
+      createdDate: createdDate,
+      title: title,
+      description: content,
+      // Los campos groupId y subjectId se dejan por defecto o se pasan si son necesarios
+    );
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),   
+        borderRadius: BorderRadius.circular(12), 
         border: Border.all(color: Colors.grey.shade300, 
-        width: 1.0                      
+        width: 1.0                              
         ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           DataBody(
-            teacherName: teacherName,
-            createdDate: createdDate,
-            noticeId: noticeId,
+            // 🚨 CAMBIO AQUÍ: PASAMOS EL MODELO COMPLETO
+            notice: noticeData, 
             optionsIsVisible: optionsIsVisible,
           ),
           const SizedBox(height: 8),
@@ -54,4 +64,3 @@ class NoticeBody extends StatelessWidget {
     );
   }
 }
-

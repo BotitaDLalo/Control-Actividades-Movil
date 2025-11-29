@@ -8,6 +8,7 @@ class NoticesFormState {
   final bool isDeleted;
   final GenericInput title;
   final GenericInput description;
+  final int noticeId; // ⬅️ 1. CAMPO AÑADIDO para el ID del aviso
 
   NoticesFormState(
       {this.isPosting = false,
@@ -15,7 +16,8 @@ class NoticesFormState {
       this.isValid = false,
       this.isDeleted = false,
       this.title = const GenericInput.pure(),
-      this.description = const GenericInput.pure()});
+      this.description = const GenericInput.pure(),
+      this.noticeId = 0}); // ⬅️ 2. VALOR POR DEFECTO AÑADIDO (0 indica que no ha sido creado)
 
   NoticesFormState copyWith({
     bool? isPosting,
@@ -24,6 +26,7 @@ class NoticesFormState {
     bool? isDeleted,
     GenericInput? title,
     GenericInput? description,
+    int? noticeId, // ⬅️ 3. PARÁMETRO AÑADIDO al copyWith
   }) =>
       NoticesFormState(
           isPosting: isPosting ?? this.isPosting,
@@ -31,5 +34,6 @@ class NoticesFormState {
           isValid: isValid ?? this.isValid,
           isDeleted: isDeleted ?? this.isDeleted,
           title: title ?? this.title,
-          description: description ?? this.description);
+          description: description ?? this.description,
+          noticeId: noticeId ?? this.noticeId); // ⬅️ 4. IMPLEMENTACIÓN AÑADIDA
 }

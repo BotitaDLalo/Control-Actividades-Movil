@@ -4,6 +4,8 @@ import 'package:aprende_mas/models/models.dart';
 import 'package:aprende_mas/providers/notices/notices_form_provider.dart';
 import 'package:aprende_mas/views/views.dart';
 import 'package:aprende_mas/views/widgets/buttons/custom_rounded_button.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/material.dart'; // Asegurar importación de Material/Widget
 
 class TeacherCreateNotice extends ConsumerStatefulWidget {
   final NoticeModel notice;
@@ -15,6 +17,35 @@ class TeacherCreateNotice extends ConsumerStatefulWidget {
 }
 
 class _TeacherCreateNoticeState extends ConsumerState<TeacherCreateNotice> {
+  // 1. Determinar el modo: 'true' si estamos editando un aviso existente.
+  late final bool isEditing;
+
+  @override
+  void initState() {
+    super.initState();
+    final NoticeModel notice = widget.notice;
+    
+    // Un aviso es para edición si NoticeId es diferente de null y mayor que 0.
+    isEditing = notice.noticeId != null && notice.noticeId! > 0;
+    
+    // Si estamos en modo edición, inicializamos el estado del form provider 
+    // con los datos del aviso actual.
+    if (isEditing) {
+      // Usamos addPostFrameCallback para asegurar que el contexto de Riverpod esté listo.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        // Inicializa el provider con los valores del aviso para edición
+        ref.read(noticesFormProvider.notifier).onInitializeEditData(
+          notice.noticeId!,
+          notice.title, 
+          notice.description,
+        );
+        // Opcional: Asegurar que el provider sepa los valores iniciales.
+        ref.read(noticesFormProvider.notifier).onTitleChanged(notice.title);
+        ref.read(noticesFormProvider.notifier).onDescriptionChanged(notice.description);
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final formNoticeNotifier = ref.read(noticesFormProvider.notifier);
@@ -30,35 +61,44 @@ class _TeacherCreateNoticeState extends ConsumerState<TeacherCreateNotice> {
       },
     );
 
-    return Scaffold(
-      appBar: CustomAppBar(
-        title: 'Crear aviso',
+    // 🆕 Títulos y textos condicionales
+    final String appBarTitle = isEditing ? 'Editar aviso' : 'Crear aviso';
+    final String buttonText = isEditing ? 'Guardar Cambios' : 'Crear';
+
+    // 🛑 La clase CustomAppBar estaba aquí, causando el error. Ahora está fuera.
+
+    return Scaffold( // ⬅️ SIN 'const' aquí
+      appBar: CustomAppBar( // ⬅️ SIN 'const' aquí
+        title: appBarTitle, // Título dinámico
       ),
 
-      // ⬇️ BOTÓN "CREAR" MOVIDO ABAJO
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 70, vertical: 25),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 25.0),
         child: CustomRoundedButton(
-          text: 'Crear',
-          onPressed: () async {
-            if (formNotice.isPosting) return;
-
-            await formNoticeNotifier.onFormSubmit(notice);
-          },
+          text: buttonText,
+          // 🚨 LÓGICA DE SUBMIT: Llama a CREAR o ACTUALIZAR
+          onPressed: formNotice.isPosting || !formNotice.isValid
+              ? null
+              : () {
+                  if (isEditing) {
+                    // Si estamos editando, llamamos a onUpdateSubmit y le pasamos el modelo con ID
+                    formNoticeNotifier.onUpdateSubmit(notice);
+                  } else {
+                    // Si estamos creando, llamamos a onFormSubmit y le pasamos el modelo base
+                    formNoticeNotifier.onFormSubmit(notice);
+                  }
+                },
         ),
       ),
 
-// ... (resto de los imports y configuración previa igual)
-
-body: Form(
-        child: SingleChildScrollView( // Mantiene el scroll para evitar errores con el teclado
+      body: Form(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 40),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start, // Alinea todo a la izquierda
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              
-              // 1. NOMBRE DE LA MATERIA (Limpio)
-              Text(
+            Text(
                 widget.notice.subjectName ?? 'Materia General',
                 style: const TextStyle(
                   fontSize: 22,
@@ -66,22 +106,18 @@ body: Form(
                   color: Colors.black87,
                 ),
               ),
-
               const SizedBox(height: 10),
-
-              // 2. Texto de ayuda
               const Text(
                 'Redacta un nuevo aviso para tu materia.\n'
                 'Puedes incluir texto, enlaces o archivos adjuntos para tus estudiantes.',
                 style: TextStyle(fontSize: 15, color: Colors.black54),
               ),
-
               const SizedBox(height: 30),
-
-              // 3. Campos del formulario
+              // 3. Campos del formulario (Usando initialValue como solicitaste)
               CustomTextFormField(
-                label: 'Título', // Corregí "Titulo" a "Título"
+                label: 'Título',
                 capitalizeFirstLetter: true,
+                initialValue: isEditing ? notice.title : null, // ✅ Se mantiene initialValue
                 onChanged: formNoticeNotifier.onTitleChanged,
               ),
               const SizedBox(height: 20),
@@ -89,30 +125,34 @@ body: Form(
                 label: 'Mensaje',
                 capitalizeFirstLetter: true,
                 enableLineBreak: true,
+                initialValue: isEditing ? notice.description : null, // ✅ Se mantiene initialValue
                 onChanged: formNoticeNotifier.onDescriptionChanged,
               ),
             ],
           ),
         ),
       ),
-// ... (resto del archivo igual)
-
     );
   }
 }
 
+// ----------------------------------------------------
+// ✅ DEFINICIÓN DE CustomAppBar (DEBE ESTAR FUERA DEL MÉTODO build)
+// ----------------------------------------------------
 class CustomAppBar extends ConsumerWidget implements PreferredSizeWidget {
   final String title;
   final Widget? leading;
 
-  const CustomAppBar({
+  CustomAppBar({ // Constructor sin const
     super.key,
     required this.title,
     this.leading,
   });
 
+  // 🔴 ¡IMPLEMENTACIÓN CORRECTA DEL BUILD DE CONSUMERWIDGET!
+  // Debe aceptar BuildContext y WidgetRef.
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context, WidgetRef ref) { 
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 25 / 2.5),

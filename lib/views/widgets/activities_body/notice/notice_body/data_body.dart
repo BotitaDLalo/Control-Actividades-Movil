@@ -1,53 +1,53 @@
 import 'package:aprende_mas/config/utils/app_theme.dart';
 import 'package:aprende_mas/config/utils/packages.dart';
+import 'package:aprende_mas/models/models.dart';
 import 'package:aprende_mas/providers/notices/notices_form_provider.dart';
 import 'package:aprende_mas/views/views.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-// import eliminado: 'package:app_teacher_notice/src/notices/application/forms/notices_form_provider.dart';
 
 class DataBody extends ConsumerWidget {
   final bool optionsIsVisible;
-  final int noticeId;
-  final String teacherName;
-  final String createdDate;
+  final NoticeModel notice; // ⬅️ Ahora recibe el modelo completo
 
   const DataBody({
     Key? key,
     required this.optionsIsVisible,
-    required this.noticeId,
-    required this.teacherName,
-    required this.createdDate,
+    required this.notice, // ⬅️ Cambiado a NoticeModel
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final formNotices = ref.read(noticesFormProvider.notifier);
+    
+    // Extracción de datos del modelo para uso local
+    final String teacherName = notice.teacherFullName ?? "Docente";
+    final int noticeId = notice.noticeId ?? 0;
+    final String createdDate = notice.createdDate.toString();
+
 
     // ---------------------------------------------------------
-    // 2. LÓGICA DE FORMATO DE FECHA
+    // LÓGICA DE FORMATO DE FECHA (OPTIMIZADA)
     // ---------------------------------------------------------
-    // Definimos el formato de entrada (basado en tu error anterior: 24-11-2025 12:00:00)
     final inputFormatter = DateFormat('dd-MM-yyyy HH:mm:ss');
+    // Usar locale 'es' para que se muestre correctamente "de MMMM"
+    final outputFormatter = DateFormat('dd \'de\' MMMM \'a las\' hh:mm a', 'es'); 
     
-    // Definimos el formato de salida deseado en español
-    final outputFormatter = DateFormat('dd \'de\' MMMM \'a las\' hh:mm a', 'es');
-    
-    String formattedDate = createdDate; // Valor por defecto por si falla
+    String formattedDate = createdDate;
 
     try {
-      // Intentamos parsear con el formato específico
+      // 1. Intentar con el formato 'dd-MM-yyyy HH:mm:ss'
       final DateTime dateToFormat = inputFormatter.parse(createdDate);
       formattedDate = outputFormatter.format(dateToFormat);
     } catch (e) {
-      // Si falla (por ejemplo, si la fecha viene en otro formato ISO), intentamos el parseo genérico
       try {
+        // 2. Si falla, intentar parsear directamente como ISO 8601 (DateTime.parse)
         final DateTime dateToFormat = DateTime.parse(createdDate);
         formattedDate = outputFormatter.format(dateToFormat);
       } catch (e2) {
-        // Si todo falla, se queda con el texto original 'createdDate'
-        print('No se pudo formatear la fecha: $createdDate');
+        // En caso de error total, se queda con la fecha original (createdDate)
+        // Opcional: mostrar un valor por defecto o loggear el error
       }
     }
     // ---------------------------------------------------------
@@ -69,7 +69,7 @@ class DataBody extends ConsumerWidget {
               ),
               const SizedBox(height: 2),
               Text(
-                formattedDate, // <--- 3. USAMOS LA FECHA FORMATEADA AQUÍ
+                formattedDate,
                 style: const TextStyle(
                   fontSize: 16,
                   color: Colors.grey,
@@ -87,61 +87,63 @@ class DataBody extends ConsumerWidget {
             itemBuilder: (context) => [
               // Opción Editar
               PopupMenuItem(
-                  onTap: () {
-                    // Funcionalidad pendiente
-                  },
-                  child: const SizedBox(
-                      width: 90,
-                      child: Text(
-                        'Editar',
-                        style: TextStyle(fontSize: 20),
-                      ))),
+                onTap: () {
+                  // NAVEGACIÓN CORREGIDA: Se pasa el modelo 'notice' completo
+                  context.push('/teacher-create-notice', extra: notice);
+                },
+                child: const SizedBox(
+                    width: 90,
+                    child: Text(
+                      'Editar',
+                      style: TextStyle(fontSize: 20),
+                    ))),
               // Opción Eliminar
               PopupMenuItem(
-                  onTap: () {
-                    showDialog(
-                      barrierDismissible: false,
-                      context: context,
-                      builder: (context) {
-                        return AlertDialog(
-                          title: const Text(
-                            '¿Desea eliminar el aviso?',
-                            style: TextStyle(fontSize: 22),
+                onTap: () {
+                  showDialog(
+                    barrierDismissible: false,
+                    context: context,
+                    builder: (context) {
+                      return AlertDialog(
+                        title: const Text(
+                          '¿Desea eliminar el aviso?',
+                          style: TextStyle(fontSize: 22),
+                        ),
+                        actions: [
+                          ElevatedButton(
+                            onPressed: () {
+                              context.pop();
+                            },
+                            style: AppTheme.buttonPrimary,
+                            child: const Text(
+                              'Cancelar',
+                              style: TextStyle(
+                                  color: Colors.white, fontSize: 16),
+                            ),
                           ),
-                          actions: [
-                            ElevatedButton(
+                          ElevatedButton(
+                              style: AppTheme.buttonPrimary,
                               onPressed: () {
+                                // Usamos el ID del modelo
+                                formNotices.onDeleteSubmit(noticeId);
                                 context.pop();
                               },
-                              style: AppTheme.buttonPrimary,
                               child: const Text(
-                                'Cancelar',
+                                'Eliminar',
                                 style: TextStyle(
                                     color: Colors.white, fontSize: 16),
-                              ),
-                            ),
-                            ElevatedButton(
-                                style: AppTheme.buttonPrimary,
-                                onPressed: () {
-                                  formNotices.onDeleteSubmit(noticeId);
-                                  context.pop();
-                                },
-                                child: const Text(
-                                  'Eliminar',
-                                  style: TextStyle(
-                                      color: Colors.white, fontSize: 16),
-                                ))
-                          ],
-                        );
-                      },
-                    );
-                  },
-                  child: const SizedBox(
-                      width: 90,
-                      child: Text(
-                        'Eliminar',
-                        style: TextStyle(fontSize: 20),
-                      ))),
+                              ))
+                        ],
+                      );
+                    },
+                  );
+                },
+                child: const SizedBox(
+                    width: 90,
+                    child: Text(
+                      'Eliminar',
+                      style: TextStyle(fontSize: 20),
+                    ))),
             ],
           )
       ],
