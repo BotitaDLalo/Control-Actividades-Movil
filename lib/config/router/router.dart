@@ -226,9 +226,14 @@ GoRoute(
       GoRoute(
         path: '/teacher-create-notice',
         builder: (context, state) {
-          final notice = state.extra as NoticeModel;
+          final extra = state.extra as Map<String, dynamic>?;
+
+          final NoticeModel? notice = extra?['notice'];
+          final String? subjectName = extra?['subjectName'] ?? notice?.subjectName;
+
           return TeacherCreateNotice(
             notice: notice,
+            externalSubjectName: subjectName,
           );
         },
       ),
