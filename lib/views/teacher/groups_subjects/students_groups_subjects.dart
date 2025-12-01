@@ -56,45 +56,49 @@ class _StudentsGroupsSubjectsState
     //   ),
     // );
 
-    return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          const SizedBox(
-            height: 10,
+return Scaffold(
+  resizeToAvoidBottomInset: false,
+  body: Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 10),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 10),
+        Expanded(
+          child: ListView.builder(
+            itemCount: lsStudents.length,
+            itemBuilder: (context, index) {
+              final studentId = lsStudents[index].alumnoId;
+              final username = lsStudents[index].username;
+              final lastname = lsStudents[index].lastName;
+              final lastname2 = lsStudents[index].lastName2;
+              final name = lsStudents[index].name;
+
+              return ElementTile(
+                icon: Icons.person,
+                iconColor: Colors.white,
+                iconSize: 32,
+                title: username,
+                subtitle: "$lastname $lastname2 $name",
+                trailingIcon: Icons.more_vert,
+                trailingColor: Colors.black,
+                trailingVoidCallback: () {
+                  widget.studentOptionsFunction!(
+                    studentId: studentId,
+                    username: username,
+                    lastName: lastname,
+                    lastName2: lastname2,
+                    name: name,
+                  );
+                },
+              );
+            },
           ),
-          Expanded(
-              child: ListView.builder(
-                  itemCount: lsStudents.length,
-                  itemBuilder: (context, index) {
-                    final studentId = lsStudents[index].alumnoId;
-                    final username = lsStudents[index].username;
-                    final lastname = lsStudents[index].lastName;
-                    final lastname2 = lsStudents[index].lastName2;
-                    final name = lsStudents[index].name;
-                    return ElementTile(
-                      icon: Icons.person,
-                      iconColor: Colors.white,
-                      iconSize: 32,
-                      title: username,
-                      subtitle: "$lastname $lastname2 $name",
-                      trailingIcon: Icons.more_vert,
-                      trailingColor: Colors.black,
-                      trailingVoidCallback: () {
-                        widget.studentOptionsFunction!(
-                            studentId: studentId,
-                            username: username,
-                            lastName: lastname,
-                            lastName2: lastname2,
-                            name: name);
-                      },
-                    );
-                  })),
-          const SizedBox(
-            height: 40,
-          )
-        ]),
-      ),
-    );
+        ),
+      ],
+    ),
+  ),
+);
+
   }
 }

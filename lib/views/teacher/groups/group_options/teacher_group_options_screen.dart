@@ -94,12 +94,8 @@ class _GroupTeacherOptionsState extends ConsumerState<GroupTeacherOptions> {
         clearScreen();
       },
       child: Scaffold(
-        appBar: const AppBarScreens(),
         body: Column(
           children: [
-            const SizedBox(
-              height: 20,
-            ),
             ContainerNameGroupSubjects(
               name: widget.groupName,
               accessCode: widget.accessCode,
