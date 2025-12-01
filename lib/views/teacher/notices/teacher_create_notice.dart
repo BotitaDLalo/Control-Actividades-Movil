@@ -2,91 +2,101 @@ import 'package:aprende_mas/config/utils/app_theme.dart';
 import 'package:aprende_mas/config/utils/packages.dart';
 import 'package:aprende_mas/models/models.dart';
 import 'package:aprende_mas/providers/notices/notices_form_provider.dart';
-import 'package:aprende_mas/views/views.dart';
 import 'package:aprende_mas/views/widgets/buttons/custom_rounded_button.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter/material.dart'; // Asegurar importación de Material/Widget
+import 'package:flutter/material.dart';
+import 'package:aprende_mas/views/widgets/inputs/custom_text_form_field.dart';
+
 
 class TeacherCreateNotice extends ConsumerStatefulWidget {
-  final NoticeModel notice;
-  const TeacherCreateNotice({super.key, required this.notice});
+  final NoticeModel? notice;          // null al crear, lleno al editar
+  final String? externalSubjectName;  // Nombre recibido desde Router
+
+  const TeacherCreateNotice({
+    super.key,
+    this.notice,
+    this.externalSubjectName,
+  });
 
   @override
-  ConsumerState<ConsumerStatefulWidget> createState() =>
+  ConsumerState<TeacherCreateNotice> createState() =>
       _TeacherCreateNoticeState();
 }
 
 class _TeacherCreateNoticeState extends ConsumerState<TeacherCreateNotice> {
-  // 1. Determinar el modo: 'true' si estamos editando un aviso existente.
   late final bool isEditing;
+  late final String subjectName;
 
   @override
   void initState() {
     super.initState();
-    final NoticeModel notice = widget.notice;
-    
-    // Un aviso es para edición si NoticeId es diferente de null y mayor que 0.
-    isEditing = notice.noticeId != null && notice.noticeId! > 0;
-    
-    // Si estamos en modo edición, inicializamos el estado del form provider 
-    // con los datos del aviso actual.
+
+    final notice = widget.notice;
+
+    // Estamos editando si el aviso tiene ID
+    isEditing = notice?.noticeId != null && notice!.noticeId! > 0;
+
+    // Nombre de la materia SIEMPRE definido
+    subjectName = widget.externalSubjectName ??
+        notice?.subjectName ??
+        "Materia no especificada";
+
+    // Si estamos editando, cargar datos al formulario
     if (isEditing) {
-      // Usamos addPostFrameCallback para asegurar que el contexto de Riverpod esté listo.
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        // Inicializa el provider con los valores del aviso para edición
-        ref.read(noticesFormProvider.notifier).onInitializeEditData(
-          notice.noticeId!,
-          notice.title, 
+        final notifier = ref.read(noticesFormProvider.notifier);
+
+        notifier.onInitializeEditData(
+          notice!.noticeId!,
+          notice.title,
           notice.description,
         );
-        // Opcional: Asegurar que el provider sepa los valores iniciales.
-        ref.read(noticesFormProvider.notifier).onTitleChanged(notice.title);
-        ref.read(noticesFormProvider.notifier).onDescriptionChanged(notice.description);
+
+        notifier.onTitleChanged(notice.title);
+        notifier.onDescriptionChanged(notice.description);
       });
+          print("NOTICE AL EDITAR: ${widget.notice}");
+          print("EXTERNAL SUBJECT NAME: ${widget.externalSubjectName}");
+
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final formNoticeNotifier = ref.read(noticesFormProvider.notifier);
-    final formNotice = ref.watch(noticesFormProvider);
-    NoticeModel notice = widget.notice;
+    final formNotifier = ref.read(noticesFormProvider.notifier);
+    final formState = ref.watch(noticesFormProvider);
+    final notice = widget.notice ?? NoticeModel();
 
-    ref.listen(
-      noticesFormProvider,
-      (previous, next) {
-        if (next.isFormPosted && !next.isPosting) {
+    // Escuchar si el formulario terminó correctamente
+    ref.listen(noticesFormProvider, (previous, next) {
+      if (next.isFormPosted && !next.isPosting) {
+        if (context.mounted) {
           context.pop();
         }
-      },
-    );
+      }
+    });
 
-    // 🆕 Títulos y textos condicionales
-    final String appBarTitle = isEditing ? 'Editar aviso' : 'Crear aviso';
-    final String buttonText = isEditing ? 'Guardar Cambios' : 'Crear';
+    final appBarTitle = isEditing ? "Editar aviso" : "Crear aviso";
+    final buttonText = isEditing ? "Guardar cambios" : "Crear";
 
-    // 🛑 La clase CustomAppBar estaba aquí, causando el error. Ahora está fuera.
+    return Scaffold(
+      appBar: CustomAppBar(title: appBarTitle),
 
-    return Scaffold( // ⬅️ SIN 'const' aquí
-      appBar: CustomAppBar( // ⬅️ SIN 'const' aquí
-        title: appBarTitle, // Título dinámico
-      ),
-
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 25.0),
+      bottomNavigationBar: Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom > 0 ? 0 : 25,
+          left: 25,
+          right: 25,
+        ),
         child: CustomRoundedButton(
           text: buttonText,
-          // 🚨 LÓGICA DE SUBMIT: Llama a CREAR o ACTUALIZAR
-          onPressed: formNotice.isPosting || !formNotice.isValid
+          onPressed: formState.isPosting || !formState.isValid
               ? null
               : () {
                   if (isEditing) {
-                    // Si estamos editando, llamamos a onUpdateSubmit y le pasamos el modelo con ID
-                    formNoticeNotifier.onUpdateSubmit(notice);
+                    formNotifier.onUpdateSubmit(notice);
                   } else {
-                    // Si estamos creando, llamamos a onFormSubmit y le pasamos el modelo base
-                    formNoticeNotifier.onFormSubmit(notice);
+                    formNotifier.onFormSubmit(notice);
                   }
                 },
         ),
@@ -98,35 +108,43 @@ class _TeacherCreateNoticeState extends ConsumerState<TeacherCreateNotice> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-            Text(
-                widget.notice.subjectName ?? 'Materia General',
+              /// Nombre de la materia — ahora SIEMPRE correcto
+              Text(
+                subjectName,
                 style: const TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
                   color: Colors.black87,
                 ),
               ),
+
               const SizedBox(height: 10),
+
               const Text(
                 'Redacta un nuevo aviso para tu materia.\n'
                 'Puedes incluir texto, enlaces o archivos adjuntos para tus estudiantes.',
                 style: TextStyle(fontSize: 15, color: Colors.black54),
               ),
+
               const SizedBox(height: 30),
-              // 3. Campos del formulario (Usando initialValue como solicitaste)
+
+              /// Campo Título
               CustomTextFormField(
                 label: 'Título',
                 capitalizeFirstLetter: true,
-                initialValue: isEditing ? notice.title : null, // ✅ Se mantiene initialValue
-                onChanged: formNoticeNotifier.onTitleChanged,
+                initialValue: isEditing ? notice.title : null,
+                onChanged: formNotifier.onTitleChanged,
               ),
+
               const SizedBox(height: 20),
+
+              /// Campo Mensaje
               CustomTextFormField(
                 label: 'Mensaje',
-                capitalizeFirstLetter: true,
                 enableLineBreak: true,
-                initialValue: isEditing ? notice.description : null, // ✅ Se mantiene initialValue
-                onChanged: formNoticeNotifier.onDescriptionChanged,
+                capitalizeFirstLetter: true,
+                initialValue: isEditing ? notice.description : null,
+                onChanged: formNotifier.onDescriptionChanged,
               ),
             ],
           ),
@@ -137,25 +155,24 @@ class _TeacherCreateNoticeState extends ConsumerState<TeacherCreateNotice> {
 }
 
 // ----------------------------------------------------
-// ✅ DEFINICIÓN DE CustomAppBar (DEBE ESTAR FUERA DEL MÉTODO build)
+// AppBar Personalizado
 // ----------------------------------------------------
+
 class CustomAppBar extends ConsumerWidget implements PreferredSizeWidget {
   final String title;
   final Widget? leading;
 
-  CustomAppBar({ // Constructor sin const
+  const CustomAppBar({
     super.key,
     required this.title,
     this.leading,
   });
 
-  // 🔴 ¡IMPLEMENTACIÓN CORRECTA DEL BUILD DE CONSUMERWIDGET!
-  // Debe aceptar BuildContext y WidgetRef.
   @override
-  Widget build(BuildContext context, WidgetRef ref) { 
+  Widget build(BuildContext context, WidgetRef ref) {
     return SafeArea(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 25 / 2.5),
+        padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
         child: Stack(
           children: [
             Positioned.fill(
@@ -170,6 +187,8 @@ class CustomAppBar extends ConsumerWidget implements PreferredSizeWidget {
                 ),
               ),
             ),
+
+            // Botón de retroceso
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
