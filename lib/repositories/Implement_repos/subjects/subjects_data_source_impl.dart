@@ -88,27 +88,61 @@ class SubjectsDataSourceImpl implements SubjectsDataSource {
     throw UnimplementedError();
   }
 
-  @override
-  // Future<List<StudentGroupSubject>> addStudentsSubject(int? groupId, int subjectId, List<String> emails) async {
-  Future<List<StudentGroupSubject>> addStudentsSubject(
-      int subjectId, List<String> emails) async {
-    try {
-      const uri = "/Alumnos/RegistrarAlumnoGMDocente";
+  // --- CÓDIGO CORREGIDO EN subjects_data_source_impl.dart ---
 
-      final res =
-          await dio.post(uri, data: {"Emails": emails, "MateriaId": subjectId});
+// --- CÓDIGO CORREGIDO EN subjects_data_source_impl.dart ---
 
-      if (res.statusCode == 200) {
-        final resList = List<Map<String, dynamic>>.from(res.data);
-        final lsStudents =
-            StudentGroupSubject.studentGroupSubjectJsonToEntity(resList);
-        return lsStudents;
-      }
-      return [];
-    } catch (e) {
-      throw Exception(e);
+@override
+Future<List<StudentGroupSubject>> addStudentsSubject(
+    int subjectId, List<String> emails) async {
+  
+  // Manejo del ID... (se asume que ya lo tienes fuera del try)
+final docenteId = await storageService.getId();
+
+// 2. Manejo de null: Si es null, lanzamos una excepción limpia.
+if (docenteId == null) {
+    throw Exception("Docente ID not found in storage."); 
+}
+// Si llega aquí, docenteId es un int no nulo.
+
+const uri = "/Alumnos/RegistrarAlumnoGMDocente";
+
+try {
+  final res = await dio.post(
+    uri, 
+    data: {
+      "Emails": emails, 
+      "MateriaId": subjectId,
+      "DocenteId": docenteId // Usamos la variable verificada
     }
+    
+  );
+
+    // Si la solicitud es exitosa (código 200), devuelve la lista
+    final resList = List<Map<String, dynamic>>.from(res.data);
+    return StudentGroupSubject.studentGroupSubjectJsonToEntity(resList); 
+
+  } on DioException catch (e) {
+    // Si la API devuelve un error 4xx o 5xx
+    final statusCode = e.response?.statusCode;
+    
+    // 1. Manejo del 400 (Error de Negocio)
+    if (statusCode == 400) {
+      // 🚨 Lanzamos una excepción con el mensaje del servidor
+      final errorData = e.response?.data;
+      final serverMessage = errorData?['mensaje'] ?? 'Error desconocido del servidor.';
+      throw Exception(serverMessage);
+    }
+    
+    // 2. Manejo de otros errores (404, 500, etc.)
+    debugPrint('Error general de la API al asignar alumnos: $statusCode');
+    throw Exception('Error en la conexión o servidor.');
+    
+  } catch (e) {
+    // Errores de parsing o fallos de red
+    throw Exception(e); 
   }
+}
 
   @override
   Future<List<StudentGroupSubject>> getStudentsSubject(int? groupId,int subjectId) async {

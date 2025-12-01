@@ -117,14 +117,37 @@ class FormSubjectsStateNotifier extends StateNotifier<FormSubjectsState> {
     state = state.copyWith(verifyEmail: verifyEmail);
   }
 
-  // onAddStudentsSubjectWithoutGroup(int? groupId, int subjectId) async {
-  onAddStudentsSubjectWithoutGroup(int subjectId) async {
-    state = state.copyWith(isPosting: true);
-    // bool res = await addStudentsGroupCallback(groupId, subjectId);
-    bool res = await addStudentsSubjectCallback(subjectId);
+// --- CÓDIGO CORREGIDO EN form_subjects_state_notifier.dart ---
+
+// --- CÓDIGO CORREGIDO EN form_subjects_state_notifier.dart ---
+
+// --- CÓDIGO TEMPORAL DE DEBUG EN form_subjects_state_notifier.dart ---
+
+onAddStudentsSubjectWithoutGroup(int subjectId) async {
+  // Limpiamos isPosting al inicio para asegurar que no se quede pegado
+  state = state.copyWith(isPosting: true, errorMessage: '');
+  
+  try {
+    bool res = await addStudentsSubjectCallback(subjectId); 
+
+    // Lógica de éxito...
     if (res) {
-      state = state.copyWith(isFormPosted: res);
+      state = state.copyWith(isFormPosted: true);
+      await Future.delayed(const Duration(milliseconds: 50)); 
+      state = state.copyWith(isFormPosted: false); 
     }
-    state = state.copyWith(isPosting: false);
+    
+  } catch (e) {
+    // 🛑 DEBUG: Imprimimos el error capturado y guardamos solo la cadena completa
+    print('🚨 ERROR CAPTURADO EN FORM NOTIFIER: $e'); 
+    
+    // Simplificamos la asignación del mensaje para evitar fallos secundarios de String
+    state = state.copyWith(errorMessage: e.toString()); 
+    
+  } finally {
+    // 🛑 DEBUG: Confirmamos que el proceso ha finalizado
+    print('--- FINALIZANDO PROCESO (FINALLY EXECUTED) ---');
+    state = state.copyWith(isPosting: false); 
   }
+}
 }

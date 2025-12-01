@@ -40,26 +40,29 @@ class StudentsSubjectStateNotifier extends StateNotifier<StudentsSubjectState> {
     state = state.copyWith(lsEmails: [verifyEmail, ...lsEmails]);
   }
 
-  Future<bool> addStudentsSubject(int subjectId) async {
-    try {
-      List<VerifyEmail> lsEmails = List.from(state.lsEmails);
-      List<String> lsVerifiedEmails = lsEmails
-          .where((element) => element.isEmailValid)
-          .map((e) => e.email)
-          .toList();
+// --- CÓDIGO CORREGIDO EN students_subject_state_notifier.dart ---
 
-      final res = await subjectsRepository.addStudentsSubject(
-          subjectId, lsVerifiedEmails);
+Future<bool> addStudentsSubject(int subjectId) async {
+  try {
+    List<VerifyEmail> lsEmails = List.from(state.lsEmails);
+    List<String> lsVerifiedEmails = lsEmails
+        .where((element) => element.isEmailValid)
+        .map((e) => e.email)
+        .toList();
 
-      if (res.isNotEmpty) {
-        _setAddStudentsSubject(res);
-        return true;
-      }
-      return false;
-    } catch (e) {
-      return false;
+    final res = await subjectsRepository.addStudentsSubject(
+        subjectId, lsVerifiedEmails);
+
+    if (res.isNotEmpty) {
+      _setAddStudentsSubject(res);
+      return true;
     }
+    return false;
+  } catch (e) {
+    // 🛑 ¡CORRECCIÓN CLAVE! Relanzamos la excepción para que el FormNotifier la capture.
+    throw e; 
   }
+}
 
   _setAddStudentsSubject(List<StudentGroupSubject> lsStudentsSubject) {
     final lsAlumnosState = List.from(state.lsStudentsSubject);

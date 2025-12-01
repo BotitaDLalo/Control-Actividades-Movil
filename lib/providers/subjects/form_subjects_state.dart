@@ -16,6 +16,7 @@ class FormSubjectsState {
   final List<int> groupsId;
   final Map<int, bool> isSelectedGroup;
   final VerifyEmail? verifyEmail;
+  final String errorMessage;
 
   FormSubjectsState(
       {this.groupsId = const [],
@@ -27,6 +28,7 @@ class FormSubjectsState {
       this.subjectDescription = const GenericInput.pure(),
       this.colorCode = const ColorInput.pure(),
       this.subPickerColor = const Color.fromARGB(0, 255, 255, 255),
+      this.errorMessage = '',
       this.verifyEmail});
 
   FormSubjectsState copyWith(
@@ -39,6 +41,7 @@ class FormSubjectsState {
           ColorInput? colorCode,
           Color? subPickerColor,
           List<int>? groupsId,
+          String? errorMessage,
           VerifyEmail? verifyEmail}) =>
       FormSubjectsState(
           isPosting: isPosting ?? this.isPosting,
@@ -50,5 +53,7 @@ class FormSubjectsState {
           colorCode: colorCode ?? this.colorCode,
           subPickerColor: subPickerColor ?? this.subPickerColor,
           groupsId: groupsId ?? this.groupsId,
-          verifyEmail: verifyEmail ?? this.verifyEmail);
+          errorMessage: errorMessage ?? this.errorMessage,
+          verifyEmail: verifyEmail ?? this.verifyEmail
+          );
 }

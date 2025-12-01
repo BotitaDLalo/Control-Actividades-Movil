@@ -42,6 +42,7 @@ Widget build(BuildContext context) {
   final content = ref.watch(contentProvider);
   final formSubjects = ref.watch(formSubjectsProvider);
   final lsEmails = ref.watch(studentsSubjectProvider).lsEmails;
+  final canSubmit = lsEmails.isNotEmpty && !formSubjects.isPosting;
 
   void clear() {
     controller.clear();
@@ -183,20 +184,25 @@ Widget build(BuildContext context) {
       
       // --- SECCIÓN 3: BOTÓN FIJO (Fuera del scroll) ---
       Padding(
-        padding: const EdgeInsets.only(right: 20, bottom: 20, top: 10),
-        child: Align(
-          alignment: Alignment.centerRight,
-          child: CustomRoundedButton(
-            text: "Agregar",
-            onPressed: () async {
-              if (formSubjects.isPosting) return;
+  padding: const EdgeInsets.only(right: 20, bottom: 20, top: 10),
+  child: Align(
+    alignment: Alignment.centerRight,
+    child: CustomRoundedButton(
+      text: "Agregar",
+      // Asignamos la función SÓLO si 'canSubmit' es verdadero.
+      // Si es falso, el botón será 'null' (deshabilitado).
+      onPressed: canSubmit 
+          ? () async {
+              // DEBUG: Agrega un print para confirmar que la función se ejecuta
+              print('--- INICIANDO ENVÍO DE ${lsEmails.length} ALUMNOS ---');
               ref
                   .read(formSubjectsProvider.notifier)
                   .onAddStudentsSubjectWithoutGroup(widget.subjectId);
-            },
-          ),
-        ),
-      ),
+            }
+          : null, // Deshabilita el botón si la lista está vacía o está enviando
+    ),
+  ),
+),
     ],
   );
 }
