@@ -36,7 +36,7 @@ class Group {
       List<Subject> materias =
           (group['Materias'] as List? ?? []).map((materia) {
         List<Activity> actividades =
-            (materia['Actividades'] as List).map((actividad) {
+            (materia['Actividades'] as List? ?? []).map((actividad) {
           return Activity(
               activityId: actividad['ActividadId'],
               nombreActividad: actividad['NombreActividad'],

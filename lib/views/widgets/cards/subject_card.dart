@@ -6,6 +6,7 @@ import 'package:aprende_mas/providers/data/key_value_storage_service_providers.d
 import 'package:aprende_mas/models/models.dart';
 import 'package:aprende_mas/config/utils/packages.dart';
 import 'package:aprende_mas/providers/subjects/subjects_provider.dart';
+import 'package:aprende_mas/providers/groups/groups_provider.dart';
 
 class SubjectCard extends ConsumerWidget {
   final int? groupId;
@@ -74,7 +75,10 @@ class SubjectCard extends ConsumerWidget {
               onPressed: () async {
                 Navigator.of(context).pop();
                 bool success = await ref.read(subjectsProvider.notifier).deleteSubject(subjectData.materiaId!);
-                if (!success) {
+                if (success) {
+                  // Refrescar la lista de grupos para que no muestre la materia eliminada
+                  await ref.read(groupsProvider.notifier).getGroupsSubjects();
+                } else {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('No se eliminó la materia')),
                   );

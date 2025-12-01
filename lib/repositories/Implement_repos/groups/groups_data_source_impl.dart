@@ -48,7 +48,7 @@ class GroupsDataSourceImpl implements GroupsDataSource {
 
   @override
   Future<List<Group>> createGroupSubjects(String groupName, String description,
-       List<SubjectsRow> subjectsList) async {
+        List<SubjectsRow> subjectsList) async {
     try {
       const uri = "/Grupos/CrearGrupoMaterias";
       final id = await storageService.getId();
@@ -56,21 +56,56 @@ class GroupsDataSourceImpl implements GroupsDataSource {
           .map((subject) => subject.toJsonGroupsSubjects())
           .toList();
 
+      debugPrint("📤 Enviando POST a: $uri");
+      debugPrint("📤 Datos: DocenteId=$id, NombreGrupo=$groupName");
       final res = await dio.post(uri, data: {
         "DocenteId": id,
         "NombreGrupo": groupName,
         "Descripcion": description,
         "Materias": subList
       });
+      debugPrint("📥 Status Code: ${res.statusCode}");
+      debugPrint("📥 Response Data: ${res.data}");
 
       if (res.statusCode == 200) {
-        final resLista = List<Map<String, dynamic>>.from(res.data);
-        final groups = Group.groupsJsonToEntityList(resLista);
-        return groups;
+        if (res.data != null && res.data is List) {
+          try {
+            // Conversión más segura que maneja nulls en campos internos
+            final cleanData = res.data.where((item) => item != null).map((item) {
+              if (item is Map<String, dynamic>) {
+                // Asegurar que campos de lista no sean null
+                return item.map((key, value) {
+                  if (value == null && (key == 'Materias' || key == 'materias')) {
+                    return MapEntry(key, <dynamic>[]);
+                  }
+                  return MapEntry(key, value);
+                });
+              }
+              return item;
+            }).toList();
+
+            final resLista = List<Map<String, dynamic>>.from(cleanData);
+            final groups = Group.groupsJsonToEntityList(resLista);
+            debugPrint("✅ Grupos creados: ${groups.length}");
+            return groups;
+          } catch (e) {
+            debugPrint("❌ Error convirtiendo response data: $e");
+            debugPrint("❌ Response data type: ${res.data.runtimeType}");
+            // Mostrar más detalles del error
+            for (var i = 0; i < res.data.length; i++) {
+              debugPrint("❌ Item $i: ${res.data[i]} (type: ${res.data[i]?.runtimeType})");
+            }
+            return [];
+          }
+        } else {
+          debugPrint("❌ Response data es null o no es List: ${res.data?.runtimeType}");
+          return [];
+        }
       }
+      debugPrint("❌ Status code no es 200: ${res.statusCode}");
       return [];
     } catch (e) {
-      print(e);
+      debugPrint("❌ Error en createGroupSubjects: $e");
       return [];
     }
   }

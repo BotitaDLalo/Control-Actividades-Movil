@@ -24,10 +24,13 @@ class GroupsNotifier extends StateNotifier<GroupsState> {
 
   Future<void> getGroupsSubjects() async {
     try {
+      debugPrint("📡 Llamando getGroupsSubjects desde backend");
       final groups = await groupsRepository.getGroupsSubjects();
+      debugPrint("📡 Recibidos ${groups.length} grupos del backend");
       setGroupsSubjects(groups);
+      debugPrint("📡 State de grupos actualizado");
     } catch (e) {
-      debugPrint(e.toString());
+      debugPrint("❌ Error en getGroupsSubjects: $e");
     }
   }
 
@@ -63,15 +66,23 @@ class GroupsNotifier extends StateNotifier<GroupsState> {
       // Color colorCode,
       List<SubjectsRow> subjectsList) async {
     try {
+      debugPrint("🆕 Creando grupo: $groupName");
       final group = await groupsRepository.createGroupSubjects(
           groupName, description, subjectsList);
 
       if (group.isNotEmpty) {
+        debugPrint("✅ Grupo creado en backend, actualizando state");
         _setCreateGroupSubjects(group);
+        // Refrescar la lista completa para asegurar consistencia
+        debugPrint("🔄 Refrescando lista de grupos...");
+        await getGroupsSubjects();
+        debugPrint("✅ Lista de grupos refrescada");
         return true;
       }
+      debugPrint("❌ No se creó el grupo");
       return false;
     } catch (e) {
+      debugPrint("❌ Error creando grupo: $e");
       throw Exception(e);
     }
   }
