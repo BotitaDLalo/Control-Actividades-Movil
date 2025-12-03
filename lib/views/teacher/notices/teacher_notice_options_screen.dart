@@ -101,10 +101,7 @@ class _NoticeOptionsScreenState
           floatingActionButton: allNotices.isNotEmpty
               ? FloatingActionButtonCustom(
                   voidCallback: () {
-                    context.push(
-                      '/teacher-create-notice?subjectName=${widget.subjectName}',
-                      extra: notice,
-                    );
+                  context.push('/teacher-create-notice', extra: notice);
                   },
                   icon: Icons.add,
                 )
@@ -154,10 +151,7 @@ class _NoticeOptionsScreenState
                                       CustomRoundedButton(
                                         text: 'Crear primer aviso',
                                         onPressed: () {
-                                          context.push(
-                                            '/teacher-create-notice?subjectName=${widget.subjectName}',
-                                            extra: notice,
-                                          );
+                                        context.push('/teacher-create-notice', extra: notice);
                                         },
                                         backgroundColor: const Color(0xFF283043),
                                         textColor: Colors.white,
