@@ -201,7 +201,11 @@ class FormCreateSubjectState extends ConsumerState<FormCreateSubject> {
                     if (formCreateSubject.isPosting) {
                       return;
                     }
+                    debugPrint("🔘 Botón Crear materia presionado");
                     await formCreateSubjectNotifier.onFormSubmit();
+                    debugPrint("🔄 Refrescando lista de grupos...");
+                    await ref.read(groupsProvider.notifier).getGroupsSubjects();
+                    debugPrint("✅ Refresco completado, cerrando formulario");
                     goRouterPop();
                   }),
             )

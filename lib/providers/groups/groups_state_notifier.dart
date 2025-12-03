@@ -28,9 +28,10 @@ class GroupsNotifier extends StateNotifier<GroupsState> {
       final groups = await groupsRepository.getGroupsSubjects();
       debugPrint("📡 Recibidos ${groups.length} grupos del backend");
       setGroupsSubjects(groups);
-      debugPrint("📡 State de grupos actualizado");
+      debugPrint("📡 State de grupos actualizado con ${state.lsGroups.length} grupos");
     } catch (e) {
       debugPrint("❌ Error en getGroupsSubjects: $e");
+      debugPrint("❌ Stack trace: ${StackTrace.current}");
     }
   }
 

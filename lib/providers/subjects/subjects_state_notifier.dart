@@ -52,10 +52,14 @@ class SubjectsStateNotifier extends StateNotifier<SubjectsState> {
   Future<void> createSubjectWithGroups(String subjectName, String description,
       Color colorCode, List<int> groupsId) async {
     try {
+      debugPrint("📝 Llamando createSubjectWithGroups: $subjectName, grupos: $groupsId");
       final subject = await subjectsRepository.createSubjectWithGroup(
           subjectName, description, colorCode, groupsId);
+      debugPrint("📝 Materia creada, actualizando groups");
       _setSubjectWithGroups(subject);
+      debugPrint("📝 Groups actualizados con nueva materia");
     } catch (e) {
+      debugPrint("❌ Error en createSubjectWithGroups: $e");
       throw Exception(e);
     }
   }

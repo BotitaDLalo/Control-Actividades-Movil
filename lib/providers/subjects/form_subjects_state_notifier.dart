@@ -65,19 +65,27 @@ class FormSubjectsStateNotifier extends StateNotifier<FormSubjectsState> {
 //  }
 
   onFormSubmit() async {
+    debugPrint("📝 onFormSubmit llamado");
     _touchEveryField();
-    if (!state.isValid) return;
+    if (!state.isValid) {
+      debugPrint("❌ Formulario no válido");
+      return;
+    }
+    debugPrint("✅ Formulario válido, grupos seleccionados: ${state.groupsId}");
     state = state.copyWith(isPosting: true);
     if (state.groupsId.isNotEmpty) {
+      debugPrint("📝 Creando materia con grupos");
       await createSubjectWithGroupsCallback(
           state.subjectName.value,
           state.subjectDescription.value,
           state.colorCode.value,
           state.groupsId);
     } else {
+      debugPrint("📝 Creando materia sin grupos");
       await createSubjectWithoutGroup(state.subjectName.value,
           state.subjectDescription.value, state.colorCode.value);
     }
+    debugPrint("📝 Materia creada, reseteando formulario");
     state = state.copyWith(isPosting: false);
     resetFormSubjects();
   }

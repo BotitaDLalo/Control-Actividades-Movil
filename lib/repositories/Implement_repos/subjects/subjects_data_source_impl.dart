@@ -39,6 +39,7 @@ class SubjectsDataSourceImpl implements SubjectsDataSource {
     try {
       const uri = "/Materias/CrearMateriaGrupos";
       final id = await storageService.getId();
+      debugPrint("📝 Creando materia '$subjectName' para grupos: $groupsId");
       final res = await dio.post(uri, data: {
         "NombreMateria": subjectName,
         "Descripcion": description,
@@ -46,11 +47,20 @@ class SubjectsDataSourceImpl implements SubjectsDataSource {
         "DocenteId": id,
         "Grupos": groupsId
       });
+      debugPrint("📥 Status Code: ${res.statusCode}");
+      debugPrint("📥 Response Data: ${res.data}");
 
-      final resList = List<Map<String, dynamic>>.from(res.data);
-      final groups = Group.groupsJsonToEntityList(resList);
-      return groups;
+      if (res.statusCode == 200) {
+        debugPrint("✅ Materia creada exitosamente en backend");
+        // El backend ahora retorna un mensaje, no la lista de grupos
+        // La actualización se hace con getGroupsSubjects después
+        return [];
+      } else {
+        debugPrint("❌ Status code ${res.statusCode}: ${res.data}");
+        return [];
+      }
     } catch (e) {
+      debugPrint("❌ Error creando materia con grupos: $e");
       throw Exception(e);
     }
   }
