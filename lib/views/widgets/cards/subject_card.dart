@@ -157,45 +157,46 @@ class SubjectCard extends ConsumerWidget {
                   ),
                 ),
 
-                // Menú de opciones en la esquina superior derecha
-                Positioned(
-                  top: 8,
-                  right: 8,
-                  child: PopupMenuButton<String>(
-                    icon: const Icon(
-                      Icons.more_vert,
-                      size: 20,
-                      color: Colors.white,
-                    ),
-                    onSelected: (value) {
-                      final data = Subject(
-                          groupId: groupId,
-                          materiaId: subjectId,
-                          nombreMateria: nombreMateria,
-                          codigoAcceso: accessCode,
-                          descripcion: description);
-                      if (value == 'options') {
-                        if (role == cn.getRoleTeacherName) {
-                          teacherSubjectOptions(data);
-                        } else if (role == cn.getRoleStudentName) {
-                          studentSubjectOptions(data);
+                if (role == cn.getRoleTeacherName)
+                  // Menú de opciones en la esquina superior derecha
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: PopupMenuButton<String>(
+                      icon: const Icon(
+                        Icons.more_vert,
+                        size: 20,
+                        color: Colors.white,
+                      ),
+                      onSelected: (value) {
+                        final data = Subject(
+                            groupId: groupId,
+                            materiaId: subjectId,
+                            nombreMateria: nombreMateria,
+                            codigoAcceso: accessCode,
+                            descripcion: description);
+                        if (value == 'options') {
+                          if (role == cn.getRoleTeacherName) {
+                            teacherSubjectOptions(data);
+                          } else if (role == cn.getRoleStudentName) {
+                            studentSubjectOptions(data);
+                          }
+                        } else if (value == 'delete') {
+                          _showDeleteConfirmation(context, data);
                         }
-                      } else if (value == 'delete') {
-                        _showDeleteConfirmation(context, data);
-                      }
-                    },
-                    itemBuilder: (context) => [
-                      const PopupMenuItem(
-                        value: 'options',
-                        child: Text('Opciones'),
-                      ),
-                      const PopupMenuItem(
-                        value: 'delete',
-                        child: Text('Eliminar'),
-                      ),
-                    ],
+                      },
+                      itemBuilder: (context) => [
+                        const PopupMenuItem(
+                          value: 'options',
+                          child: Text('Opciones'),
+                        ),
+                        const PopupMenuItem(
+                          value: 'delete',
+                          child: Text('Eliminar'),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
 
                 // Contenido principal
                 Padding(
