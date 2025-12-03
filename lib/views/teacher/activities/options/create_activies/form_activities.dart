@@ -168,7 +168,7 @@ class _FormActivitiesState extends ConsumerState<FormActivities> {
                     controller: activityNotifier.horaController,
                     label: 'Hora de Entrega',
                     isTimeField: true,
-                    hint: 'Hora',
+                    hint: 'Hora (Opcional)',
                     errorMessage: activityForm.isFormPosted
                         ? activityForm.horaLimite.errorMessage
                         : null,
@@ -185,9 +185,7 @@ class _FormActivitiesState extends ConsumerState<FormActivities> {
                 textEditingController: activityNotifier.puntajeController,
                 label: 'Puntaje (Opcional)',
                 onChanged: activityNotifier.onPuntajeChanged,
-                errorMessage: activityForm.isFormPosted
-                    ? activityForm.puntaje.errorMessage
-                    : null),
+                ),
             const SizedBox(
               height: 30, // Separación antes del botón
             ),

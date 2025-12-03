@@ -135,42 +135,47 @@ onPuntajeChanged(String value) {
     );
 }
 
-  DateTime? _getFechaHoraConcatenada() {
-    try {
-      // Obtener y parsear la fecha
-      final fechaStr = state.fechaLimite.value;
-      if (fechaStr.isEmpty) {
-        throw Exception("La fecha es nula o está vacía");
-      }
-      final fecha = DateTime.tryParse(fechaStr);
-      if (fecha == null) {
-        throw Exception("Formato de fecha inválido: $fechaStr");
-      }
+    DateTime? _getFechaHoraConcatenada() {
+        try {
+          // Obtener y parsear la fecha
+          final fechaStr = state.fechaLimite.value;
+          if (fechaStr.isEmpty) {
+            throw Exception("La fecha es nula o está vacía");
+          }
+          final fecha = DateTime.tryParse(fechaStr);
+          if (fecha == null) {
+            throw Exception("Formato de fecha inválido: $fechaStr");
+          }
 
-      // Obtener y parsear la hora
-      final horaStr = state.horaLimite.value;
-      if (horaStr.isEmpty) {
-        throw Exception("La hora es nula o está vacía");
-      }
-      final horaParts = horaStr.split(':');
-      if (horaParts.length != 2) {
-        throw Exception("Formato de hora inválido: $horaStr");
-      }
-      final hora = int.tryParse(horaParts[0]) ?? 0;
-      final minuto = int.tryParse(horaParts[1]) ?? 0;
+          // 🎯 LÓGICA ACTUALIZADA: Obtener y manejar la hora
+          final horaStr = state.horaLimite.value;
+          
+          // 1. Si la hora está vacía, usamos 23:59 (11:59 PM)
+          int hora = 23; // Default: 23 horas
+          int minuto = 59; // Default: 59 minutos
 
-      // Combinar fecha y hora en un objeto DateTime
-      return DateTime(
-        fecha.year,
-        fecha.month,
-        fecha.day,
-        hora,
-        minuto,
-      );
-    } catch (e) {
-      return null; // Retorna null si hay un error
+          if (horaStr.isNotEmpty) {
+              final horaParts = horaStr.split(':');
+              if (horaParts.length != 2) {
+                throw Exception("Formato de hora inválido: $horaStr");
+              }
+              hora = int.tryParse(horaParts[0]) ?? 0;
+              minuto = int.tryParse(horaParts[1]) ?? 0;
+          }
+          // Si horaStr está vacía, se usan los valores por defecto (23 y 59).
+
+          // Combinar fecha y hora en un objeto DateTime
+          return DateTime(
+            fecha.year,
+            fecha.month,
+            fecha.day,
+            hora,
+            minuto,
+          );
+        } catch (e) {
+          return null; // Retorna null si hay un error
+        }
     }
-  }
 
   // 2. NUEVO MÉTODO: Limpiar formulario (usado al entrar en modo Creación)
   void clearForm() {
@@ -283,18 +288,19 @@ _touchEveryField() {
     final nombre = GenericInput.dirty(state.nombre.value);
     final descripcion = GenericInput.dirty(state.descripcion.value);
     final fechaLimite = GenericInput.dirty(state.fechaLimite.value);
-    final horaLimite = GenericInput.dirty(state.horaLimite.value);
-    final puntaje = GenericInput.dirty(state.puntaje.value); // Se mantiene para marcar como 'dirty'
+    final horaLimite = GenericInput.dirty(state.horaLimite.value); // Se mantiene como dirty
+    final puntaje = GenericInput.dirty(state.puntaje.value);
 
     state = state.copyWith(
         isFormPosted: true,
         nombre: nombre,
         descripcion: descripcion,
         fechaLimite: fechaLimite,
-        horaLimite: horaLimite,
+        horaLimite: horaLimite, // Lo marcamos como tocado
         puntaje: puntaje,
         isValid: Formz.validate(
-            [nombre, descripcion, fechaLimite, horaLimite] // <--- SE ELIMINA 'puntaje' DE LA VALIDACIÓN
+            // 🎯 CAMBIO: Se remueve horaLimite y puntaje de la validación
+            [nombre, descripcion, fechaLimite] 
         ));
 }
 
