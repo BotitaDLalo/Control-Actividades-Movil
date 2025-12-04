@@ -8,6 +8,7 @@ class NoticeModel {
   final String? createdDate;
   int groupId;
   int subjectId;
+  String? subjectName;
 
   NoticeModel({
     this.noticeId,
@@ -17,6 +18,7 @@ class NoticeModel {
     this.createdDate,
     this.groupId = 0,
     this.subjectId = 0,
+    this.subjectName,
   });
 
   NoticeModel copyWith({
@@ -27,6 +29,7 @@ class NoticeModel {
     String? createdDate,
     int? groupId,
     int? subjectId,
+    String? subjectName,
   }) =>
       NoticeModel(
         noticeId: noticeId ?? this.noticeId,
@@ -36,6 +39,7 @@ class NoticeModel {
         createdDate: createdDate ?? this.createdDate,
         groupId: groupId ?? this.groupId,
         subjectId: subjectId ?? this.subjectId,
+        subjectName: subjectName ?? this.subjectName,
       );
 
   static List<NoticeModel> jsonToEntitylsNotices(

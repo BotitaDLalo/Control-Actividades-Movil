@@ -12,6 +12,7 @@ class ElementTile extends ConsumerWidget {
   final double iconSize;
   final GestureTapCallback? onTapFunction;
   final VoidCallback? trailingVoidCallback;
+  final Widget? trailingWidget;
 
   const ElementTile({
     super.key,
@@ -24,54 +25,69 @@ class ElementTile extends ConsumerWidget {
     required this.subtitle,
     this.onTapFunction,
     this.trailingVoidCallback,
+    this.trailingWidget,
     this.trailingIcon,
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+// En el archivo de tu widget ElementTile
+
+Widget build(BuildContext context, WidgetRef ref) {
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 8.0),
       child: Container(
         decoration: BoxDecoration(
-            // color: const Color.fromARGB(10, 0, 0, 0),
-            // border: Border.all(color: const Color.fromARGB(28, 0, 0, 0), width: 1.0),
-            // borderRadius: BorderRadius.circular(12),
-            ),
+            color: Colors.white, // Fondo blanco
+            borderRadius: BorderRadius.circular(10), // Bordes redondeados
+            // Solo un borde sutil, sin sombra
+            border: Border.all(color: Colors.grey.shade300, width: 1.0),
+        ),
         child: ListTile(
-            leading: CircleAvatar(
-              backgroundColor: Colors.black,
-              radius: 22,
-              child: Icon(icon, color: iconColor, size: iconSize),
+            
+            // --- Trailing (Ícono de tres puntos) ---
+            trailing: trailingWidget ?? (
+                trailingIcon != null
+                    ? IconButton(
+                        onPressed: trailingVoidCallback,
+                        icon: Icon(
+                          trailingIcon,
+                          color: trailingColor,
+                          size: 25,
+                        ))
+                    : Text(
+                        trailingString ?? "",
+                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      )
             ),
+            
+            // --- Leading (Ícono de la actividad) ---
+            leading: CircleAvatar(
+              backgroundColor: Colors.transparent, 
+              radius: 22,
+              child: Icon(icon, color: Colors.black, size: iconSize),
+            ),
+            
+            // --- Title (Título de la actividad) ---
             title: Text(
               title,
               style: const TextStyle(
                 fontSize: 18,
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.w700, // Ajustado a W700 para que se vea más audaz
+                color: Colors.black, 
                 overflow: TextOverflow.ellipsis,
               ),
             ),
+            
+            // --- Subtitle (Fecha/Descripción) ---
             subtitle: Text(
               subtitle,
               style: const TextStyle(
-                  fontSize: 20,
+                  fontSize: 16,
                   color: Colors.grey,
                   overflow: TextOverflow.ellipsis),
             ),
-            trailing: trailingIcon != null
-                ? IconButton(
-                    onPressed: trailingVoidCallback,
-                    icon: Icon(
-                      trailingIcon,
-                      color: trailingColor,
-                      size: 25,
-                    ))
-                : Text(
-                    trailingString ?? "",
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
             onTap: onTapFunction),
       ),
     );
-  }
+}
 }

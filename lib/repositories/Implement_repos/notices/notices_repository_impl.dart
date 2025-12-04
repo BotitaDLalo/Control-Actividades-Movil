@@ -23,4 +23,9 @@ class NoticesRepositoryImpl implements NoticesRepository {
   Future<bool> deleteNotice(int notice) {
     return noticesDataSource.deleteNotice(notice);
   }
+
+  @override
+  Future<List<NoticeModel>> updateNotice(NoticeModel notice) {
+    return noticesDataSource.updateNotice(notice);
+  }
 }

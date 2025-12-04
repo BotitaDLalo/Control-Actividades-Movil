@@ -12,14 +12,17 @@ class FloatingActionButtonCustom extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
 
 
+    final iconColor = AppTheme.mainColor.computeLuminance() > 0.5
+        ? Colors.black
+        : Colors.white;
+
     return FloatingActionButton(
       onPressed: voidCallback,
       backgroundColor: AppTheme.mainColor,
       shape: AppTheme.shapeFloatingActionButton(),
       child: Icon(
         icon,
-        color: Colors.white,
-        // size: 35,
+        color: iconColor,
       ),
     );
   }

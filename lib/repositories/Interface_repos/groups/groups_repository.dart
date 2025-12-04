@@ -23,5 +23,9 @@ abstract class GroupsRepository {
 
   Future<List<StudentGroupSubject>> getStudentsGroup(int groupId);
 
+    Future<bool> removeStudentFromGroup({
+        required int groupId, 
+        required int studentId
+      });
   
 }

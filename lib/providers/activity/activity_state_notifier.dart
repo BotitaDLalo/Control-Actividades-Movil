@@ -117,6 +117,46 @@ void _setCreatedActivity(Activity activity) {
   //   state = state.copyWith(lsActivities: activity);
   // }
 
+Future<void> updateActivity(
+  int activityId, 
+  String nombre, 
+  String descripcion, 
+  DateTime fechaLimite, 
+  int puntaje, 
+  int materiaId) async {
+    try {
+      state = state.copyWith(isLoading: true);
+      
+      final updatedActivity = await activityRepository.updateActivity(
+          activityId, nombre, descripcion, fechaLimite, puntaje, materiaId);
+
+// 2. IMPORTANTE: Actualizamos la lista localmente AQUÍ MISMO
+      _updateActivityInState(updatedActivity);
+
+    } catch (e) {
+      state = state.copyWith(errorMessage: e.toString());
+      throw Exception("Error updating activity: $e");
+    } finally {
+      state = state.copyWith(isLoading: false);
+    }
+  }
+
+  // --- AGREGA ESTA FUNCIÓN PRIVADA EN TU CLASE ActivityNotifier ---
+  void _updateActivityInState(Activity updatedActivity) {
+    // 1. Hacemos una copia de la lista actual para poder modificarla
+    List<Activity> currentList = List.from(state.lsActivities);
+    
+    // 2. Buscamos la actividad vieja usando el ID
+    final index = currentList.indexWhere((a) => a.activityId == updatedActivity.activityId);
+    
+    if (index != -1) {
+      // 3. La reemplazamos por la nueva que vino del servidor
+      currentList[index] = updatedActivity;
+      
+      // 4. Actualizamos el estado. ¡Esto refresca la pantalla instantáneamente!
+      state = state.copyWith(lsActivities: currentList);
+    }
+  }
 
   Future<void> deleteActivity(int activityId) async {
     try {
