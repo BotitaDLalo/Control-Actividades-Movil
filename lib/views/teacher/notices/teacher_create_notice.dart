@@ -4,6 +4,8 @@ import 'package:aprende_mas/models/models.dart';
 import 'package:aprende_mas/providers/notices/notices_form_provider.dart';
 import 'package:aprende_mas/views/views.dart';
 import 'package:aprende_mas/views/widgets/buttons/custom_rounded_button.dart';
+// CAMBIO: Import agregado para mostrar mensajes de error con snackbar
+import 'package:aprende_mas/views/widgets/alerts/error_snackbar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart'; // Asegurar importación de Material/Widget
 
@@ -56,7 +58,12 @@ class _TeacherCreateNoticeState extends ConsumerState<TeacherCreateNotice> {
       noticesFormProvider,
       (previous, next) {
         if (next.isFormPosted && !next.isPosting) {
+          // CAMBIO: Solo hacer pop cuando la creación fue exitosa
           context.pop();
+        }
+        // CAMBIO: Mostrar mensaje de error si la creación falló
+        if (next.errorMessage.isNotEmpty && !next.isPosting) {
+          errorMessage(context, next.errorMessage);
         }
       },
     );

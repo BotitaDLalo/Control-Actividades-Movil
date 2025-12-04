@@ -77,6 +77,8 @@ class _NoticeOptionsScreenState
     ref.listen(
       noticesFormProvider,
       (previous, next) {
+        // CAMBIO: Refrescar la lista cuando se crea/elimina un aviso exitosamente
+        // Esto asegura que los cambios se reflejen inmediatamente en la UI
         if ((next.isFormPosted || next.isDeleted) && !next.isPosting) {
           requestAgain();
         }
