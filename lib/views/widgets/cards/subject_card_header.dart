@@ -20,7 +20,7 @@ class CustomHeaderContainer extends StatelessWidget {
               topLeft: Radius.circular(12), topRight: Radius.circular(12))),
       child: Text(
         nombreMateria,
-        style: const TextStyle(fontSize: 18, color: Colors.white),
+          style: const TextStyle(fontSize: 18, color: Colors.black),
       ),
     );
   }

@@ -86,6 +86,38 @@ class StudentsGroupStateNotifier extends StateNotifier<StudentsGroupState> {
         state.copyWith(lsStudentsGroup: [...lsStudentsGroup, ...lsStudents]);
   }
 
+Future<bool> removeStudentFromGroup({
+    required int groupId,
+    required int studentId,
+  }) async {
+    try {
+      // 1. Llamada a la API
+      final success = await groupsRepository.removeStudentFromGroup(
+        groupId: groupId,
+        studentId: studentId,
+      );
+
+      if (success) {
+        // 2. Actualizar el estado local (Filtrar la lista)
+        // Nota: Asegúrate de usar .alumnoId o la propiedad correcta que definimos antes
+        final updatedList = state.lsStudentsGroup
+            .where((student) => student.alumnoId != studentId) 
+            .toList();
+
+        // 3. Emitir nuevo estado
+        state = state.copyWith(
+          lsStudentsGroup: updatedList,
+        );
+        
+        return true;
+      }
+      return false;
+    } catch (e) {
+      debugPrint('Error al eliminar alumno del grupo: $e');
+      return false;
+    }
+  }
+
   void clearGroupTeacherOptionsLs() {
     state = state.copyWith(lsEmails: [], lsStudentsGroup: []);
   }

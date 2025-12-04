@@ -14,6 +14,7 @@ class CustomTextFormField extends StatelessWidget {
   final bool capitalizeFirstLetter;
   final double? customHeight;
   final bool isNumericKeyboard;
+  final String? initialValue;
 
   const CustomTextFormField({
     super.key,
@@ -30,6 +31,7 @@ class CustomTextFormField extends StatelessWidget {
     this.capitalizeFirstLetter = false,
     this.customHeight,
     this.isNumericKeyboard = false,
+    this.initialValue,
   });
 
   @override
@@ -39,6 +41,7 @@ class CustomTextFormField extends StatelessWidget {
     return TextFormField(
       cursorColor: Colors.black,
       controller: textEditingController,
+      initialValue: initialValue,
       onChanged: onChanged,
       validator: validator,
       obscureText: obscureText,

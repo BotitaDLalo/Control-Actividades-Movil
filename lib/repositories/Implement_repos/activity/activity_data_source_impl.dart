@@ -44,15 +44,61 @@ class ActivityDataSourceImpl implements ActivityDataSource {
     }
   }
 
+// En activity_data_source_impl.dart
+
   @override
   Future<Activity> updateActivity(
     int activityId,
     String nombreActividad,
     String descripcion,
     DateTime fechaLimite,
-  ) {
-    // TODO: implement updateActivity
-    throw UnimplementedError();
+    int puntaje,
+    int materiaId,
+  ) async {
+    try {
+      final uri = "/Actividades/ActualizarActividad?id=$activityId";
+
+      // Limpieza de fechas (seguridad extra para SQL Server)
+      String fechaLimiteSegura = fechaLimite.toIso8601String().split('.').first;
+      String fechaCreacionSegura = DateTime.now().toIso8601String().split('.').first;
+
+      final response = await dio.put(
+        uri,
+        data: {
+          // --- Identificadores ---
+          "ActividadId": activityId,
+          "MateriaId": materiaId,
+          //"TipoActividadId": 1, 
+          "Puntaje": puntaje,
+
+          "NombreActividad": nombreActividad,
+
+          // --- Enviamos AMBOS nombres para asegurar compatibilidad ---
+          
+          // 1. Nombres probables del modelo C# original
+          "Descripcion": descripcion, 
+          "FechaLimite": fechaLimiteSegura,
+          
+          // 2. Nombres según el Log del error anterior
+          "DescripcionActividad": descripcion, 
+          "FechaLimiteActividad": fechaLimiteSegura,
+
+          // Fecha de creación para evitar error de rango SQL
+          "FechaCreacionActividad": fechaCreacionSegura,
+        }
+      );
+
+      debugPrint("Update response: ${response.data}");
+      final updatedActivity = ActivityMapper.jsonToEntity(response.data);
+      return updatedActivity;
+
+    } catch (e) {
+      debugPrint("Error updateActivity: $e");
+      if(e is DioException && e.response != null) {
+          debugPrint("Detalle del error: ${e.response?.data}");
+      }
+      throw Exception("ActivityDataSourceImpl error al actualizar actividad: $e");
+    }
   }
 
   @override
@@ -177,7 +223,7 @@ class ActivityDataSourceImpl implements ActivityDataSource {
   @override
   Future<void> deleteActivity(int activityId) async {
     try {
-      const uri = "/Actividades/EliminarActividad/";
+      const uri = "/Actividades/EliminarActividad?id=";
       await dio.delete(uri + activityId.toString());
     } catch (e) {
       throw UncontrolledError();

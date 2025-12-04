@@ -50,3 +50,5 @@ flutter:
     - assets/icons/activities20.svg
     - assets/icons/alert1.svg
     - assets/icons/alert2.svg
+    - assets/icons/new_notice.svg
+    - assets/icons/add_activity.svg

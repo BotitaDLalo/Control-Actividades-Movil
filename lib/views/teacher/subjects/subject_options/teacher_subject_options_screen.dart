@@ -58,7 +58,7 @@ class _ActividadesScreenState
           optionId: 1,
           isVisible: widget.groupId == null ? true : false,
           optionText: 'Avisos',
-          widgetOption: TeacherNoticeOptionsScreen(subjectId: widget.subjectId,)),
+          widgetOption: TeacherNoticeOptionsScreen(subjectId: widget.subjectId,subjectName: widget.subjectName)),
       GroupSubjectWidgetOption(
           optionId: 2,
           isVisible: true,
@@ -97,26 +97,26 @@ class _ActividadesScreenState
         clearScreen();
       },
       child: Scaffold(
-        appBar: const AppBarScreens(),
-        body: Column(
-          children: [
-            const SizedBox(
-              height: 20,
-            ),
-            ContainerNameGroupSubjects(
-              name: widget.subjectName,
-              accessCode: widget.codeAccess,
-              color: AppTheme.mainColor,
-            ),
-            TeacherSubjectOptions(
-              lsSubjectOptions: lsSubjectOptions,
-              onOptionSelected: onOptionSelected,
-              selectedOptionIndex: ref.watch(_itemTappedProvider),
-            ),
-            Expanded(
-              child: getWidget(itemTapped),
-            ),
-          ],
+        body: MediaQuery.removePadding(
+          context: context,
+          removeTop: true,
+          child: Column(
+            children: [
+              ContainerNameGroupSubjects(
+                name: widget.subjectName,
+                accessCode: widget.codeAccess,
+                color: const Color(0xFF31D492),
+              ),
+              TeacherSubjectOptions(
+                lsSubjectOptions: lsSubjectOptions,
+                onOptionSelected: onOptionSelected,
+                selectedOptionIndex: ref.watch(_itemTappedProvider),
+              ),
+              Expanded(
+                child: getWidget(itemTapped),
+              ),
+            ],
+          ),
         ),
       ),
     );

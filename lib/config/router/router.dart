@@ -130,17 +130,48 @@ final goRouterProvider = Provider((ref) {
           );
         },
       ),
-      GoRoute(
-        path: '/create-activities',
-        builder: (context, state) {
-          final subjectData = state.extra as Subject;
-          debugPrint(
-              'Route /create-activity: subjectId: ${subjectData.materiaId}, nombreMateria: ${subjectData.nombreMateria}');
-          return CreateActivitiesScreen(
-              subjectId: subjectData.materiaId,
-              nombreMateria: subjectData.nombreMateria);
-        },
-      ),
+// Tu código del router (modificado)
+
+GoRoute(
+  path: '/create-activities',
+  builder: (context, state) {
+    int subjectId = 0;
+    String subjectName = '';
+    Activity? activityToEdit;
+
+    // CASO 1 & 2: CREAR O EDITAR (Ambos vienen ahora como Subject)
+    if (state.extra is Subject) {
+      final subjectData = state.extra as Subject;
+      
+      subjectId = subjectData.materiaId;
+      subjectName = subjectData.nombreMateria;
+      
+      // 🎯 NUEVA LÓGICA DE EDICIÓN
+      // Si el objeto Subject trae la propiedad 'activity' llena, estamos editando.
+      if (subjectData.activity != null) {
+          activityToEdit = subjectData.activity;
+      }
+      
+    } 
+    // NOTA: EL 'else if (state.extra is Activity)' AHORA ES OBSOLETO, 
+    // PERO PUEDES DEJARLO COMO RESPALDO PARA NAVEGACIÓN LEGACY.
+
+    // ... dejar el resto del código como está para manejar rutas antiguas si es necesario.
+    else if (state.extra is Activity) {
+        final activityData = state.extra as Activity;
+        activityToEdit = activityData;
+        subjectId = activityData.materiaId;
+        subjectName = ''; // No se puede obtener aquí, pero funciona con el fallback.
+    }
+
+
+    return CreateActivitiesScreen(
+      subjectId: subjectId,
+      nombreMateria: subjectName,
+      activity: activityToEdit, 
+    );
+  },
+),
       GoRoute(
         path: '/student-subject-options',
         builder: (context, state) {

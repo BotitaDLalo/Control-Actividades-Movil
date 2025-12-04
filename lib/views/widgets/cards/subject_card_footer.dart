@@ -3,6 +3,7 @@ import 'package:aprende_mas/config/utils/packages.dart';
 import 'package:aprende_mas/config/utils/catalog_names.dart';
 import 'package:aprende_mas/config/data/data.dart';
 import 'package:aprende_mas/providers/data/key_value_storage_service_providers.dart';
+import 'package:aprende_mas/config/utils/app_theme.dart';
 
 class CustomFooterContainer extends ConsumerWidget {
   final int? groupId;
@@ -34,10 +35,12 @@ class CustomFooterContainer extends ConsumerWidget {
       context.push('/student-subject-options', extra: data);
     }
 
+    final iconColor = AppTheme.mainColor;
+
     return Container(
       width: double.infinity,
-      height: 48,
-      padding: const EdgeInsets.all(5.0),
+      height: 52,
+      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
@@ -55,16 +58,8 @@ class CustomFooterContainer extends ConsumerWidget {
                   studentSubjectOptions(data);
                 }
               },
-              icon: const Icon(Icons.assignment)),
-          // const SizedBox(
-          //   width: 60,
-          // ),
-          IconButton(onPressed: () {}, icon: const Icon(Icons.people_alt)),
-          // const SizedBox(
-          //   width: 60,
-          // ),
-          // IconButton(
-          //     onPressed: () {}, icon: const Icon(Icons.star_border_rounded)),
+              icon: Icon(Icons.assignment, color: iconColor)),
+          IconButton(onPressed: () {}, icon: Icon(Icons.people_alt, color: iconColor)),
         ],
       ),
     );

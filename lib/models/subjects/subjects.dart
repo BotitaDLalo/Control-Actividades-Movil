@@ -10,6 +10,7 @@ class Subject {
   final String? codigoColor;
   // final List<Activities>? actividades;
   final List<Activity>? actividades;
+  final Activity? activity;
 
   Subject({
     this.groupId,
@@ -19,6 +20,7 @@ class Subject {
     this.descripcion,
     this.codigoColor,
     this.actividades,
+    this.activity,
   });
 
   static List<Subject> subjectsJsonToEntityList(
