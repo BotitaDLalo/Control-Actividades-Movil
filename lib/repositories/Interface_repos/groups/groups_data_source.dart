@@ -22,4 +22,9 @@ abstract class GroupsDataSource {
   Future<List<StudentGroupSubject>> addStudentsGroup(int groupId, List<String> emails);
 
   Future<List<StudentGroupSubject>> getStudentsGroup(int groupId);
+
+  Future<bool> removeStudentFromGroup({
+    required int groupId, 
+    required int studentId
+  });
 }

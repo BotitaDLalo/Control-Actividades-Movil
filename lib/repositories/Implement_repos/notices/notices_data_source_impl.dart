@@ -86,4 +86,39 @@ class NoticesDataSourceImpl implements NoticesDataSource {
       return false;
     }
   }
+  @override
+  Future<List<NoticeModel>> updateNotice(NoticeModel notice) async { // NUEVO
+    try {
+      // Usamos el mismo URI de createNotice pero con los parámetros de actualización
+      const uri = "/Avisos/ActualizarAviso";
+
+      Map<String, dynamic> data = {
+        "AvisoId": notice.noticeId, // Clave para la actualización
+        "Titulo": notice.title,
+        "Descripcion": notice.description,
+      };
+
+      // Nota: El API espera un POST para la ruta ActualizarAviso
+      final res = await dio.post(uri, data: data); 
+
+      if (res.statusCode == 200) {
+        final response = Map<String, dynamic>.from(res.data);
+        
+        // 1. Convertimos la respuesta simple del API a un NoticeModel
+        NoticeModel updatedNotice = NoticeModel.jsonToEntityNotice(response);
+        
+        // 2. CORRECCIÓN VITAL: El API no devuelve TeacherFullName, así que
+        //    lo copiamos del objeto NoticeModel original que recibimos como parámetro.
+        updatedNotice = updatedNotice.copyWith(
+          teacherFullName: notice.teacherFullName, 
+        );
+
+        return [updatedNotice];
+      }
+      return [];
+    } catch (e) {
+      debugPrint(e.toString());
+      return [];
+    }
+  }
 }

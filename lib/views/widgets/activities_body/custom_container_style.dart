@@ -18,18 +18,15 @@ class CustomContainerStyle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(15, 0, 15, 0),
-      child: Container(
-        // height: height,
-        width: width,
-        decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: const Color.fromARGB(27, 0, 0, 0))
-        ),
-        child: child,
+    return Container(
+      height: height,
+      width: width,
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(0), // Sin bordes redondeados para cubrir todo
+        border: Border.all(color: const Color.fromARGB(27, 0, 0, 0))
       ),
+      child: child,
     );
   }
 }

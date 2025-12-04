@@ -11,11 +11,14 @@ final noticesFormProvider = StateNotifierProvider.autoDispose<
     final deleteNoticeCallback =
         ref.read(noticesProvider.notifier).deleteNotice;
 
+    final updateNoticeCallback =
+        ref.read(noticesProvider.notifier).updateNotice; 
+
     return NoticesFormStateNotifier(
         createNoticeCallback: createNoticeCallback,
-        deleteNoticeCallback: deleteNoticeCallback
-        // getNoticesCallback: getNoticesCallback
-
+        deleteNoticeCallback: deleteNoticeCallback,
+        // getNoticesCallback: getNoticesCallback,
+         updateNoticeCallback: updateNoticeCallback
         );
   },
 );

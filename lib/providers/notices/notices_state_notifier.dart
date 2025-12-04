@@ -47,6 +47,21 @@ class NoticesStateNotifier extends StateNotifier<NoticesState> {
   //   }
   // }
   // _setlsNotices(List<NoticeModel> lsNotices) {}
-
-  _setNewNotice(NoticeModel notice) {}
+  Future<bool> updateNotice(NoticeModel notice) async {
+    try {
+      List<NoticeModel> lsNotices = await noticesRepository.updateNotice(notice);
+      if (lsNotices.isNotEmpty) {
+        // En una app real, aquí actualizarías el listado principal, pero por ahora 
+        // solo retornamos true si el backend tuvo éxito.
+        return true;
+      }
+      return false;
+    } catch (e) {
+      debugPrint(e.toString());
+      return false;
+    }
+  }
+  void _setNewNotice(NoticeModel notice) {
+    state = state.copyWith(lsNotices: [notice, ...state.lsNotices]);
+  }
 }

@@ -4,6 +4,7 @@ import 'package:aprende_mas/providers/subjects/students_subject_provider.dart';
 import 'package:aprende_mas/views/views.dart';
 import 'package:aprende_mas/providers/providers.dart';
 import 'package:aprende_mas/views/widgets/buttons/button_form.dart';
+import 'package:aprende_mas/views/widgets/buttons/custom_rounded_button.dart';
 
 final contentProvider = StateProvider<String>((ref) => '');
 final addStudentMessageProvider = StateProvider<bool>((ref) => false);
@@ -36,154 +37,173 @@ class _StudentsSubjectAssignmentState
   }
 
   @override
-  Widget build(BuildContext context) {
-    final isNotEmpty = ref.watch(addStudentMessageProvider);
-    final content = ref.watch(contentProvider);
+Widget build(BuildContext context) {
+  final isNotEmpty = ref.watch(addStudentMessageProvider);
+  final content = ref.watch(contentProvider);
+  final formSubjects = ref.watch(formSubjectsProvider);
+  final lsEmails = ref.watch(studentsSubjectProvider).lsEmails;
+  final canSubmit = lsEmails.isNotEmpty && !formSubjects.isPosting;
 
-    final formSubjects = ref.watch(formSubjectsProvider);
+  void clear() {
+    controller.clear();
+    ref.read(addStudentMessageProvider.notifier).state = false;
+    FocusScope.of(context).unfocus();
+  }
 
-    final lsEmails = ref.watch(studentsSubjectProvider).lsEmails;
-
-    void clear() {
-      controller.clear();
-      ref.read(addStudentMessageProvider.notifier).state = false;
-      FocusScope.of(context).unfocus();
-    }
-
-    ref.listen(
-      formSubjectsProvider,
-      (previous, next) {
-        final isValid = next.verifyEmail?.isEmailValid ?? false;
-        if (isValid) {
-          clear();
-        }
-      },
-    );
-
-    ref.listen(formSubjectsProvider, (previous, next) {
-      final isFormPosted = next.isFormPosted;
-      if (isFormPosted) {
-        ref.read(studentsSubjectProvider.notifier).clearLsEmails();
+  // Listeners permanecen igual
+  ref.listen(
+    formSubjectsProvider,
+    (previous, next) {
+      final isValid = next.verifyEmail?.isEmailValid ?? false;
+      if (isValid) {
+        clear();
       }
-    });
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          SizedBox(
-            width: 350,
-            height: 150,
-            child: Column(
-              children: [
-                CustomTextFormField(
-                  textEditingController: controller,
-                  label: 'Agregar alumno',
-                ),
-                isNotEmpty
-                    ? SizedBox(
-                        width: 330,
-                        child: Container(
-                          color: Colors.grey.shade200,
-                          child: ListTile(
-                            onTap: () async {
-                              if (formSubjects.isPosting) {
-                                return;
-                              }
-                              await ref
-                                  .read(formSubjectsProvider.notifier)
-                                  .onVerifyEmailSubmit(content);
-                            },
-                            title: const Text(
-                              'Agregar',
-                              style: TextStyle(fontSize: 16.5),
-                            ),
-                            subtitle: Text(
-                              content,
-                              style: const TextStyle(fontSize: 16.5),
-                            ),
-                            trailing: IconButton(
-                              icon: const Icon(Icons.person),
-                              iconSize: 30,
-                              onPressed: () {},
-                            ),
-                          ),
-                        ),
-                      )
-                    : const SizedBox(),
-              ],
-            ),
-          ),
-          SizedBox(
-            // width: 350,
-            height: 350,
-            child: Column(
-              children: [
-                Text(
-                  'Agregar alumnos',
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                Column(
+    },
+  );
+
+  ref.listen(formSubjectsProvider, (previous, next) {
+    final isFormPosted = next.isFormPosted;
+    if (isFormPosted) {
+      ref.read(studentsSubjectProvider.notifier).clearLsEmails();
+    }
+  });
+
+  return Column( // El widget principal es ahora un Column
+    children: [
+      Expanded( // Esta sección crecerá y es la única que podrá desplazarse
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              const SizedBox(height: 10),
+              // --- SECCIÓN 1: INPUT Y SUGERENCIA (Altura dinámica) ---
+              SizedBox(
+                width: 350,
+                // height: 150 fue eliminado en el paso anterior
+                child: Column(
                   children: [
-                    SizedBox(
-                      height: 250,
-                      width: 360,
-                      child: ListView.builder(
-                        itemCount: lsEmails.length,
-                        itemBuilder: (context, index) {
-                          final email = lsEmails[index];
-                          if (email.isEmailValid) {
-                            return Container(
-                              margin: const EdgeInsets.only(bottom: 10),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(10),
-                                color: Colors.grey.shade200,
-                              ),
+                    CustomTextFormField(
+                      textEditingController: controller,
+                      label: 'Agregar alumno',
+                      icon: const Icon(Icons.search, color: Colors.grey),
+                    ),
+                    isNotEmpty
+                        ? SizedBox(
+                            width: 330,
+                            child: Container(
+                              color: Colors.grey.shade200,
                               child: ListTile(
-                                leading: IconButton(
-                                  icon: const Icon(Icons.person),
-                                  iconSize: 30,
-                                  onPressed: () {},
+                                onTap: () async {
+                                  if (formSubjects.isPosting) return;
+                                  await ref
+                                      .read(formSubjectsProvider.notifier)
+                                      .onVerifyEmailSubmit(content);
+                                },
+                                title: const Text(
+                                  'Agregar',
+                                  style: TextStyle(fontSize: 16.5),
                                 ),
-                                title: Text(
-                                  email.email,
-                                  overflow: TextOverflow.ellipsis,
+                                subtitle: Text(
+                                  content,
                                   style: const TextStyle(fontSize: 16.5),
                                 ),
                                 trailing: IconButton(
-                                  icon: const Icon(Icons.delete),
-                                  onPressed: () {
-                                    ref
-                                        .read(studentsSubjectProvider.notifier)
-                                        .onDeleteVeryfyEmail(index);
-                                  },
+                                  icon: const Icon(Icons.person_add),
+                                  iconSize: 30,
+                                  onPressed: () {},
                                 ),
                               ),
-                            );
-                          }
-                          return const SizedBox();
-                        },
+                            ),
+                          )
+                        : const SizedBox(),
+                  ],
+                ),
+              ),
+              
+              // --- SECCIÓN 2: LISTADO DE ALUMNOS (Contenido scrollable) ---
+              // Nota: Mantuve el height: 350. Si quieres que la lista crezca infinitamente, puedes quitarlo.
+              SizedBox(
+                height: 350, 
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(top: 15.0, bottom: 10.0),
+                      child: Text(
+                        'Agregar alumnos',
+                        style: Theme.of(context).textTheme.titleLarge,
                       ),
                     ),
-                    Container(
-                        alignment: const Alignment(0.9, 2),
-                        child: ButtonForm(
-                            style: AppTheme.buttonPrimary,
-                            buttonName: "Agregar",
-                            onPressed: () async {
-                              if (formSubjects.isPosting) {
-                                return;
-                              }
-                              ref
-                                  .read(formSubjectsProvider.notifier)
-                                  .onAddStudentsSubjectWithoutGroup(
-                                      widget.subjectId);
-                            })),
+                    Expanded( // Aseguramos que el ListView ocupe el espacio restante
+                      child: SizedBox(
+                        width: 360,
+                        child: ListView.builder(
+                          itemCount: lsEmails.length,
+                          itemBuilder: (context, index) {
+                            final email = lsEmails[index];
+                            if (email.isEmailValid) {
+                              return Container(
+                                margin: const EdgeInsets.only(bottom: 10),
+                                // ... contenido de ListTile ...
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(10),
+                                  color: Colors.grey.shade200,
+                                ),
+                                child: ListTile(
+                                  leading: IconButton(
+                                    icon: const Icon(Icons.person),
+                                    iconSize: 30,
+                                    onPressed: () {},
+                                  ),
+                                  title: Text(
+                                    email.email,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(fontSize: 16.5),
+                                  ),
+                                  trailing: IconButton(
+                                    icon: const Icon(Icons.delete),
+                                    onPressed: () {
+                                      ref
+                                          .read(studentsSubjectProvider.notifier)
+                                          .onDeleteVeryfyEmail(index);
+                                    },
+                                  ),
+                                ),
+                              );
+                            }
+                            return const SizedBox();
+                          },
+                        ),
+                      ),
+                    ),
                   ],
-                )
-              ],
-            ),
-          )
-        ],
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
-    );
-  }
+      
+      // --- SECCIÓN 3: BOTÓN FIJO (Fuera del scroll) ---
+      Padding(
+  padding: const EdgeInsets.only(right: 20, bottom: 20, top: 10),
+  child: Align(
+    alignment: Alignment.centerRight,
+    child: CustomRoundedButton(
+      text: "Agregar",
+      // Asignamos la función SÓLO si 'canSubmit' es verdadero.
+      // Si es falso, el botón será 'null' (deshabilitado).
+      onPressed: canSubmit 
+          ? () async {
+              // DEBUG: Agrega un print para confirmar que la función se ejecuta
+              print('--- INICIANDO ENVÍO DE ${lsEmails.length} ALUMNOS ---');
+              ref
+                  .read(formSubjectsProvider.notifier)
+                  .onAddStudentsSubjectWithoutGroup(widget.subjectId);
+            }
+          : null, // Deshabilita el botón si la lista está vacía o está enviando
+    ),
+  ),
+),
+    ],
+  );
+}
 }
