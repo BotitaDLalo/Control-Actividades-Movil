@@ -40,8 +40,6 @@ class StudentsSubjectStateNotifier extends StateNotifier<StudentsSubjectState> {
     state = state.copyWith(lsEmails: [verifyEmail, ...lsEmails]);
   }
 
-// --- CÓDIGO CORREGIDO EN students_subject_state_notifier.dart ---
-
 Future<bool> addStudentsSubject(int subjectId) async {
   try {
     List<VerifyEmail> lsEmails = List.from(state.lsEmails);
@@ -59,7 +57,6 @@ Future<bool> addStudentsSubject(int subjectId) async {
     }
     return false;
   } catch (e) {
-    // 🛑 ¡CORRECCIÓN CLAVE! Relanzamos la excepción para que el FormNotifier la capture.
     throw e; 
   }
 }
@@ -87,38 +84,33 @@ Future<bool> addStudentsSubject(int subjectId) async {
   }
 
 
-// 🎯 IMPLEMENTACIÓN DE LA LÓGICA DE ELIMINACIÓN DE ALUMNO
-  Future<bool> removeStudentFromSubject({
-    required int subjectId,
-    required int studentId,
-  }) async {
-    try {
-      // 1. Llamar al repositorio para realizar la eliminación en el backend
-      final success = await subjectsRepository.removeStudent(
-        subjectId: subjectId,
-        studentId: studentId,
-      );
+        Future<bool> removeStudentFromSubject({
+            required int subjectId,
+            required int studentId,
+        }) async {
+            try {
+                final success = await subjectsRepository.removeStudentFromSubject( 
+                    subjectId: subjectId,
+                    studentId: studentId,
+                );
 
-      if (success) {
-        // 2. 🚨 ACTUALIZAR EL ESTADO (Principio de Inmutabilidad)
-        // Se asume que StudentGroupSubject tiene una propiedad 'id' o 'studentId' para comparar.
-          final updatedList = state.lsStudentsSubject
-            .where((student) => student.alumnoId != studentId) // ¡SOLUCIÓN!
-            .toList();
+                if (success) {
+                    final updatedList = state.lsStudentsSubject
+                        .where((student) => student.alumnoId != studentId)
+                        .toList();
 
-        // 3. Reemplazar el estado con la nueva lista sin el estudiante
-        state = state.copyWith(
-          lsStudentsSubject: updatedList,
-        );
-        
-        return true;
-      }
-      return false;
-    } catch (e) {
-      debugPrint('Error al eliminar alumno: $e');
-      return false;
-    }
-  }
+                    state = state.copyWith(
+                        lsStudentsSubject: updatedList,
+                    );
+
+                    return true;
+                }
+                return false;
+            } catch (e) {
+                // ...
+                return false;
+            }
+        }
 
   void clearSubjectTeacherOptionsLs() {
     state = state.copyWith(lsEmails: [], lsStudentsSubject: []);
