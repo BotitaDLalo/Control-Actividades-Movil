@@ -94,35 +94,54 @@ class _ActivityOptionState extends ConsumerState<ActivityOptionScreen> {
                       ? Center(
                           child: SingleChildScrollView(
                             padding: const EdgeInsets.only(top: 60.0),
-                            child: Column(
-                              children: [
-                                SizedBox(
-                                  height: 180,
-                                  child: SvgPicture.asset(
-                                    'assets/icons/add_activity.svg',
-                                    fit: BoxFit.contain,
+                            child: widget.buttonCreateIsVisible
+                                //  ESTADO VACÍO PARA EL DOCENTE (Teacher)
+                                ? Column(
+                                    children: [
+                                      SizedBox(
+                                        height: 180,
+                                        child: SvgPicture.asset(
+                                          'assets/icons/add_activity.svg',
+                                          fit: BoxFit.contain,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 24),
+                                      const Text(
+                                        'Aquí podrás crear actividades,\nproyectos o evaluaciones para tus estudiantes',
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(fontSize: 16),
+                                      ),
+                                      const SizedBox(height: 32),
+                                      CustomRoundedButton(
+                                        text: 'Crear primera actividad',
+                                        onPressed: () {
+                                          buttonModal();
+                                        },
+                                        backgroundColor: Color(0xFF283043),
+                                        textColor: Colors.white,
+                                        borderRadius: 24,
+                                        height: 48,
+                                        padding:
+                                            EdgeInsets.symmetric(horizontal: 32),
+                                      ),
+                                    ],
+                                  )
+                                //  ESTADO VACÍO PARA EL ESTUDIANTE (Student)
+                                : const Column(
+                                    children: [
+                                      Icon(
+                                        Icons.list_alt_outlined, // Icono referente
+                                        size: 180,
+                                        color: Colors.grey,
+                                      ),
+                                      SizedBox(height: 24),
+                                      Text(
+                                        'Sin Actividades, espera a que \ntu docente te asigne actividades',
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(fontSize: 16),
+                                      ),
+                                    ],
                                   ),
-                                ),
-                                const SizedBox(height: 24),
-                                const Text(
-                                  'Aquí podrás crear actividades,\nproyectos o evaluaciones para tus estudiantes',
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(fontSize: 16),
-                                ),
-                                const SizedBox(height: 32),
-                                CustomRoundedButton(
-                                  text: 'Crear primera actividad',
-                                  onPressed: () {
-                                    buttonModal();
-                                  },
-                                  backgroundColor: Color(0xFF283043),
-                                  textColor: Colors.white,
-                                  borderRadius: 24,
-                                  height: 48,
-                                  padding: EdgeInsets.symmetric(horizontal: 32),
-                                ),
-                              ],
-                            ),
                           ),
                         )
                       : ActivityList(
@@ -133,7 +152,6 @@ class _ActivityOptionState extends ConsumerState<ActivityOptionScreen> {
               ),
             ),
 
-            // FAB fijo que NO sube con el teclado 🙌
             if (floatingButton != null)
               Positioned(
                 bottom: 16.0,
@@ -142,7 +160,6 @@ class _ActivityOptionState extends ConsumerState<ActivityOptionScreen> {
               ),
           ],
         );
-
       },
     );
   }

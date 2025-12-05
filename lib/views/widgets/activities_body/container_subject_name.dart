@@ -22,7 +22,7 @@ class ContainerNameGroupSubjects extends StatelessWidget {
     return CustomContainerStyle(
       height: 220,
       width: double.infinity,
-      color: color,
+      color: const Color(0xFF31D492),
       child: Stack(
         children: [
           // Flecha de regresar dentro del container

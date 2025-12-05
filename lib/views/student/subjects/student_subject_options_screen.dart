@@ -69,15 +69,11 @@ class _StudentSubjectOptionsScreenState
     }
 
     return Scaffold(
-      appBar: const AppBarScreens(),
       body: Column(
         children: [
-          const SizedBox(
-            height: 20,
-          ),
           ContainerNameGroupSubjects(
             name: widget.subjectName,
-            color: AppTheme.mainColor,
+            color: const Color(0xFF31D492),
             accessCode: widget.accessCode,
           ),
           StudentSubjectOptions(
