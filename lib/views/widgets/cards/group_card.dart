@@ -103,7 +103,7 @@ class CustomExpansionTileState extends ConsumerState<GroupCard>
     }
     
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10),
+      padding: ResponsiveUtils.margin(context, horizontal: 0.04, vertical: 0.013), // 4% horizontal, 1.3% vertical
       child: AnimatedSize(
         duration: widget.animationDuration,
         curve: Curves.easeInOut,
@@ -123,28 +123,28 @@ class CustomExpansionTileState extends ConsumerState<GroupCard>
                   ),
             // cuando está expandido usamos un color de fondo más claro
             color: _isExpanded ? widget.color.withOpacity(0.70) : null,
-            borderRadius: BorderRadius.circular(_isExpanded ? 15 : 20),
+            borderRadius: BorderRadius.circular(_isExpanded ? context.radius(0.04) : context.radius(0.055)), // 4% o 5.5%
             border: Border.all(
               color: const Color.fromARGB(255, 6, 179, 226),
-              width: 2,
+              width: context.width(0.005), // 0.5% del ancho
             ),
           ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(_isExpanded ? 15 : 20),
+            borderRadius: BorderRadius.circular(_isExpanded ? context.radius(0.04) : context.radius(0.055)),
             child: Material(
               color: Colors.transparent,
               child: Stack(
                 children: [
                   // Watermark en la esquina inferior izquierda
                   Positioned(
-                    right: 20,
-                    bottom: -10,
+                    right: context.width(0.05), // 5% del ancho
+                    bottom: -context.height(0.013), // 1.3% del alto (negativo)
                     child: Opacity(
                       opacity: 0.30,
                       child: SvgPicture.asset(
                         'assets/icons/grupo2.svg',
-                        width: 100,
-                        height: 100,
+                        width: context.width(0.25), // 25% del ancho
+                        height: context.width(0.25), // 25% del ancho (mantiene proporción)
                         color: Colors.white,
                       ),
                     ),
@@ -158,12 +158,12 @@ class CustomExpansionTileState extends ConsumerState<GroupCard>
                         color: const Color.fromARGB(0, 220, 14, 203),
                         child: InkWell(
                           onTap: _toggleExpand,
-                          borderRadius: BorderRadius.circular(19),
+                          borderRadius: BorderRadius.circular(context.radius(0.052)), // 5.2%
                           child: SizedBox(
-                            height: MediaQuery.of(context).size.height * 0.1,
+                            height: context.height(0.1), // 10% del alto
                             child: Row(
                               children: [
-                                const SizedBox(width: 12),
+                                SizedBox(width: context.width(0.03)), // 3% del ancho
                                 Expanded(
                                   child: Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
@@ -172,19 +172,19 @@ class CustomExpansionTileState extends ConsumerState<GroupCard>
                                       Text(
                                         widget.title,
                                         overflow: TextOverflow.ellipsis,
-                                        style: const TextStyle(
-                                          color: Color.fromARGB(255, 255, 255, 255),
-                                          fontSize: 21,
+                                        style: TextStyle(
+                                          color: const Color.fromARGB(255, 255, 255, 255),
+                                          fontSize: context.fontSize(21), // Tamaño base 21, escalado responsive
                                           fontWeight: FontWeight.bold,
                                         ),
                                       ),
-                                      const SizedBox(height: 4),
+                                      SizedBox(height: context.height(0.005)), // 0.5% del alto
                                       Text(
                                         widget.description,
                                         overflow: TextOverflow.ellipsis,
-                                        style: const TextStyle(
-                                          color: Color.fromARGB(253, 183, 242, 251),
-                                          fontSize: 15,
+                                        style: TextStyle(
+                                          color: const Color.fromARGB(253, 183, 242, 251),
+                                          fontSize: context.fontSize(15), // Tamaño base 15, escalado responsive
                                         ),
                                       ),
                                     ],
@@ -192,12 +192,12 @@ class CustomExpansionTileState extends ConsumerState<GroupCard>
                                 ),
                                 if (role == cn.getRoleTeacherName)
                                   Padding(
-                                    padding: const EdgeInsets.only(right: 12.0),
+                                    padding: EdgeInsets.only(right: context.width(0.03)), // 3% del ancho
                                     child: PopupMenuButton<String>(
-                                      icon: const Icon(
+                                      icon: Icon(
                                         Icons.more_vert,
-                                        size: 28,
-                                        color: Color.fromARGB(221, 255, 255, 255),
+                                        size: context.width(0.075), // 7.5% del ancho
+                                        color: const Color.fromARGB(221, 255, 255, 255),
                                       ),
                                       onSelected: (value) {
                                         final Group groupData = Group(
@@ -225,7 +225,7 @@ class CustomExpansionTileState extends ConsumerState<GroupCard>
                                     ),
                                   )
                                 else
-                                  const SizedBox(width: 12),
+                                  SizedBox(width: context.width(0.03)), // 3% del ancho
                               ],
                             ),
                           ),
@@ -236,7 +236,7 @@ class CustomExpansionTileState extends ConsumerState<GroupCard>
                       if (_isExpanded) ...[
                         const Divider(height: 1, color: Color.fromARGB(255, 255, 255, 255)),
                         Padding(
-                          padding: const EdgeInsets.all(8.0),
+                          padding: EdgeInsets.all(context.width(0.02)), // 2% del ancho en todos los lados
                           child: Column(children: widget.children),
                         ),
                       ],

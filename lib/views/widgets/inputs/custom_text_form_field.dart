@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:aprende_mas/config/utils/packages.dart';
 
 class CustomTextFormField extends StatelessWidget {
   final Widget? icon;
@@ -50,19 +51,26 @@ class CustomTextFormField extends StatelessWidget {
       textCapitalization: capitalizeFirstLetter
           ? TextCapitalization.sentences
           : TextCapitalization.none,
-      style: const TextStyle(fontSize: 20, color: Colors.black),
+      style: TextStyle(
+        fontSize: context.fontSize(20), // Tamaño base 20, escalado responsive
+        color: Colors.black,
+      ),
       decoration: InputDecoration(
         prefixIcon: icon,
-        floatingLabelStyle: const TextStyle(
-            color: Colors.black, fontWeight: FontWeight.bold, fontSize: 18),
+        floatingLabelStyle: TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+            fontSize: context.fontSize(18)), // Tamaño base 18, escalado responsive
         // No definir bordes explícitos aquí para respetar el InputDecorationTheme global
         isDense: true,
         label: label != null ? Text(label!) : null,
         hintText: hint,
         errorText: errorMessage,
         focusColor: colors.primaryColor,
-        contentPadding:
-            EdgeInsets.symmetric(horizontal: 8, vertical: customHeight ?? 15),
+        contentPadding: EdgeInsets.symmetric(
+          horizontal: context.width(0.02), // 2% del ancho
+          vertical: customHeight ?? context.height(0.02), // 2% de la altura por defecto
+        ),
       ),
     );
   }

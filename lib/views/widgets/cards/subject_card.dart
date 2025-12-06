@@ -122,21 +122,21 @@ class SubjectCard extends ConsumerWidget {
         }
       },
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 7.0, vertical: 9.0),
+        margin: ResponsiveUtils.margin(context, horizontal: 0.02, vertical: 0.01), // 2% horizontal, 1% vertical
         width: width,
         height: height,
         decoration: BoxDecoration(
           gradient: gradient,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(context.radius(0.055)), // 5.5% del ancho
           boxShadow: [
             BoxShadow(
                 color: Colors.black.withOpacity(0.12),
-                blurRadius: 12,
-                offset: const Offset(0, 6))
+                blurRadius: context.width(0.03), // 3% del ancho
+                offset: Offset(0, context.height(0.008))) // 0.8% de la altura
           ],
         ),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(context.radius(0.055)),
           child: Material(
             color: Colors.transparent,
             child: Stack(
@@ -160,12 +160,12 @@ class SubjectCard extends ConsumerWidget {
                 if (role == cn.getRoleTeacherName)
                   // Menú de opciones en la esquina superior derecha
                   Positioned(
-                    top: 8,
-                    right: 8,
+                    top: context.height(0.01), // 1% de la altura
+                    right: context.width(0.02), // 2% del ancho
                     child: PopupMenuButton<String>(
-                      icon: const Icon(
+                      icon: Icon(
                         Icons.more_vert,
-                        size: 20,
+                        size: context.width(0.055), // 5.5% del ancho
                         color: Colors.white,
                       ),
                       onSelected: (value) {
@@ -200,7 +200,7 @@ class SubjectCard extends ConsumerWidget {
 
                 // Contenido principal
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                  padding: ResponsiveUtils.padding(context, horizontal: 0.04, vertical: 0.015), // 4% horizontal, 1.5% vertical
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -209,18 +209,21 @@ class SubjectCard extends ConsumerWidget {
                         nombreMateria,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
+                        style: TextStyle(
                             color: Colors.white,
-                            fontSize: 18,
+                            fontSize: context.fontSize(18), // Tamaño base 18, escalado responsive
                             fontWeight: FontWeight.bold),
                       ),
-                      const SizedBox(height: 6),
+                      SizedBox(height: context.height(0.008)), // 0.8% de la altura
                       // Descripción pequeña
                       Text(
                         description,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(color: Colors.white.withOpacity(0.9), fontSize: 13),
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.9),
+                          fontSize: context.fontSize(13), // Tamaño base 13, escalado responsive
+                        ),
                       ),
                       const Spacer(),
                       // Row inferior: MORE y posible número de actividades
@@ -240,7 +243,7 @@ class SubjectCard extends ConsumerWidget {
                               '${actividades!.length} actividades',
                               style: TextStyle(
                                 color: Colors.white.withOpacity(0.85),
-                                fontSize: 15,
+                                fontSize: context.fontSize(15), // Tamaño base 15, escalado responsive
                               ),
                             ),
                         ],
