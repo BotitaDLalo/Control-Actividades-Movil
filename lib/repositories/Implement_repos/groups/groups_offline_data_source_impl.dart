@@ -2,12 +2,15 @@ import 'package:aprende_mas/models/models.dart';
 import 'package:aprende_mas/repositories/Interface_repos/groups/groups_offline_data_source.dart';
 import 'package:aprende_mas/config/data/db_local.dart';
 import 'package:aprende_mas/config/utils/general_utils.dart';
+import 'package:sqflite/sqflite.dart';
+import 'package:flutter/foundation.dart';
 
 class GroupsOfflineDataSourceImpl implements GroupsOfflineDataSource {
   @override
   Future<List<Group>> getGroupsSubjects() async {
+    Database? db;
     try {
-      final db = await DbLocal.initDatabase();
+      db = await DbLocal.initDatabase();
 
       if (db.isOpen) {
         final querylsGroups = await db.rawQuery('SELECT * FROM tbGrupos');
@@ -76,23 +79,27 @@ class GroupsOfflineDataSourceImpl implements GroupsOfflineDataSource {
             ));
           }
 
-          await db.close();
           return lsGroups;
         }
       }
 
-      await db.close();
       return [];
     } catch (e) {
-      print(e);
+      debugPrint('Error en getGroupsSubjects: $e');
       return [];
+    } finally {
+      // Asegurarse de cerrar la base de datos siempre
+      if (db != null && db.isOpen) {
+        await db.close();
+      }
     }
   }
 
   @override
   Future<void> saveGroupSubjects(List<Group> lsGroups) async {
+    Database? db;
     try {
-      final db = await DbLocal.initDatabase();
+      db = await DbLocal.initDatabase();
       if (db.isOpen) {
         for (var group in lsGroups) {
           await db.transaction(
@@ -144,10 +151,14 @@ class GroupsOfflineDataSourceImpl implements GroupsOfflineDataSource {
             }
           }
         }
-        await db.close();
       }
     } catch (e) {
-      print(e);
+      debugPrint('Error en saveGroupSubjects: $e');
+    } finally {
+      // Asegurarse de cerrar la base de datos siempre
+      if (db != null && db.isOpen) {
+        await db.close();
+      }
     }
   }
 }
