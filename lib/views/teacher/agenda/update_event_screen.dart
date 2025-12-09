@@ -1,6 +1,7 @@
 import 'package:aprende_mas/models/agenda/event_model.dart';
 import 'package:aprende_mas/views/teacher/agenda/form_update_event.dart';
 import 'package:aprende_mas/views/views.dart';
+import 'package:aprende_mas/views/widgets/structure/app_bar_home.dart';
 import 'package:flutter/material.dart';
 
 class UpdateEventScreen extends StatelessWidget {
@@ -14,29 +15,11 @@ class UpdateEventScreen extends StatelessWidget {
     return GestureDetector(
       onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
       child: Scaffold(
+        appBar: AppBarHome(title: 'Editar Evento', showSettings: false),
         body: SingleChildScrollView(
-          child: Column(
-            children: [
-              const Stack(
-                children: [
-                  HeaderTile(
-                    svg: 'assets/icons/agregar-tarea.svg', 
-                    titulo: 'Crear Evento',
-                    // colorUno: Color(0xff536cf6),
-                    // colorDos: Color(0xff66A9F2),
-                  ),
-                  Positioned(
-                    left: 10,
-                    top: 40,
-                    child: ButtonClose(),
-                  ),
-                ],
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 20.0),
-                child: FormUpdateEvent(event),
-              ),
-            ],
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
+            child: FormUpdateEvent(event),
           ),
         ),
       ),

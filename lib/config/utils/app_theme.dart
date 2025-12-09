@@ -116,13 +116,32 @@ class AppTheme {
 
   ThemeData theme() {
     // Aplicar la tipografía Inter a toda la aplicación, respetando los estilos
-    final base = ThemeData(scaffoldBackgroundColor: _colorThemes[0]);
+    final base = ThemeData(
+      scaffoldBackgroundColor: _colorThemes[0],
+      useMaterial3: true, // Habilitar Material Design 3
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: mainColor,
+        brightness: Brightness.light,
+        surface: _colorThemes[0],
+        surfaceContainerHighest: Colors.white,
+        onSurface: Colors.black,
+        primary: mainColor,
+        onPrimary: Colors.white,
+        secondary: const Color(0xFF17B7F7),
+        onSecondary: Colors.white,
+        tertiary: const Color(0xFF086E9A),
+        onTertiary: Colors.white,
+      ),
+    );
     return base.copyWith(
       textTheme: GoogleFonts.interTextTheme(textThemes),
       primaryTextTheme: GoogleFonts.interTextTheme(base.primaryTextTheme),
       // también aplicamos a los textos de widgets elevados y botones donde corresponda
       appBarTheme: AppBarTheme(
         titleTextStyle: GoogleFonts.inter(textStyle: textThemes.titleLarge),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        surfaceTintColor: Colors.transparent,
       ),
       // Estilo global para todos los campos de texto: línea inferior (underline)
       inputDecorationTheme: InputDecorationTheme(
