@@ -39,8 +39,9 @@ class CustomInputField extends StatelessWidget {
     final colors = Theme.of(context);
 
     return TextFormField(
-      controller: textEditingController ?? TextEditingController(text: initialValue),
-      onChanged: onChanged,
+      controller: textEditingController,
+      initialValue: textEditingController == null ? initialValue : null,
+      onChanged: onChanged != null ? (value) => onChanged!(value) : null,
       validator: validator,
       obscureText: obscureText,
       keyboardType: isNumericKeyboard ? TextInputType.number : keyboardType,

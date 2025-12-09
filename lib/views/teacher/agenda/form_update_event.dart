@@ -30,11 +30,6 @@ class FormUpdateEvent extends ConsumerWidget {
       }
     });
 
-    debugPrint("FormUpdateEvent");
-    debugPrint("idgrupo: ${event.groupIds}");
-    debugPrint("idmateria: ${event.subjectIds}");
-    debugPrint("id profesor: ${event.teacherId}");
-    print("Color inicial del evento en FormUpdateEvent: ${event.color}");
 
 
     return Form(
@@ -278,7 +273,6 @@ class FormUpdateEvent extends ConsumerWidget {
                       event.eventId!,
                       event.teacherId,
                     );
-                    print("color: ${event.color}");
                     goRouterPop();
                   }
                 },
