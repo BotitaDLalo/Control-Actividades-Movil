@@ -20,7 +20,7 @@ class FormUpdateEvent extends ConsumerWidget {
         ref.read(formUpdateEventProvider(event).notifier);
 
     void goRouterPop() {
-      context.go("/agenda-teacher");
+      context.go("/teacher-home");
     }
 
     ref.listen(formUpdateEventProvider(event), (previous, next) {
@@ -269,11 +269,13 @@ class FormUpdateEvent extends ConsumerWidget {
                 buttonName: 'Actualizar Evento',
                 onPressed: () async {
                   if (!ref.watch(formUpdateEventProvider(event)).isPosting) {
-                    await formUpdateEventNotifier.onUpdateFormSubmit(
+                    final success = await formUpdateEventNotifier.onUpdateFormSubmit(
                       event.eventId!,
                       event.teacherId,
                     );
-                    goRouterPop();
+                    if (success) {
+                      goRouterPop();
+                    }
                   }
                 },
               ),

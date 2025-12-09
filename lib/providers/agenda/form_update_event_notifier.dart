@@ -239,7 +239,7 @@ Future<bool> onUpdateFormSubmit(int eventId, int teacherId) async {
     "Descripcion": state.description.value,
     "Color": colorToHex(state.colorCode.value), //"FF5733"
     "EventosGrupos": state.groupIds!.isNotEmpty ? state.groupIds!.map((id) => {"GrupoId": id}).toList() : null,
-    "EventosMaterias": state.subjectIds!.isNotEmpty ? state.groupIds!.map((id) => {"MateriaId": id}).toList() : null,
+    "EventosMaterias": state.subjectIds!.isNotEmpty ? state.subjectIds!.map((id) => {"MateriaId": id}).toList() : null,
   };
 
   print("eventLike: $eventLike");
