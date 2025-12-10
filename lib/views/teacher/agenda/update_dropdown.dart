@@ -93,13 +93,13 @@ void initState() {
 
     final options = _isGroup
         ? groupsState.map((group) => DropdownMenuItem<int>(
-              value: group.grupoId,
-              child: Text(group.nombreGrupo),
-            )).toList()
-        : subjectsState.map((subject) => DropdownMenuItem<int>(
-              value: subject.materiaId,
-              child: Text(subject.nombreMateria),
-            )).toList();
+            value: group.grupoId,
+            child: Text(group.nombreGrupo, style: TextStyle(color: Colors.black)),
+          )).toList()
+      : subjectsState.map((subject) => DropdownMenuItem<int>(
+            value: subject.materiaId,
+            child: Text(subject.nombreMateria, style: TextStyle(color: Colors.black)),
+          )).toList();
 
     if (_selectedItemId == null && widget.initialItemId != null) {
       final existsInOptions = options.any((option) => option.value == widget.initialItemId);
@@ -108,35 +108,32 @@ void initState() {
       }
     }
 
-    return Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Flexible(
-          flex: 2,
-          child: DropdownButtonFormField<String>(
-            decoration: InputDecoration(
-              labelText: 'Tipo',
-              isDense: true,
-            ),
-            items: const [
-              DropdownMenuItem(value: 'Grupo', child: Text('Grupo')),
-              DropdownMenuItem(value: 'Materia', child: Text('Materia')),
-            ],
-            value: _isGroup ? 'Grupo' : 'Materia',
-            onChanged: _onTypeChanged,
+        DropdownButtonFormField<String>(
+          decoration: InputDecoration(
+            labelText: 'Tipo',
+            isDense: true,
+            contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           ),
+          items: const [
+            DropdownMenuItem(value: 'Grupo', child: Text('Grupo', style: TextStyle(color: Colors.black))),
+            DropdownMenuItem(value: 'Materia', child: Text('Materia', style: TextStyle(color: Colors.black, fontSize: 14))),
+          ],
+          value: _isGroup ? 'Grupo' : 'Materia',
+          onChanged: _onTypeChanged,
         ),
-        const SizedBox(width: 8),
-        Flexible(
-          flex: 2,
-          child: DropdownButtonFormField<int>(
-            decoration: InputDecoration(
-              labelText: _isGroup ? 'Grupo' : 'Materia',
-              isDense: true,
-            ),
-            items: options,
-            value: _selectedItemId,
-            onChanged: _onItemSelected,
+        const SizedBox(height: 16),
+        DropdownButtonFormField<int>(
+          decoration: InputDecoration(
+            labelText: _isGroup ? 'Grupo' : 'Materia',
+            isDense: true,
+            contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
           ),
+          items: options,
+          value: _selectedItemId,
+          onChanged: _onItemSelected,
         ),
       ],
     );

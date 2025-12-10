@@ -82,7 +82,7 @@ class _OptionDropdownFormState extends ConsumerState<OptionDropdownForm> {
             items: ['Grupo', 'Materia']
                 .map((type) => DropdownMenuItem(
                       value: type,
-                      child: Text(type, style: const TextStyle(color: Colors.black87)),
+                      child: Text(type, style: const TextStyle(color: Colors.black)),
                     ))
                 .toList(),
             value: _selectedType,
@@ -109,7 +109,7 @@ class _OptionDropdownFormState extends ConsumerState<OptionDropdownForm> {
                 : _options.map((option) {
                     return DropdownMenuItem(
                       value: int.parse(option['id']),
-                      child: Text(option['name'], style: const TextStyle(color: Colors.black87)),
+                      child: Text(option['name'], style: const TextStyle(color: Colors.black)),
                     );
                   }).toList(),
             value: _selectedItemId,
