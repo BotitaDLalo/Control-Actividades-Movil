@@ -5,8 +5,8 @@ import 'package:aprende_mas/views/widgets/buttons/custom_rounded_button.dart';
 import 'package:aprende_mas/providers/activity/activity_provider.dart';
 import 'activity_list.dart';
 import '../../teacher/activities/options/create_activies/button_create_general.dart';
-import 'package:aprende_mas/config/utils/utils.dart';
-import 'package:aprende_mas/config/data/data.dart';
+//import 'package:aprende_mas/config/utils/utils.dart';
+//import 'package:aprende_mas/config/data/data.dart';
 import 'package:aprende_mas/models/models.dart';
 
 class ActivityOptionScreen extends ConsumerStatefulWidget {
@@ -84,52 +84,75 @@ class _ActivityOptionState extends ConsumerState<ActivityOptionScreen> {
 
         return Stack(
           children: [
-            Scaffold(
-              resizeToAvoidBottomInset: false,
-              floatingActionButton: null,
-              body: SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 10),
-                  child: lsActivities.isEmpty
-                      ? Center(
-                          child: SingleChildScrollView(
-                            padding: const EdgeInsets.only(top: 60.0),
-                            child: Column(
-                              children: [
-                                SizedBox(
-                                  height: 180,
-                                  child: SvgPicture.asset(
-                                    'assets/icons/add_activity.svg',
+            SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                child: lsActivities.isEmpty
+                    ? widget.buttonCreateIsVisible
+                        ? Center(
+                            child: SingleChildScrollView(
+                              padding: const EdgeInsets.only(top: 60.0),
+                              child: Column(
+                                children: [
+                                  SizedBox(
+                                    height: 180,
+                                    child: SvgPicture.asset(
+                                      'assets/icons/activities20.svg',
+                                      height: 180,
+                                      width: 180,
+                                      fit: BoxFit.contain,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 24),
+                                  const Text(
+                                    'Aquí podrás crear actividades,\nproyectos o evaluaciones para tus estudiantes',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(fontSize: 16),
+                                  ),
+                                  const SizedBox(height: 32),
+                                  CustomRoundedButton(
+                                    text: 'Crear primera actividad',
+                                    onPressed: () {
+                                      buttonModal();
+                                    },
+                                    backgroundColor: Color(0xFF283043),
+                                    textColor: Colors.white,
+                                    borderRadius: 24,
+                                    height: 48,
+                                    padding: EdgeInsets.symmetric(horizontal: 32),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          )
+                        : Center(
+                            child: SingleChildScrollView(
+                              padding: const EdgeInsets.only(top: 40.0),
+                              child: Column(
+                                children: [
+                                  SvgPicture.asset(
+                                    'assets/icons/sleep1.svg',
+                                    height: 170,
+                                    width: 170,
                                     fit: BoxFit.contain,
                                   ),
-                                ),
-                                const SizedBox(height: 24),
-                                const Text(
-                                  'Aquí podrás crear actividades,\nproyectos o evaluaciones para tus estudiantes',
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(fontSize: 16),
-                                ),
-                                const SizedBox(height: 32),
-                                CustomRoundedButton(
-                                  text: 'Crear primera actividad',
-                                  onPressed: () {
-                                    buttonModal();
-                                  },
-                                  backgroundColor: Color(0xFF283043),
-                                  textColor: Colors.white,
-                                  borderRadius: 24,
-                                  height: 48,
-                                  padding: EdgeInsets.symmetric(horizontal: 32),
-                                ),
-                              ],
+                                  const SizedBox(height: 16),
+                                  const Text(
+                                    'Excelente, no tienes actividades pendientes para esta materia',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                        )
-                      : ActivityList(
-                          subjectId: widget.subjectId,
-                          nombreMateria: widget.subjectName,
-                        ),
-                ),
+                          )
+                    : ActivityList(
+                        subjectId: widget.subjectId,
+                        nombreMateria: widget.subjectName,
+                      ),
               ),
             ),
 
