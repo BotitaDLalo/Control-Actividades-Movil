@@ -63,23 +63,31 @@ class _TeacherActivityStudentsSubmissionsState
             body: Column(
               children: [
                 SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.12,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      ContainerInformationActivity(
-                          icon: Icons.mail_rounded,
-                          title: 'Entregados',
-                          content: data.totalSubmissions.toString()),
-                      ContainerInformationActivity(
-                        icon: Icons.grade_rounded,
-                        title: 'Puntaje',
-                        content: data.score.toString(),
-                        onTapFunction: () {
-                          //TODO: MODIFICAR PUNTAJE AQUI
-                        },
-                      )
-                    ],
+                  height: MediaQuery.of(context).size.height * 0.15,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Expanded(
+                          child: ContainerInformationActivity(
+                              icon: Icons.mail_rounded,
+                              title: 'Entregados',
+                              content: data.totalSubmissions.toString()),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: ContainerInformationActivity(
+                            icon: Icons.grade_rounded,
+                            title: 'Puntaje',
+                            content: data.score.toString(),
+                            onTapFunction: () {
+                              //TODO: MODIFICAR PUNTAJE AQUI
+                            },
+                          ),
+                        )
+                      ],
+                    ),
                   ),
                 ),
                 const SizedBox(

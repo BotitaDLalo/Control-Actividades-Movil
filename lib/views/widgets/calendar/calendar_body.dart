@@ -50,7 +50,9 @@ Future<void> getRole() async {
       final teacherEvents = ref.read(eventProvider).events; // 🔹 Obtener eventos actualizados
       calendarDataSource.updateEvents(teacherEvents); // 🔹 Actualizar UI solo para docentes
     } else if (role == cn.getRoleStudentName) {
-      await ref.read(eventProvider.notifier).getEventsStudent(); // 🔹 Cargar eventos de alumnos (pero sin actualizar la UI)
+      await ref.read(eventProvider.notifier).getEventsStudent(); // 🔹 Cargar eventos de alumnos
+      final studentEvents = ref.read(eventProvider).events; // 🔹 Obtener eventos actualizados
+      calendarDataSource.updateEvents(studentEvents); // 🔹 Actualizar UI para alumnos
     }
   });
 }

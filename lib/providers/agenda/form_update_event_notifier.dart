@@ -147,6 +147,7 @@ class FormUpdateEventNotifier extends StateNotifier<FormEventState>{
   void onUpdateGroupIdsChanged(List<int> ids) {
   state = state.copyWith(
     groupIds: ids, // Manteniendo el nombre original
+    subjectIds: [], // Limpiar subjects cuando se asignan groups
     isValid: Formz.validate([
       GenericInput.dirty(state.title.value),
       GenericInput.dirty(state.description.value),
@@ -162,6 +163,7 @@ class FormUpdateEventNotifier extends StateNotifier<FormEventState>{
 void onUpdateSubjectIdsChanged(List<int> ids) {
   state = state.copyWith(
     subjectIds: ids, // Manteniendo el nombre original
+    groupIds: [], // Limpiar groups cuando se asignan subjects
     isValid: Formz.validate([
       GenericInput.dirty(state.title.value),
       GenericInput.dirty(state.description.value),
