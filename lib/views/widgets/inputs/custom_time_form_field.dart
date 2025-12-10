@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class CustomTimeFormField extends StatefulWidget {
   final String? label;
@@ -56,15 +57,24 @@ class CustomTimeFormFieldState extends State<CustomTimeFormField> {
   }
 
   Future<void> _selectDate(BuildContext context) async {
+    DateTime initialDate = DateTime.now();
+    try {
+      if (_internalController.text.isNotEmpty) {
+        initialDate = DateFormat('dd-MM-yyyy').parse(_internalController.text);
+      }
+    } catch (e) {
+      // Si falla el parseo, usar fecha actual
+    }
+
     DateTime? pickedDate = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
+      initialDate: initialDate,
       firstDate: DateTime(2000),
       lastDate: DateTime(2100),
     );
 
     if (pickedDate != null) {
-      final formattedDate = "${pickedDate.toLocal()}".split(' ')[0];
+      final formattedDate = DateFormat('dd-MM-yyyy').format(pickedDate);
       _internalController.text = formattedDate;
       widget.onChanged?.call(formattedDate);
       setState(() {});
@@ -72,14 +82,27 @@ class CustomTimeFormFieldState extends State<CustomTimeFormField> {
   }
 
   Future<void> _selectTime(BuildContext context) async {
+    TimeOfDay initialTime = TimeOfDay.now();
+    try {
+      if (_internalController.text.isNotEmpty) {
+        final timeParts = _internalController.text.split(':');
+        if (timeParts.length == 2) {
+          final hour = int.parse(timeParts[0]);
+          final minute = int.parse(timeParts[1]);
+          initialTime = TimeOfDay(hour: hour, minute: minute);
+        }
+      }
+    } catch (e) {
+      // Si falla el parseo, usar hora actual
+    }
+
     TimeOfDay? pickedTime = await showTimePicker(
       context: context,
-      initialTime: TimeOfDay.now(),
+      initialTime: initialTime,
     );
 
     if (pickedTime != null) {
-      final formattedTime = pickedTime.format(context);
-      final time24Hour = _convertTo24HourFormat(formattedTime);
+      final time24Hour = '${pickedTime.hour.toString().padLeft(2, '0')}:${pickedTime.minute.toString().padLeft(2, '0')}';
       _internalController.text = time24Hour;
       widget.onChanged?.call(time24Hour);
       setState(() {});

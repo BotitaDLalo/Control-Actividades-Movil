@@ -67,8 +67,14 @@ class EventNotifier extends StateNotifier<EventState>{
     }
   }
 
-  _setCreateEvent(List<Event> event) {
-    state = state.copyWith(events: event);
+  _setCreateEvent(List<Event>? event) {
+    print("🔹 _setCreateEvent llamado con: $event");
+    if (event == null) {
+      print("❌ Error: event es nulo, usando lista vacía");
+      state = state.copyWith(events: []);
+    } else {
+      state = state.copyWith(events: event);
+    }
   }
 
   Future<void> updateEvents(Map<String, dynamic> eventLike) async{

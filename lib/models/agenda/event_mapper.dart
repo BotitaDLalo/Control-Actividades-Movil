@@ -18,7 +18,7 @@ class EventMapper {
         groupIds:
             (map['GrupoId'] as int?) != null ? [map['GrupoId'] as int] : [],
         subjectIds:
-            (map['MateriaId'] as int?) != null ? [map['MateriaId'] as int] : [],
+            (map['MateriaId'] as int?) != null && map['MateriaId'] != "null" ? [map['MateriaId'] as int] : [],
       );
     }).toList();
   }
@@ -41,7 +41,25 @@ class EventMapper {
   }
 
   static Event jsonToEntity(Map<String, dynamic> json) {
-    print("Datos json: $json");
+    print("🔹 Iniciando jsonToEntity con datos: $json");
+
+    // Manejo seguro de GrupoId
+    final grupoId = json['GrupoId'];
+    print("🔹 GrupoId: $grupoId (tipo: ${grupoId?.runtimeType})");
+    final groupIds = grupoId != null && grupoId != "null"
+        ? [grupoId is int ? grupoId : int.tryParse(grupoId.toString()) ?? 0]
+        : <int>[];
+    print("🔹 groupIds procesados: $groupIds");
+
+    // Manejo seguro de MateriaId
+    final materiaId = json['MateriaId'];
+    print("🔹 MateriaId: $materiaId (tipo: ${materiaId?.runtimeType})");
+
+    final subjectIds = materiaId != null && materiaId != "null"
+        ? [materiaId is int ? materiaId : int.tryParse(materiaId.toString()) ?? 0]
+        : <int>[];
+    print("🔹 subjectIds procesados: $subjectIds");
+
     return Event(
       eventId: json['EventoId'] as int?,
       teacherId: json['DocenteId'] as int,
@@ -50,8 +68,8 @@ class EventMapper {
       title: json['Titulo'] as String,
       description: json['Descripcion'] as String,
       color: json['Color'] as String,
-      groupIds: json['GrupoId'] != null ? [json['GrupoId'] as int] : [],
-      subjectIds: json['MateriaId'] != null ? [json['MateriaId'] as int] : [],
+      groupIds: groupIds.isNotEmpty ? groupIds : null,
+      subjectIds: subjectIds.isNotEmpty ? subjectIds : null,
     );
   }
 
