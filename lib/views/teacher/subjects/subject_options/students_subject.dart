@@ -130,9 +130,10 @@ class _StudentsSubjectState extends ConsumerState<StudentsSubject> {
           padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 8.0),
           child: TextField(
             controller: _searchController,
-            decoration: const InputDecoration(
-              labelText: 'Buscar estudiantes por nombre o usuario',
-              prefixIcon: Icon(Icons.search),
+            decoration: InputDecoration(
+              labelText: '  Buscar estudiantes por nombre o usuario',
+              prefixIconConstraints: BoxConstraints(maxWidth: 24, maxHeight: 24),
+              prefixIcon: SizedBox(width: 20, height: 20, child: SvgPicture.asset('assets/icons/buscar.svg', colorFilter: ColorFilter.mode(Colors.blue, BlendMode.srcIn))),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.all(Radius.circular(25.0)),
               ),
