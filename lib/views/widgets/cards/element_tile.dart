@@ -4,7 +4,8 @@ class ElementTile extends ConsumerWidget {
   // final Notice notification;
   final String title;
   final String subtitle;
-  final IconData icon;
+  final IconData? icon;
+  final Widget? iconWidget;
   final IconData? trailingIcon;
   final String? trailingString;
   final Color iconColor;
@@ -16,7 +17,8 @@ class ElementTile extends ConsumerWidget {
 
   const ElementTile({
     super.key,
-    required this.icon,
+    this.icon,
+    this.iconWidget,
     required this.iconColor,
     this.trailingColor,
     this.trailingString,
@@ -62,9 +64,9 @@ Widget build(BuildContext context, WidgetRef ref) {
             
             // --- Leading (Ícono de la actividad) ---
             leading: CircleAvatar(
-              backgroundColor: Colors.transparent, 
+              backgroundColor: Colors.transparent,
               radius: 22,
-              child: Icon(icon, color: Colors.black, size: iconSize),
+              child: iconWidget ?? (icon != null ? Icon(icon, color: Colors.black, size: iconSize) : const SizedBox()),
             ),
             
             // --- Title (Título de la actividad) ---

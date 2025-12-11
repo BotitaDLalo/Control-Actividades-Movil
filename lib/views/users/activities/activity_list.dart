@@ -152,9 +152,9 @@ class _ActivityListState extends ConsumerState<ActivityList> {
         children: [
           TextField(
             controller: _searchController,
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
               labelText: 'Buscar actividades',
-              prefixIcon: Icon(Icons.search),
+              prefixIcon: SvgPicture.asset('assets/icons/buscar.svg', width: 20, height: 20, colorFilter: ColorFilter.mode(Colors.blue, BlendMode.srcIn)),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.all(Radius.circular(25)),
               ),
@@ -204,9 +204,9 @@ class _ActivityListState extends ConsumerState<ActivityList> {
                   }
 
                   return ElementTile(
-                    icon: Icons.assignment,
-                    iconSize: 28,
-                    iconColor: Colors.white,
+                    iconWidget: SvgPicture.asset('assets/icons/act1.svg', width: 40, height: 40),
+                    iconSize: 40,
+                    iconColor: Colors.black,
                     title: activity.nombreActividad,
                     subtitle: formattedDate,
                     trailingWidget: role == cn.getRoleTeacherName
