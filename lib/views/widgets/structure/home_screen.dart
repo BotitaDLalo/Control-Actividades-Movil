@@ -106,9 +106,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               const SizedBox(height: 6),
               // Opciones del drawer
               ListTile(
-                leading: const Icon(
-                  Icons.exit_to_app,
-                  size: 30,
+                leading: SvgPicture.asset(
+                  'assets/icons/logout2.svg',
+                  width: 30,
+                  height: 30,
                 ),
                 title: const Text(
                   'Cerrar Sesión',

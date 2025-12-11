@@ -23,33 +23,14 @@ class ContainerNameGroupSubjects extends StatelessWidget {
             left: context.width(0.04), // 4% del ancho
             child: IconButton(
               onPressed: () => Navigator.of(context).maybePop(),
-              icon: Icon(Icons.arrow_back, color: Colors.white, size: context.width(0.08)), // 8% del ancho
+              icon: SvgPicture.asset('assets/icons/retroceder.svg', width: 30, height: 30, color: Colors.white),
               tooltip: 'Regresar',
-            ),
-          ),
-          // Iconos arriba derecha
-          Positioned(
-            top: context.height(0.04),
-            right: context.width(0.06), // 6% del ancho
-            child: Row(
-              mainAxisSize: MainAxisSize.min, // Solo ocupar el espacio necesario
-              children: [
-                Icon(Icons.calendar_today, color: Colors.white, size: context.width(0.08)),
-                SizedBox(width: context.width(0.04)), // 4% del ancho
-                Icon(Icons.notifications, color: Colors.white, size: context.width(0.08)),
-                SizedBox(width: context.width(0.04)),
-                CircleAvatar(
-                  radius: context.radius(0.055), // 5.5% del ancho
-                  backgroundColor: Colors.white,
-                  child: Icon(Icons.person, color: color, size: context.width(0.07)), // 7% del ancho
-                ),
-              ],
             ),
           ),
           // Título y código abajo izquierda (siempre visible y alternativo si no hay código)
           Positioned(
             left: context.width(0.06), // 6% del ancho
-            right: context.width(0.25), // 25% del ancho (espacio para el botón de ajustes)
+            right: context.width(0.06), // 6% del ancho (sin espacio para el botón de ajustes)
             bottom: context.height(0.025), // 2.5% de la altura
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -99,10 +80,10 @@ class ContainerNameGroupSubjects extends StatelessWidget {
               ],
             ),
           ),
-          // Botón de ajustes circular abajo derecha
+          // Botón de ajustes circular arriba derecha
           Positioned(
+            top: context.height(0.04),
             right: context.width(0.06),
-            bottom: context.height(0.025),
             child: GestureDetector(
               onTap: () {},
               child: CircleAvatar(

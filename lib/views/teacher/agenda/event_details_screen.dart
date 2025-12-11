@@ -1,5 +1,6 @@
 import 'package:aprende_mas/config/utils/general_utils.dart';
 import 'package:aprende_mas/config/utils/packages.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:aprende_mas/models/agenda/event_model.dart';
 import 'package:aprende_mas/models/groups/group.dart';
 import 'package:aprende_mas/models/subjects/subjects.dart';
@@ -78,7 +79,7 @@ class EventDetailsScreen extends ConsumerWidget {
     }
 
     return Scaffold(
-      appBar: AppBarHome(title: 'Detalles del Evento', showSettings: false),
+      appBar: AppBarHome(title: 'Detalles del Evento', showSettings: false, leading: IconButton(icon: SvgPicture.asset('assets/icons/retroceder.svg', width: 30, height: 30, color: Colors.white), onPressed: () => context.pop())),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -326,7 +327,7 @@ class EventDetailsScreen extends ConsumerWidget {
               context.push('/update-event', extra: eventData);
               ref.read(eventProvider.notifier).getEvents();
             },
-            child: const Icon(Icons.edit),
+            child: SvgPicture.asset('assets/icons/edit2.svg', width: 24, height: 24),
           ),
           const SizedBox(height: 16),
           FloatingActionButton(
@@ -355,7 +356,7 @@ class EventDetailsScreen extends ConsumerWidget {
                 }
               }
             },
-            child: const Icon(Icons.delete),
+            child: SvgPicture.asset('assets/icons/eliminar4.svg', width: 28, height: 28),
           ),
         ],
       ),

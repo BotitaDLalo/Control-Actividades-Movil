@@ -1,5 +1,6 @@
 import 'package:aprende_mas/config/utils/general_utils.dart';
 import 'package:aprende_mas/config/utils/packages.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:aprende_mas/models/models.dart';
 import 'package:aprende_mas/views/views.dart';
 import 'package:aprende_mas/providers/providers.dart';
@@ -200,16 +201,18 @@ class _ActivitySectionSubmissionState
                             Icons.send,
                             color: Colors.grey.withOpacity(0.8),
                           )
-                        : Icon(
-                            Icons.add,
-                            color: Colors.grey.withOpacity(0.8),
+                        : SvgPicture.asset(
+                            'assets/icons/agregar.svg',
+                            color: Colors.black,
+                            width: 40,
+                            height: 40,
                           ))
                 : const SizedBox(),
         appBar: AppBar(
           backgroundColor: Colors.white,
           elevation: 0,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
+            icon: SvgPicture.asset('assets/icons/retroceder.svg', width: 30, height: 30, color: Colors.black),
             onPressed: () {
               Navigator.pop(context);
             },

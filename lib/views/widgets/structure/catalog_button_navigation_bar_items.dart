@@ -29,7 +29,7 @@ class CatalogButtonNavigationBarItems {
     ),
     BottomNavigationBarItem(
       icon: SvgPicture.asset(
-        'assets/icons/chat1.svg',
+        'assets/icons/IA2.svg',
         width: 24,
         height: 24,
       ),

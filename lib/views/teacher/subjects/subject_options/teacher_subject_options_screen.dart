@@ -105,7 +105,7 @@ class _ActividadesScreenState
               ContainerNameGroupSubjects(
                 name: widget.subjectName,
                 accessCode: widget.codeAccess,
-                color: const Color(0xFF31D492),
+                color: AppTheme.mainColor,
               ),
               TeacherSubjectOptions(
                 lsSubjectOptions: lsSubjectOptions,

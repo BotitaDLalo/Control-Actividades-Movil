@@ -63,7 +63,7 @@ class EventDetailsStudentScreen extends ConsumerWidget {
     }
 
     return Scaffold(
-      appBar: AppBarHome(title: 'Detalles del Evento', showSettings: false),
+      appBar: AppBarHome(title: 'Detalles del Evento', showSettings: false, leading: IconButton(icon: SvgPicture.asset('assets/icons/retroceder.svg', width: 30, height: 30, color: Colors.white), onPressed: () => Navigator.pop(context))),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(

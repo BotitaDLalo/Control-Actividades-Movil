@@ -2,6 +2,7 @@ import 'package:aprende_mas/views/teacher/agenda/form_events.dart';
 import 'package:aprende_mas/views/views.dart';
 import 'package:aprende_mas/views/widgets/structure/app_bar_home.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
 class CreateEventScreen extends StatelessWidget {
@@ -18,8 +19,7 @@ class CreateEventScreen extends StatelessWidget {
           showSettings: false,
           leading: IconButton(
             onPressed: () => context.pop(),
-            icon: const Icon(Icons.arrow_back),
-            color: Colors.white,
+            icon: SvgPicture.asset('assets/icons/retroceder.svg', width: 30, height: 30, color: Colors.white),
           ),
         ),
         body: SingleChildScrollView(

@@ -8,6 +8,7 @@ import 'package:aprende_mas/views/widgets/buttons/custom_rounded_button.dart';
 import 'package:aprende_mas/views/widgets/alerts/error_snackbar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart'; // Asegurar importación de Material/Widget
+import 'package:flutter_svg/flutter_svg.dart';
 
 class TeacherCreateNotice extends ConsumerStatefulWidget {
   final NoticeModel notice;
@@ -183,8 +184,8 @@ class CustomAppBar extends ConsumerWidget implements PreferredSizeWidget {
                 leading ??
                     Transform.translate(
                       offset: const Offset(-14, 0),
-                      child: BackButton(
-                        color: Colors.black,
+                      child: IconButton(
+                        icon: SvgPicture.asset('assets/icons/retroceder.svg', width: 30, height: 30, color: Colors.black),
                         onPressed: () => context.pop(),
                       ),
                     ),

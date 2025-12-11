@@ -14,7 +14,7 @@ class ConfirmationCodeScreen extends ConsumerWidget {
         appBar: AppBar(
           backgroundColor: Colors.white,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.black),
+            icon: SvgPicture.asset('assets/icons/retroceder.svg', width: 30, height: 30, color: Colors.white),
             onPressed: () {
               ref.read(authProvider.notifier).popAuth();
               context.go('/');

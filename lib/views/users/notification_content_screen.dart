@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class NotificationContentScreen extends StatelessWidget {
   final String messageId;
@@ -20,7 +21,7 @@ class NotificationContentScreen extends StatelessWidget {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: SvgPicture.asset('assets/icons/retroceder.svg', width: 30, height: 30),
           onPressed: () {
             Navigator.pop(context);
           },

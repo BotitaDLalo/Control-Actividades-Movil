@@ -21,7 +21,7 @@ class FormScreen extends ConsumerWidget {
                     FocusScope.of(context).unfocus();
                     context.pop();
                   },
-                  icon: const Icon(Icons.arrow_back),
+                  icon: SvgPicture.asset('assets/icons/retroceder.svg', width: 30, height: 30, color: Colors.white,),
                 ),
               )
             : AppBar(
@@ -31,10 +31,7 @@ class FormScreen extends ConsumerWidget {
                       FocusScope.of(context).unfocus();
                       context.pop();
                     },
-                    icon: const Icon(
-                      Icons.arrow_back,
-                      color: Color.fromARGB(255, 255, 255, 255),
-                    )),
+                    icon: SvgPicture.asset('assets/icons/retroceder.svg', width: 30, height: 30, color: Colors.white)),
               ),
         body: Center(
           child: SingleChildScrollView(

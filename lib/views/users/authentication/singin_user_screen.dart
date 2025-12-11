@@ -30,7 +30,7 @@ class SinginUserScreen extends ConsumerWidget {
               FocusScope.of(context).unfocus();
               context.pop();
             },
-            icon: const Icon(Icons.arrow_back),
+            icon: SvgPicture.asset('assets/icons/retroceder.svg', width: 30, height: 30),
           ),
         ),
         body: const SingleChildScrollView(
