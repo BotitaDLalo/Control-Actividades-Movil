@@ -33,8 +33,8 @@ class FormForgotPassword extends ConsumerWidget {
             CustomTextFormField(
               icon: SvgPicture.asset(
                 'assets/icons/email.svg',
-                width: 20,
-                height: 20,
+                width: 40,
+                height: 40,
                 color: const Color.fromARGB(255, 12, 129, 231),
               ),
               label: '  Correo',

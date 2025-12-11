@@ -1,4 +1,5 @@
 import 'package:aprende_mas/config/utils/packages.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 // auth provider removed from this widget to keep AppBarHome generic
 import 'header_background.dart';
 
@@ -70,14 +71,15 @@ class AppBarHome extends ConsumerWidget implements PreferredSizeWidget {
                 child: GestureDetector(
                   onTap: () => Scaffold.of(context).openEndDrawer(),
                   child: Container(
-                    width: 50,
-                    height: 50,
+                    width: 45,
+                    height: 45,
                     // Estilo del icono de configuración
-                    child: const Icon(
-                      Icons.settings,
-                      color: Color.fromARGB(255, 255, 255, 255),
-                      size: 30,
-                    ),
+                     child: SvgPicture.asset(
+                       'assets/icons/settings1.svg',
+                       color: const Color.fromARGB(255, 255, 255, 255),
+                       width: 20,
+                       height: 20,
+                     ),
                   ),
                 ),
               ),

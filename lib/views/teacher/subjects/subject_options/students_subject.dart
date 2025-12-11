@@ -3,6 +3,7 @@ import 'package:aprende_mas/providers/providers.dart';
 import 'package:aprende_mas/providers/subjects/students_subject_provider.dart';
 import 'package:aprende_mas/views/teacher/groups_subjects/students_groups_subjects.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class StudentsSubject extends ConsumerStatefulWidget {
   final int id;
@@ -91,14 +92,15 @@ class _StudentsSubjectState extends ConsumerState<StudentsSubject> {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: const [
-            Icon(
-              Icons.school_outlined,
-              size: 200,
-              color: Colors.grey,
+          children: [
+            SvgPicture.asset(
+              'assets/icons/studentcap1.svg',
+              height: 200,
+              width: 200,
+              color: Colors.black,
             ),
-            SizedBox(height: 16),
-            Padding(
+            const SizedBox(height: 16),
+            const Padding(
               padding: EdgeInsets.symmetric(horizontal: 40),
               child: Text(
                 "Aquí se mostrarán los estudiantes que agregues a la materia.",

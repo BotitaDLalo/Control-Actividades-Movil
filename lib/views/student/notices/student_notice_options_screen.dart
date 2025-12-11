@@ -2,6 +2,7 @@ import 'package:aprende_mas/config/data/key_value_storage_service_impl.dart';
 import 'package:aprende_mas/config/utils/packages.dart';
 import 'package:aprende_mas/models/models.dart';
 import 'package:aprende_mas/views/widgets/activities_body/notice/notice_body/notice_body.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../providers/notices/future_notices_provider.dart';
 
@@ -46,24 +47,47 @@ class _StudentNoticeOptionsScreenState
           },
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
-            child: Column(
-                children: data
-                    .map(
-                      (e) => Column(
-                        children: [
-                          NoticeBody(
-                              optionsIsVisible: false,
-                              noticeId: e.noticeId ?? 0,
-                              teacherName: e.teacherFullName ?? "",
-                              createdDate: e.createdDate.toString(),
-                              title: e.title,
-                              content: e.description),
-                          SizedBox(
-                              height: MediaQuery.of(context).size.height * 0.02)
-                        ],
-                      ),
-                    )
-                    .toList()),
+            child: data.isEmpty
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SvgPicture.asset(
+                          'assets/icons/nuevoanuncio.svg',
+                          height: 200,
+                          width: 200,
+                          fit: BoxFit.contain,
+                        ),
+                        const SizedBox(height: 16),
+                        const Text(
+                          'No tienes avisos en esta materia',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                : Column(
+                    children: data
+                        .map(
+                          (e) => Column(
+                            children: [
+                              NoticeBody(
+                                  optionsIsVisible: false,
+                                  noticeId: e.noticeId ?? 0,
+                                  teacherName: e.teacherFullName ?? "",
+                                  createdDate: e.createdDate.toString(),
+                                  title: e.title,
+                                  content: e.description),
+                              SizedBox(
+                                  height: MediaQuery.of(context).size.height * 0.02)
+                            ],
+                          ),
+                        )
+                        .toList()),
           ),
         ),
         error: (error, stackTrace) => Text(error.toString()),

@@ -1,5 +1,5 @@
-import 'package:aprende_mas/config/data/data.dart';
-import 'package:aprende_mas/config/utils/app_theme.dart';
+//import 'package:aprende_mas/config/data/data.dart';
+//import 'package:aprende_mas/config/utils/app_theme.dart';
 import 'package:aprende_mas/config/utils/packages.dart';
 import 'package:aprende_mas/providers/providers.dart';
 import 'package:aprende_mas/views/views.dart';
@@ -46,8 +46,8 @@ class FormLoginState extends ConsumerState<FormLogin> {
             CustomTextFormField(
               icon: SvgPicture.asset(
                 'assets/icons/email.svg',
-                width: 10,
-                height: 10,
+                width: 40,
+                height: 40,
                 color: const Color.fromARGB(255, 12, 129, 231),
               ),
               label: '  Correo',
@@ -61,8 +61,8 @@ class FormLoginState extends ConsumerState<FormLogin> {
             CustomTextFormField(
               icon: SvgPicture.asset(
                 'assets/icons/password1.svg',
-                width: 10,
-                height: 10,
+                width: 45,
+                height: 45,
                 color: const Color.fromARGB(255, 12, 129, 231),
               ),
               label: '  Contraseña',

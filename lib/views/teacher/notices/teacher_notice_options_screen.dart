@@ -139,7 +139,9 @@ class _NoticeOptionsScreenState
                                       SizedBox(
                                         height: 180,
                                         child: SvgPicture.asset(
-                                          'assets/icons/new_notice.svg',
+                                          'assets/icons/nuevoanuncio.svg',
+                                          height: 180,
+                                          width: 180,
                                           fit: BoxFit.contain,
                                         ),
                                       ),

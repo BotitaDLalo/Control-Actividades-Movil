@@ -1,21 +1,38 @@
 import 'package:aprende_mas/config/utils/packages.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class CatalogButtonNavigationBarItems {
   static List<BottomNavigationBarItem> lsBarItems = [
-    const BottomNavigationBarItem(
-      icon: Icon(Icons.calendar_month_outlined),
+    BottomNavigationBarItem(
+      icon: SvgPicture.asset(
+        'assets/icons/calendar1.svg',
+        width: 24,
+        height: 24,
+      ),
       label: 'Agenda',
     ),
-    const BottomNavigationBarItem(
-      icon: Icon(Icons.school_outlined),
+    BottomNavigationBarItem(
+      icon: SvgPicture.asset(
+        'assets/icons/studentcap1.svg',
+        width: 24,
+        height: 24,
+      ),
       label: 'Clases',
     ),
-    const BottomNavigationBarItem(
-      icon: Icon(Icons.notifications),
+    BottomNavigationBarItem(
+      icon: SvgPicture.asset(
+        'assets/icons/notificaciones3.svg',
+        width: 24,
+        height: 24,
+      ),
       label: 'Notificaciones',
     ),
-    const BottomNavigationBarItem(
-      icon: Icon(Icons.app_shortcut_outlined),
+    BottomNavigationBarItem(
+      icon: SvgPicture.asset(
+        'assets/icons/chat1.svg',
+        width: 24,
+        height: 24,
+      ),
       label: 'Chat',
     ),
   ];

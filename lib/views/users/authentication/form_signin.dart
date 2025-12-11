@@ -83,8 +83,8 @@ class FormSingin extends ConsumerWidget {
             CustomTextFormField(
               icon: SvgPicture.asset(
                 'assets/icons/user2.svg',
-                width: 20,
-                height: 20,
+                width: 40,
+                height: 40,
                 color: const Color.fromARGB(255, 12, 129, 231),
               ),
               label: "  Nombres",
@@ -101,8 +101,8 @@ class FormSingin extends ConsumerWidget {
                   child: CustomTextFormField(
                     icon: SvgPicture.asset(
                       'assets/icons/user2.svg',
-                      width: 20,
-                      height: 20,
+                      width: 40,
+                      height: 40,
                       color: const Color.fromARGB(255, 12, 129, 231),
                     ),
                     label: "Apellido Paterno",
@@ -116,8 +116,8 @@ class FormSingin extends ConsumerWidget {
                   child: CustomTextFormField(
                     icon: SvgPicture.asset(
                       'assets/icons/user2.svg',
-                      width: 20,
-                      height: 20,
+                      width: 40,
+                      height: 40,
                       color: const Color.fromARGB(255, 12, 129, 231),
                     ),
                     label: "Apellido Materno",
@@ -130,8 +130,8 @@ class FormSingin extends ConsumerWidget {
             CustomTextFormField(
               icon: SvgPicture.asset(
                 'assets/icons/password1.svg',
-                width: 10,
-                height: 10,
+                width: 40,
+                height: 40,
                 color: const Color.fromARGB(255, 12, 129, 231),
               ),
               label: '  Contraseña',
@@ -147,8 +147,8 @@ class FormSingin extends ConsumerWidget {
             CustomDropdown(
               icon: SvgPicture.asset(
                 'assets/icons/usercheck1.svg',
-                width: 20,
-                height: 20,
+                width: 40,
+                height: 40,
                 color: const Color.fromARGB(255, 12, 129, 231),
               ),
               label: '  Elige tu rol',

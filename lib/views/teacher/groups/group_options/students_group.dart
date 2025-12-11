@@ -3,6 +3,7 @@ import 'package:aprende_mas/providers/groups/groups_provider.dart';
 import 'package:aprende_mas/providers/groups/students_group_provider.dart';
 import 'package:aprende_mas/views/teacher/groups_subjects/students_groups_subjects.dart';
 import 'package:flutter/material.dart'; // Importante para TextField
+import 'package:flutter_svg/flutter_svg.dart';
 
 class StudentsGroup extends ConsumerStatefulWidget {
   final int id; // Este es el GroupId
@@ -124,14 +125,15 @@ class _StudentsGroupState extends ConsumerState<StudentsGroup> {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: const [
-            Icon(
-              Icons.group_outlined, // Icono adaptado para grupos
-              size: 200,
-              color: Colors.grey,
+          children: [
+            SvgPicture.asset(
+              'assets/icons/studentcap1.svg',
+              height: 200,
+              width: 200,
+              color: Colors.black,
             ),
-            SizedBox(height: 16),
-            Padding(
+            const SizedBox(height: 16),
+            const Padding(
               padding: EdgeInsets.symmetric(horizontal: 40),
               child: Text(
                 "Aquí se mostrarán los estudiantes que agregues al grupo.",
