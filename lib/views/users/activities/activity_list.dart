@@ -114,7 +114,7 @@ class _ActivityListState extends ConsumerState<ActivityList> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 ListTile(
-                  leading: const Icon(Icons.edit),
+                  leading: SvgPicture.asset('assets/icons/edit2.svg', width: 24, height: 24),
                   title: const Text('Editar'),
                   onTap: () {
                     Navigator.pop(context);
@@ -132,7 +132,7 @@ class _ActivityListState extends ConsumerState<ActivityList> {
                   },
                 ),
                 ListTile(
-                  leading: const Icon(Icons.delete_forever),
+                  leading: SvgPicture.asset('assets/icons/eliminar1.svg', width: 24, height: 24),
                   title: const Text('Eliminar'),
                   onTap: () {
                     Navigator.pop(context);

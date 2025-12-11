@@ -52,7 +52,7 @@ class _ActivitySectionSubmissionState
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 ListTile(
-                  leading: const Icon(Icons.edit_note),
+                  leading: SvgPicture.asset('assets/icons/activities20.svg', width: 24, height: 24),
                   title: const Text('Agregar Respuesta'),
                   onTap: () {
                     Navigator.pop(context);
@@ -134,7 +134,7 @@ class _ActivitySectionSubmissionState
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 ListTile(
-                  leading: const Icon(Icons.delete),
+                  leading: SvgPicture.asset('assets/icons/eliminar1.svg', width: 24, height: 24),
                   title: const Text('Eliminar respuesta'),
                   onTap: () {
                     ref.read(activityFormProvider.notifier).dropAnswer();
@@ -159,7 +159,7 @@ class _ActivitySectionSubmissionState
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 ListTile(
-                  leading: const Icon(Icons.delete),
+                  leading: SvgPicture.asset('assets/icons/eliminar1.svg', width: 24, height: 24),
                   title: const Text('Cancelar Entregable'),
                   onTap: () {
                     if (authConectionType == AuthConnectionType.online) {
@@ -300,9 +300,9 @@ class _ActivitySectionSubmissionState
                                         }
                                       },
                                       child: ElementTile(
-                                          icon: Icons.edit_note,
-                                          iconSize: 28,
+                                          iconWidget: SvgPicture.asset('assets/icons/activities20.svg', width: 28, height: 28),
                                           iconColor: Colors.white,
+                                          iconSize: 28,
                                           title: "Respuesta",
                                           subtitle: "",
                                           onTapFunction: () {
@@ -360,7 +360,7 @@ class _ActivitySectionSubmissionState
                                 showModalBottomDropAnswer(context);
                               },
                               child: ElementTile(
-                                icon: Icons.edit_note,
+                                iconWidget: SvgPicture.asset('assets/icons/activities20.svg', width: 28, height: 28),
                                 iconSize: 28,
                                 iconColor: Colors.white,
                                 title: 'Respuesta',

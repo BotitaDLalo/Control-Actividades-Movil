@@ -40,7 +40,7 @@ class NoticesScreenState extends ConsumerState<NotificationsScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 ListTile(
-                  leading: const Icon(Icons.delete),
+                  leading: SvgPicture.asset('assets/icons/eliminar1.svg', width: 24, height: 24),
                   title: const Text('Eliminar notificación'),
                   onTap: () {
                     noticesNotifier.deleteNotification(sentDate);

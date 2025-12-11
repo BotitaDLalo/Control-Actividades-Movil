@@ -46,8 +46,8 @@ class _ActivityOptionState extends ConsumerState<ActivityOptionScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 ListTile(
-                  leading: const Icon(Icons.create),
-                  title: const Text("Actividad"),
+                  leading: SvgPicture.asset('assets/icons/agregarActividad.svg', width: 24, height: 24),
+                  title: const Text("Nueva actividad"),
                   onTap: () {
                     final data = Subject(
                       materiaId: widget.subjectId,
@@ -97,7 +97,7 @@ class _ActivityOptionState extends ConsumerState<ActivityOptionScreen> {
                                   SizedBox(
                                     height: 180,
                                     child: SvgPicture.asset(
-                                      'assets/icons/activities20.svg',
+                                      'assets/icons/agregarActividad.svg',
                                       height: 180,
                                       width: 180,
                                       fit: BoxFit.contain,

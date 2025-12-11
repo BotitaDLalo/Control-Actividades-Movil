@@ -33,7 +33,7 @@ class CatalogButtonNavigationBarItems {
         width: 24,
         height: 24,
       ),
-      label: 'Chat',
+      label: 'Chat IA',
     ),
   ];
 }

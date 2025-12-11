@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
 class ButtonCreateGeneral extends StatelessWidget {
@@ -12,8 +13,8 @@ class ButtonCreateGeneral extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: const Icon(Icons.create),
-              title: const Text("Actividad"),
+              leading: SvgPicture.asset('assets/icons/agregarActividad.svg', width: 24, height: 24),
+              title: const Text("Nueva actividad"),
               onTap: () {
                 context.go('/create-activities');
                 // Agregar lógica para crear Actividad
