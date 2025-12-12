@@ -111,9 +111,32 @@ class SubjectsDataSourceImpl implements SubjectsDataSource {
   }
 
   @override
-  Future<void> updateSubject() {
-    // TODO: implement updateSubject
-    throw UnimplementedError();
+  Future<Subject> updateSubject(int subjectId, String name, String description) async {
+    try {
+      const uri = "/Materias/UpdateSubject";
+      final res = await dio.put(uri, data: {
+        "MateriaId": subjectId,
+        "NombreMateria": name,
+        "Descripcion": description,
+      });
+
+      if (res.statusCode == 200) {
+        // Assuming the response contains the updated subject
+        final subjectMap = res.data as Map<String, dynamic>;
+        final updatedSubject = Subject(
+          materiaId: subjectMap['MateriaId'],
+          nombreMateria: subjectMap['NombreMateria'],
+          descripcion: subjectMap['Descripcion'] ?? "",
+          codigoAcceso: subjectMap['CodigoAcceso'] ?? "",
+          codigoColor: subjectMap['CodigoColor'] ?? "",
+        );
+        return updatedSubject;
+      } else {
+        throw Exception("Error updating subject: ${res.statusCode}");
+      }
+    } catch (e) {
+      throw Exception(e);
+    }
   }
 
   // --- CÓDIGO CORREGIDO EN subjects_data_source_impl.dart ---

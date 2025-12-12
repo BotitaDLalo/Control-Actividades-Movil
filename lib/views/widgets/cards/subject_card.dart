@@ -91,6 +91,64 @@ class SubjectCard extends ConsumerWidget {
       );
     }
 
+    void _showEditDialog(BuildContext context, Subject subjectData) {
+      final nameController = TextEditingController(text: subjectData.nombreMateria);
+      final descriptionController = TextEditingController(text: subjectData.descripcion);
+
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Editar materia'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: nameController,
+                decoration: const InputDecoration(labelText: 'Nombre de la materia'),
+              ),
+              TextField(
+                controller: descriptionController,
+                decoration: const InputDecoration(labelText: 'Descripción'),
+                maxLines: 3,
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancelar'),
+            ),
+            TextButton(
+              onPressed: () async {
+                final newName = nameController.text.trim();
+                final newDescription = descriptionController.text.trim();
+                if (newName.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('El nombre no puede estar vacío')),
+                  );
+                  return;
+                }
+                Navigator.of(context).pop();
+                bool success = await ref.read(subjectsProvider.notifier).updateSubject(subjectData.materiaId!, newName, newDescription);
+                if (success) {
+                  // Refrescar la lista de grupos
+                  await ref.read(groupsProvider.notifier).getGroupsSubjects();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Materia actualizada')),
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Error al actualizar la materia')),
+                  );
+                }
+              },
+              child: const Text('Actualizar'),
+            ),
+          ],
+        ),
+      );
+    }
+
 
     // Selección determinística de watermark (usa recursos existentes en assets/icons)
     const watermarkIcons = [
@@ -175,19 +233,15 @@ class SubjectCard extends ConsumerWidget {
                             nombreMateria: nombreMateria,
                             codigoAcceso: accessCode,
                             descripcion: description);
-                        if (value == 'options') {
-                          if (role == cn.getRoleTeacherName) {
-                            teacherSubjectOptions(data);
-                          } else if (role == cn.getRoleStudentName) {
-                            studentSubjectOptions(data);
-                          }
+                        if (value == 'edit') {
+                          _showEditDialog(context, data);
                         } else if (value == 'delete') {
                           _showDeleteConfirmation(context, data);
                         }
                       },
                       itemBuilder: (context) => [
                         const PopupMenuItem(
-                          value: 'options',
+                          value: 'edit',
                           child: Text('Editar'),
                         ),
                         const PopupMenuItem(

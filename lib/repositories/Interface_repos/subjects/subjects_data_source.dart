@@ -12,7 +12,7 @@ abstract class SubjectsDataSource {
 
   Future<bool> deleteSubject(int subjectId);
 
-  Future<void> updateSubject();
+  Future<Subject> updateSubject(int subjectId, String name, String description);
 
   Future<VerifyEmail> verifyEmail(String email);
 

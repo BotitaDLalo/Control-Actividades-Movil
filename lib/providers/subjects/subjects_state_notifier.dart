@@ -132,6 +132,33 @@ class SubjectsStateNotifier extends StateNotifier<SubjectsState> {
     }
   }
 
+  Future<bool> updateSubject(int subjectId, String name, String description) async {
+    try {
+      debugPrint("🖊️ Iniciando actualización de materia ID: $subjectId");
+      final updatedSubject = await subjectsRepository.updateSubject(subjectId, name, description);
+      if (updatedSubject != null) {
+        _updateSubjectInState(updatedSubject);
+        debugPrint("✅ Materia actualizada en state local");
+        return true;
+      } else {
+        debugPrint("❌ El backend no retornó la materia actualizada");
+        return false;
+      }
+    } catch (e) {
+      debugPrint("❌ Error inesperado al actualizar materia: $e");
+      return false;
+    }
+  }
+
+  void _updateSubjectInState(Subject updatedSubject) {
+    List<Subject> lsSubjects = List.from(state.lsSubjects);
+    final index = lsSubjects.indexWhere((s) => s.materiaId == updatedSubject.materiaId);
+    if (index != -1) {
+      lsSubjects[index] = updatedSubject;
+      state = state.copyWith(lsSubjects: lsSubjects);
+    }
+  }
+
   void _deleteSubjectFromState(int subjectId) {
     List<Subject> lsSubjects = List.from(state.lsSubjects);
     lsSubjects.removeWhere((subject) => subject.materiaId == subjectId);

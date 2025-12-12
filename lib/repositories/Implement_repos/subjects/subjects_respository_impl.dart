@@ -30,9 +30,8 @@ class SubjectsRespositoryImpl implements SubjectsRepository {
   }
 
   @override
-  Future<void> updateSubject() {
-    // TODO: implement updateSubject
-    throw UnimplementedError();
+  Future<Subject> updateSubject(int subjectId, String name, String description) {
+    return subjectsDataSource.updateSubject(subjectId, name, description);
   }
 
   @override
