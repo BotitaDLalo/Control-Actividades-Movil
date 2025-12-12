@@ -71,8 +71,8 @@ class SubjectsOfflineDataSourceImpl extends SubjectsOfflineDataSource {
             lsSubjects.add(Subject(
               materiaId: subjectId,
               nombreMateria: subjectRow['NombreMateria'] as String,
-              descripcion: subjectRow['Descripcion'] as String,
-              // codigoAcceso: subjectRow['CodigoAcceso'] as String,
+              descripcion: subjectRow['Descripcion'] as String? ?? "",
+              codigoAcceso: subjectRow['CodigoAcceso'] as String? ?? "",
               actividades: lsActivities,
             ));
           }
@@ -102,7 +102,7 @@ class SubjectsOfflineDataSourceImpl extends SubjectsOfflineDataSource {
             'Descripcion': subject.descripcion,
             'CodigoColor': subject.codigoColor,
             'CodigoAcceso': subject.codigoAcceso,
-          });
+          }, conflictAlgorithm: ConflictAlgorithm.replace);
 
           int subjectId = subject.materiaId;
 

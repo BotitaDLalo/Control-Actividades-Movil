@@ -25,14 +25,25 @@ class SubjectsStateNotifier extends StateNotifier<SubjectsState> {
   Future<void> getSubjects() async {
     try {
       final subjects = await subjectsRepository.getSubjectsWithoutGroup();
-      debugPrint("SubjectsStateNotifier: $subjects");
+      debugPrint("SubjectsStateNotifier: ${subjects.map((s) => {'id': s.materiaId, 'desc': s.descripcion, 'code': s.codigoAcceso}).toList()}");
       if (mounted) {
         setSubjects(subjects);
+        await subjectsOffline.saveSubjectsWithoutGroup(subjects);
       }
     } catch (e, stacktrace) {
-      debugPrint("Error en getSubjects: $e");
+      debugPrint("Error en getSubjects online: $e");
       debugPrint("Stacktrace: $stacktrace");
-      throw Exception(e);
+      // Fallback a offline
+      try {
+        final subjectsOfflineList = await subjectsOffline.getSujectsWithoutGroup();
+        debugPrint("Cargando desde offline: ${subjectsOfflineList.map((s) => {'id': s.materiaId, 'desc': s.descripcion, 'code': s.codigoAcceso}).toList()}");
+        if (mounted) {
+          setSubjects(subjectsOfflineList);
+        }
+      } catch (e2) {
+        debugPrint("Error en offline: $e2");
+        // No hacer nada
+      }
     }
   }
 
@@ -75,6 +86,7 @@ class SubjectsStateNotifier extends StateNotifier<SubjectsState> {
       final subjects = await subjectsRepository.createSubjectWithoutGroup(
           subjectName, description, colorCode);
       _setSubjectsWithoutGroups(subjects);
+      await subjectsOffline.saveSubjectsWithoutGroup(subjects);
     } catch (e) {
       throw Exception(e);
     }

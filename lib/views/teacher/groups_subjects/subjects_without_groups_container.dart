@@ -20,6 +20,11 @@ class _SubjectsWithoutGroupsState
   void initState() {
     super.initState();
 
+    // Cargar materias sin grupo
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(subjectsProvider.notifier).getSubjects();
+    });
+
     // 2. LISTENER: Actualiza la variable _searchTerm cada vez que escribes
     _searchController.addListener(() {
       setState(() {
@@ -89,15 +94,15 @@ class _SubjectsWithoutGroupsState
                         final subject = filteredSubjects[index];
                         return Padding(
                           padding: const EdgeInsets.all(8.0),
-                          child: SubjectCard(
-                            subjectId: subject.materiaId,
-                            nombreMateria: subject.nombreMateria,
-                            description: subject.descripcion ?? "",
-                            accessCode: subject.codigoAcceso ?? "",
-                            actividades: subject.actividades,
-                            widthFactor: 0.96,
-                            heightFactor: 0.14,
-                          ),
+                         child: SubjectCard(
+                           subjectId: subject.materiaId,
+                           nombreMateria: subject.nombreMateria,
+                           description: subject.descripcion?.trim() ?? "",
+                           accessCode: subject.codigoAcceso?.trim() ?? "",
+                           actividades: subject.actividades,
+                           widthFactor: 0.96,
+                           heightFactor: 0.18,
+                         ),
                         );
                       },
                     ),
