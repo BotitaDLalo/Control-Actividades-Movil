@@ -53,7 +53,7 @@ class _StudentNoticeOptionsScreenState
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         SvgPicture.asset(
-                          'assets/icons/nuevoanuncio.svg',
+                          'assets/icons/calendar2.svg',
                           height: 200,
                           width: 200,
                           fit: BoxFit.contain,

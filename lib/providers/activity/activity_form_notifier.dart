@@ -136,16 +136,23 @@ onPuntajeChanged(String value) {
 }
 
     DateTime? _getFechaHoraConcatenada() {
-        try {
-          // Obtener y parsear la fecha
-          final fechaStr = state.fechaLimite.value;
-          if (fechaStr.isEmpty) {
-            throw Exception("La fecha es nula o está vacía");
-          }
-          final fecha = DateTime.tryParse(fechaStr);
-          if (fecha == null) {
-            throw Exception("Formato de fecha inválido: $fechaStr");
-          }
+          try {
+            // Obtener y parsear la fecha
+            final fechaStr = state.fechaLimite.value.trim();
+            if (fechaStr.isEmpty) {
+              throw Exception("La fecha es nula o está vacía");
+            }
+            final fechaParts = fechaStr.split('-');
+            if (fechaParts.length != 3) {
+              throw Exception("Formato de fecha inválido: $fechaStr");
+            }
+            final day = int.tryParse(fechaParts[0]);
+            final month = int.tryParse(fechaParts[1]);
+            final year = int.tryParse(fechaParts[2]);
+            if (day == null || month == null || year == null) {
+              throw Exception("Formato de fecha inválido: $fechaStr");
+            }
+            final fecha = DateTime(year, month, day);
 
           // 🎯 LÓGICA ACTUALIZADA: Obtener y manejar la hora
           final horaStr = state.horaLimite.value;

@@ -58,7 +58,7 @@ class _FormActivitiesState extends ConsumerState<FormActivities> {
           }
 
           // 3. Ahora sí podemos formatear el DateTime seguro
-          final datePart = DateFormat('yyyy-MM-dd').format(dateObject);
+          final datePart = DateFormat('dd-MM-yyyy').format(dateObject);
           final timePart = DateFormat('HH:mm').format(dateObject);
 
           notifier.fechaController.text = datePart;

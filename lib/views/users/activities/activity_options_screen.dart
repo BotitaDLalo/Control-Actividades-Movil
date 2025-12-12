@@ -67,27 +67,28 @@ class _ActivityOptionState extends ConsumerState<ActivityOptionScreen> {
 
     return Consumer(
       builder: (context, ref, _) {
-        final actls = ref.watch(activityProvider).lsActivities;
-        final lsActivities = ref
-            .read(activityProvider.notifier)
-            .getActivitiesBySubject(widget.subjectId, actls);
+        final activitiesAsync = ref.watch(activitiesBySubjectProvider(widget.subjectId));
 
-        final floatingButton =
-            (widget.buttonCreateIsVisible && lsActivities.isNotEmpty)
-                ? FloatingActionButtonCustom(
-                    voidCallback: () {
-                      buttonModal();
-                    },
-                    icon: Icons.add,
-                  )
-                : null;
+        return activitiesAsync.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (e, s) => const Center(child: Text('Error al cargar actividades.')),
+          data: (lsActivities) {
+            final floatingButton =
+                (widget.buttonCreateIsVisible && lsActivities.isNotEmpty)
+                    ? FloatingActionButtonCustom(
+                        voidCallback: () {
+                          buttonModal();
+                        },
+                        icon: Icons.add,
+                      )
+                    : null;
 
-        return Stack(
-          children: [
-            SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10),
-                child: lsActivities.isEmpty
+            return Stack(
+              children: [
+                SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    child: lsActivities.isEmpty
                     ? widget.buttonCreateIsVisible
                         ? Center(
                             child: SingleChildScrollView(
@@ -165,7 +166,8 @@ class _ActivityOptionState extends ConsumerState<ActivityOptionScreen> {
               ),
           ],
         );
-
+          },
+        );
       },
     );
   }
