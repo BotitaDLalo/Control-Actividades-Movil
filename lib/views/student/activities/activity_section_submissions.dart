@@ -212,7 +212,7 @@ class _ActivitySectionSubmissionState
           backgroundColor: Colors.white,
           elevation: 0,
           leading: IconButton(
-            icon: SvgPicture.asset('assets/icons/retroceder.svg', width: 30, height: 30, color: Colors.black),
+            icon: SvgPicture.asset('assets/icons/retroceder.svg', width: 30, height: 30, color: Colors.white),
             onPressed: () {
               Navigator.pop(context);
             },

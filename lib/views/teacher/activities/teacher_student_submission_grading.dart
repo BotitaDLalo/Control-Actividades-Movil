@@ -65,7 +65,7 @@ class _TeacherStudentSubmissionGradingState
         elevation: 0,
         forceMaterialTransparency: true,
         leading: IconButton(
-          icon: SvgPicture.asset('assets/icons/retroceder.svg', width: 30, height: 30),
+          icon: SvgPicture.asset('assets/icons/retroceder.svg', width: 30, height: 30, color: Colors.white),
           onPressed: () {
             Navigator.pop(context);
           },

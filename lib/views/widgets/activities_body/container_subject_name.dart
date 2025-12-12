@@ -82,15 +82,18 @@ class ContainerNameGroupSubjects extends StatelessWidget {
           ),
           // Botón de ajustes circular arriba derecha
           Positioned(
-            top: context.height(0.04),
-            right: context.width(0.06),
+            top: context.height(0.12),
+            right: context.width(0.07),
             child: GestureDetector(
               onTap: () {},
+              child: SvgPicture.asset('assets/icons/settings2.svg', width: 50, height: 50, color: Colors.white,),
+              /*
               child: CircleAvatar(
                 radius: context.radius(0.07), // 7% del ancho
                 backgroundColor: Colors.white,
-                child: Icon(Icons.settings, color: color, size: context.width(0.07)),
+                child: SvgPicture.asset('assets/icons/settings2.svg', width: 30, height: 30, color: Colors.blue[900],),
               ),
+              */
             ),
           ),
         ],

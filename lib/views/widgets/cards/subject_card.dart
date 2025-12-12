@@ -188,7 +188,7 @@ class SubjectCard extends ConsumerWidget {
                       itemBuilder: (context) => [
                         const PopupMenuItem(
                           value: 'options',
-                          child: Text('Opciones'),
+                          child: Text('Editar'),
                         ),
                         const PopupMenuItem(
                           value: 'delete',
@@ -204,20 +204,20 @@ class SubjectCard extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Título grande a la izquierda
-                      Text(
-                        nombreMateria,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontSize: context.fontSize(18), // Tamaño base 18, escalado responsive
-                            fontWeight: FontWeight.bold),
-                      ),
+                     // Título grande a la izquierda
+                     Text(
+                       nombreMateria,
+                       maxLines: 2,
+                       overflow: TextOverflow.ellipsis,
+                       style: TextStyle(
+                           color: Colors.white,
+                           fontSize: context.fontSize(16), // Tamaño base 16, escalado responsive
+                           fontWeight: FontWeight.bold),
+                     ),
                       SizedBox(height: context.height(0.008)), // 0.8% de la altura
                       // Descripción pequeña
                       Text(
-                        description,
+                        description.trim().isNotEmpty ? description.trim() : "Sin descripción",
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
@@ -226,18 +226,10 @@ class SubjectCard extends ConsumerWidget {
                         ),
                       ),
                       const Spacer(),
-                      // Row inferior: MORE y posible número de actividades
+                      // Row inferior: número de actividades
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        mainAxisAlignment: MainAxisAlignment.start,
                         children: [
-                          /*
-                          Text(
-                            'MORE',
-                            style: TextStyle(
-                                color: Colors.white.withOpacity(0.9),
-                                fontWeight: FontWeight.w600),
-                          ),
-                          */
                           if (actividades != null && actividades!.isNotEmpty)
                             Text(
                               '${actividades!.length} actividades',
