@@ -5,6 +5,7 @@ import 'package:aprende_mas/views/views.dart';
 import 'package:aprende_mas/providers/providers.dart';
 import 'package:aprende_mas/views/widgets/buttons/button_form.dart';
 import 'package:aprende_mas/views/widgets/buttons/custom_rounded_button.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 final contentProvider = StateProvider<String>((ref) => '');
 final addStudentMessageProvider = StateProvider<bool>((ref) => false);
@@ -83,8 +84,8 @@ Widget build(BuildContext context) {
                   children: [
                     CustomTextFormField(
                       textEditingController: controller,
-                      label: 'Agregar alumno',
-                      icon: const Icon(Icons.search, color: Colors.grey),
+                      label: '  Agregar alumno',
+                      icon: SizedBox(width: 20, height: 20, child: SvgPicture.asset('assets/icons/buscar.svg', colorFilter: ColorFilter.mode(Colors.blue, BlendMode.srcIn))),
                     ),
                     isNotEmpty
                         ? SizedBox(

@@ -3,6 +3,7 @@ import 'package:aprende_mas/providers/groups/students_group_provider.dart';
 import 'package:aprende_mas/views/views.dart';
 import 'package:aprende_mas/providers/providers.dart';
 import 'package:aprende_mas/views/widgets/buttons/custom_rounded_button.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 final addStudentGroupMessageProvider = StateProvider<bool>((ref) => false);
 final contentGroupProvider = StateProvider<String>((ref) => '');
@@ -80,8 +81,8 @@ class _StudentsGroupState extends ConsumerState<StudentsGroupAssigment> {
                     children: [
                       CustomTextFormField(
                         textEditingController: controller,
-                        label: 'Agregar alumno',
-                        icon: const Icon(Icons.search, color: Colors.grey),
+                        label: '  Agregar alumno',
+                        icon: SizedBox(width: 20, height: 20, child: SvgPicture.asset('assets/icons/buscar.svg', colorFilter: ColorFilter.mode(Colors.blue, BlendMode.srcIn))),
                       ),
 
                       isNotEmpty
