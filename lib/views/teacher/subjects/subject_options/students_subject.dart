@@ -53,6 +53,9 @@ class _StudentsSubjectState extends ConsumerState<StudentsSubject> {
       required String lastName,
       required String lastName2,
     }) {
+      // Leer el notifier ANTES de la operación async para evitar el error de ref disposed
+      final subjectNotifier = ref.read(studentsSubjectProvider.notifier);
+
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
@@ -61,7 +64,7 @@ class _StudentsSubjectState extends ConsumerState<StudentsSubject> {
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.pop(context);
+                Navigator.pop(context); // Cerrar solo el diálogo
               },
               child: const Text('Cancelar'),
             ),
@@ -69,15 +72,15 @@ class _StudentsSubjectState extends ConsumerState<StudentsSubject> {
               onPressed: () async {
                 if (!context.mounted) return;
 
-                final subjectNotifier =
-                    ref.read(studentsSubjectProvider.notifier);
-
+                // Usar el notifier ya leído
                 await subjectNotifier.removeStudentFromSubject(
                   subjectId: widget.id,
                   studentId: studentId,
                 );
 
                 if (context.mounted) {
+                  Navigator.pop(context); // Cerrar el diálogo
+                  // Cerrar el ModalBottomSheet después de la eliminación
                   Navigator.pop(context);
                 }
               },

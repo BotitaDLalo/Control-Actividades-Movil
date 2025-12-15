@@ -231,15 +231,15 @@ class GroupsDataSourceImpl implements GroupsDataSource {
 
   @override
   Future<bool> removeStudentFromGroup({
-    required int groupId, 
+    required int groupId,
     required int studentId
   }) async {
     try {
-      // Esta es la ruta que acabamos de crear en C#
-      const uri = "/api/Alumnos/EliminarAlumnoGrupo"; 
+      // Ruta corregida para ser consistente con otros endpoints
+      const uri = "/Alumnos/EliminarAlumnoGrupo";
 
       final res = await dio.post(
-        uri, 
+        uri,
         data: {
           "GrupoId": groupId,
           "AlumnoId": studentId,

@@ -57,15 +57,15 @@ class _StudentsGroupState extends ConsumerState<StudentsGroup> {
 
     void showStudentOptions({
       // 2. AÑADIDO: Recibir el ID del alumno
-      required int studentId, 
+      required int studentId,
       required String username,
       required String name,
       required String lastName,
       required String lastName2,
     }) {
-      
-      // Cerrar el ModalBottomSheet antes de mostrar el diálogo
-      Navigator.pop(context);
+
+      // Leer el notifier ANTES de la operación async para evitar el error de ref disposed
+      final groupNotifier = ref.read(studentsGroupProvider.notifier);
 
       showDialog(
         context: context,
@@ -87,18 +87,15 @@ class _StudentsGroupState extends ConsumerState<StudentsGroup> {
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.pop(context);
+                Navigator.pop(context); // Cerrar solo el diálogo
               },
               child: const Text('Cancelar'),
             ),
             TextButton(
               onPressed: () async {
                 // 3. IMPLEMENTACIÓN DE LA LÓGICA
-                
-                // Acceder al Notifier de Grupos
-                final groupNotifier = ref.read(studentsGroupProvider.notifier);
 
-                // Llamar a la función de eliminación
+                // Usar el notifier ya leído
                 final success = await groupNotifier.removeStudentFromGroup(
                   groupId: widget.id,
                   studentId: studentId,
@@ -106,6 +103,8 @@ class _StudentsGroupState extends ConsumerState<StudentsGroup> {
 
                 if (context.mounted) {
                   Navigator.pop(context); // Cerrar el diálogo
+                  // Cerrar el ModalBottomSheet después de la eliminación
+                  Navigator.pop(context);
                 }
 
                 if (success) {
