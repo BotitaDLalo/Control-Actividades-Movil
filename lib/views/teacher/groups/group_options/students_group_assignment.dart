@@ -3,6 +3,7 @@ import 'package:aprende_mas/providers/groups/students_group_provider.dart';
 import 'package:aprende_mas/views/views.dart';
 import 'package:aprende_mas/providers/providers.dart';
 import 'package:aprende_mas/views/widgets/buttons/custom_rounded_button.dart';
+import 'package:aprende_mas/views/widgets/alerts/success_dialog.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 final addStudentGroupMessageProvider = StateProvider<bool>((ref) => false);
@@ -61,6 +62,11 @@ class _StudentsGroupState extends ConsumerState<StudentsGroupAssigment> {
     ref.listen(formStudentsGroupProvider, (previous, next) {
       if (next.isFormPosted) {
         ref.read(studentsGroupProvider.notifier).clearLsEmails();
+        // Mostrar diálogo de éxito
+        SuccessDialog.show(
+          context,
+          message: 'Alumno agregado correctamente',
+        );
       }
     });
 

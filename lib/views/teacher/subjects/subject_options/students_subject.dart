@@ -2,6 +2,7 @@ import 'package:aprende_mas/config/utils/packages.dart';
 import 'package:aprende_mas/providers/providers.dart';
 import 'package:aprende_mas/providers/subjects/students_subject_provider.dart';
 import 'package:aprende_mas/views/teacher/groups_subjects/students_groups_subjects.dart';
+import 'package:aprende_mas/views/widgets/alerts/success_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -82,6 +83,12 @@ class _StudentsSubjectState extends ConsumerState<StudentsSubject> {
                   Navigator.pop(context); // Cerrar el diálogo
                   // Cerrar el ModalBottomSheet después de la eliminación
                   Navigator.pop(context);
+
+                  // Mostrar diálogo de éxito
+                  SuccessDialog.show(
+                    context,
+                    message: 'Alumno eliminado correctamente',
+                  );
                 }
               },
               child: const Text('Eliminar'),

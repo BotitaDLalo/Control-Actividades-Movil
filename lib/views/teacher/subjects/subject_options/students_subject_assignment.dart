@@ -5,6 +5,7 @@ import 'package:aprende_mas/views/views.dart';
 import 'package:aprende_mas/providers/providers.dart';
 import 'package:aprende_mas/views/widgets/buttons/button_form.dart';
 import 'package:aprende_mas/views/widgets/buttons/custom_rounded_button.dart';
+import 'package:aprende_mas/views/widgets/alerts/success_dialog.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 final contentProvider = StateProvider<String>((ref) => '');
@@ -66,6 +67,11 @@ Widget build(BuildContext context) {
     final isFormPosted = next.isFormPosted;
     if (isFormPosted) {
       ref.read(studentsSubjectProvider.notifier).clearLsEmails();
+      // Mostrar diálogo de éxito
+      SuccessDialog.show(
+        context,
+        message: 'Alumno agregado correctamente',
+      );
     }
   });
 

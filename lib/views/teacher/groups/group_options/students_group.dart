@@ -2,6 +2,7 @@ import 'package:aprende_mas/config/utils/packages.dart';
 import 'package:aprende_mas/providers/groups/groups_provider.dart';
 import 'package:aprende_mas/providers/groups/students_group_provider.dart';
 import 'package:aprende_mas/views/teacher/groups_subjects/students_groups_subjects.dart';
+import 'package:aprende_mas/views/widgets/alerts/success_dialog.dart';
 import 'package:flutter/material.dart'; // Importante para TextField
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -105,11 +106,12 @@ class _StudentsGroupState extends ConsumerState<StudentsGroup> {
                   Navigator.pop(context); // Cerrar el diálogo
                   // Cerrar el ModalBottomSheet después de la eliminación
                   Navigator.pop(context);
-                }
 
-                if (success) {
-                  // Opcional: Feedback visual
-                  // print("Alumno eliminado del grupo correctamente");
+                  // Mostrar diálogo de éxito
+                  SuccessDialog.show(
+                    context,
+                    message: 'Alumno eliminado correctamente',
+                  );
                 }
               },
               child: const Text('Eliminar'),
