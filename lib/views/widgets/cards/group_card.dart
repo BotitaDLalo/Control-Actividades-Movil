@@ -215,7 +215,7 @@ class CustomExpansionTileState extends ConsumerState<GroupCard>
                                       itemBuilder: (context) => [
                                         const PopupMenuItem(
                                           value: 'edit',
-                                          child: Text('Editar'),
+                                          child: Text('Opciones'),
                                         ),
                                         const PopupMenuItem(
                                           value: 'delete',
