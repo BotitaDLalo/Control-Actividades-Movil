@@ -5,6 +5,8 @@ import 'package:aprende_mas/views/widgets/cards/element_card.dart';
 import 'package:flutter/services.dart';
 import 'package:aprende_mas/config/utils/app_theme.dart';
 import 'package:aprende_mas/providers/providers.dart';
+import 'package:aprende_mas/views/widgets/alerts/success_dialog.dart';
+import 'package:aprende_mas/views/widgets/alerts/error_dialog.dart';
 
 class TeacherStudentSubmissionGrading extends ConsumerStatefulWidget {
   final TeacherStudentSubmissionGradingModel data;
@@ -46,12 +48,12 @@ class _TeacherStudentSubmissionGradingState
 
     showSuccessMessage(String message) {
       hideSnackBar();
-      successMessage(context, message);
+      SuccessDialog.show(context, message: message);
     }
 
     showErrorMessage(String message) {
       hideSnackBar();
-      errorMessage(context, message);
+      ErrorDialog.show(context, message: message);
     }
 
     closeKeyboard() {

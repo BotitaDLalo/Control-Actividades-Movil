@@ -1,7 +1,7 @@
 import 'package:aprende_mas/config/utils/packages.dart';
 import 'package:aprende_mas/config/utils/utils.dart';
 import 'package:aprende_mas/views/users/authentication/form_login.dart';
-import 'package:aprende_mas/views/widgets/alerts/error_snackbar.dart';
+import 'package:aprende_mas/views/widgets/alerts/error_dialog.dart';
 import 'package:aprende_mas/providers/providers.dart';
 
 class LoginUserScreen extends ConsumerWidget {
@@ -10,7 +10,7 @@ class LoginUserScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     void showErrorMessage(String message) {
-      errorMessage(context, message);
+      ErrorDialog.show(context, message: message);
     }
 
     hideSnackBar() {

@@ -25,7 +25,7 @@ class TextfieldNumber extends ConsumerWidget {
           isDense: true,
           // Dejar que el tema global maneje los bordes (underline por defecto)
         ),
-        style: Theme.of(context).textTheme.headlineMedium,
+        style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: Colors.black),
         keyboardType: TextInputType.number,
         textAlign: TextAlign.center,
         inputFormatters: [

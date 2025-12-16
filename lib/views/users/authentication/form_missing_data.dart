@@ -3,6 +3,7 @@ import 'package:aprende_mas/config/utils/packages.dart';
 import 'package:aprende_mas/views/views.dart';
 import 'package:aprende_mas/views/widgets/buttons/button_login.dart';
 import 'package:aprende_mas/views/widgets/inputs/custom_dropdown.dart';
+import 'package:aprende_mas/views/widgets/alerts/error_dialog.dart';
 import 'package:aprende_mas/providers/providers.dart';
 
 class FormMissingData extends ConsumerStatefulWidget {
@@ -51,7 +52,7 @@ class _FormMissingDataState extends ConsumerState<FormMissingData> {
           if (next.errorHandlingStyle == ErrorHandlingStyle.snackBar) {
             Navigator.of(context).pop();
             ScaffoldMessenger.of(context).clearSnackBars();
-            errorMessage(context, next.errorMessage);
+            ErrorDialog.show(context, message: next.errorMessage);
           }
         }
       },

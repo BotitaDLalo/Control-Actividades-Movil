@@ -4,6 +4,8 @@ import 'package:aprende_mas/providers/group_subjects/groups_subjects_provider.da
 import 'package:aprende_mas/views/views.dart';
 import 'package:aprende_mas/views/widgets/buttons/button_login.dart';
 import 'package:aprende_mas/views/widgets/structure/app_bar_home.dart';
+import 'package:aprende_mas/views/widgets/alerts/error_dialog.dart';
+import 'package:aprende_mas/views/widgets/alerts/success_dialog.dart';
 
 class StudentJoinGroupSubject extends ConsumerWidget {
   const StudentJoinGroupSubject({super.key});
@@ -30,7 +32,15 @@ class StudentJoinGroupSubject extends ConsumerWidget {
       formStudentJoinClassProvider,
       (previous, next) {
         if (!next.isPosting && next.isFormPosted) {
-          Navigator.of(context).popUntil((route) => route.isFirst);
+          Navigator.of(context).pop(); // Cerrar loading screen
+          // Mostrar mensaje de éxito antes de navegar
+          SuccessDialog.show(
+            context,
+            message: 'Te has unido a la clase correctamente',
+            onOkPressed: () {
+              Navigator.of(context).popUntil((route) => route.isFirst);
+            },
+          );
         }
       },
     );
@@ -39,9 +49,12 @@ class StudentJoinGroupSubject extends ConsumerWidget {
       groupsSubjectsProvider,
       (previous, next) {
         if (next.errorMessage.isNotEmpty) {
-          Navigator.of(context).pop();
+          Navigator.of(context).pop(); // Cerrar loading screen
           hideSnackBar();
-          errorMessage(context, next.errorMessage);
+          ErrorDialog.show(
+            context,
+            message: next.errorMessage,
+          );
         }
       },
     );
