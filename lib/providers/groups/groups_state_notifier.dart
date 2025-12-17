@@ -148,6 +148,18 @@ class GroupsNotifier extends StateNotifier<GroupsState> {
   }
 
   void addGroupToState(Group group) async {
+    final groupId = group.grupoId;
+
+    // Verificar si el grupo ya existe en el estado
+    final existingGroupIndex = state.lsGroups.indexWhere((g) => g.grupoId == groupId);
+
+    if (existingGroupIndex != -1) {
+      // El grupo ya existe, no lo agregamos de nuevo
+      debugPrint("⚠️ Grupo ID $groupId ya existe en el estado, omitiendo duplicado");
+      return;
+    }
+
+    // El grupo no existe, lo agregamos
     state = state.copyWith(lsGroups: [group, ...state.lsGroups]);
 
     List<Group> lsGroup = [group];

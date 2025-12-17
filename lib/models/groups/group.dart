@@ -45,7 +45,7 @@ class Group {
               fechaCreacion: formatDate(actividad['FechaCreacion']),
               fechaLimite: formatDate(actividad['FechaLimite']),
               puntaje: actividad['Puntaje'],
-              materiaId: actividad['MateriaId']);
+              materiaId: materia['MateriaId']); // Usar el materiaId del Subject padre
         }).toList();
 
         return Subject(

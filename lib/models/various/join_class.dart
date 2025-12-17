@@ -12,5 +12,5 @@ class JoinClass {
       group: map['Grupo'] != null ? Group.mapToEntity(map['Grupo']) : null,
       subject:
           map['Materia'] != null ? Subject.mapToEntity(map['Materia']) : null,
-      isGroup: map['EsGrupo'] as bool);
+      isGroup: map['EsGrupo'] as bool? ?? false); // Handle nullable bool
 }

@@ -51,9 +51,17 @@ class StudentJoinGroupSubject extends ConsumerWidget {
         if (next.errorMessage.isNotEmpty) {
           Navigator.of(context).pop(); // Cerrar loading screen
           hideSnackBar();
+
+          // Mostrar directamente el mensaje del backend
+          String errorMessage = next.errorMessage;
+
           ErrorDialog.show(
             context,
-            message: next.errorMessage,
+            message: errorMessage,
+            onOkPressed: () {
+              // Solo cerrar el diálogo, mantener al usuario en la pantalla
+              // para que pueda intentar con otro código
+            },
           );
         }
       },

@@ -98,6 +98,17 @@ class SubjectsStateNotifier extends StateNotifier<SubjectsState> {
 
   void addSubjectToState(Subject subject) async {
     final subjectId = subject.materiaId;
+
+    // Verificar si la materia ya existe en el estado
+    final existingSubjectIndex = state.lsSubjects.indexWhere((s) => s.materiaId == subjectId);
+
+    if (existingSubjectIndex != -1) {
+      // La materia ya existe, no la agregamos de nuevo
+      debugPrint("⚠️ Materia ID $subjectId ya existe en el estado, omitiendo duplicado");
+      return;
+    }
+
+    // La materia no existe, la agregamos
     state = state.copyWith(lsSubjects: [subject, ...state.lsSubjects]);
 
     List<Subject> lsSubject = [subject];
