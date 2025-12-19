@@ -9,20 +9,31 @@ class ActivityDataSourceImpl implements ActivityDataSource {
   final storageService = KeyValueStorageServiceImpl();
   @override
   Future<List<Activity>> getAllActivities(int materiaId) async {
-    try {
-      const uri = "/Actividades/ObtenerActividadesPorMateria";
-      final response = await dio.get(uri, queryParameters: {"materiaId":materiaId});
+    const uri = "/Actividades/ObtenerActividadesPorMateria";
+    debugPrint("🔍 [ACTIVITY] Solicitando actividades: $uri?materiaId=$materiaId");
 
+    // Usar options para asegurar que no se lancen excepciones por status codes
+    final response = await dio.get(
+      uri,
+      queryParameters: {"materiaId": materiaId},
+      options: Options(validateStatus: (status) => true),
+    );
+
+    debugPrint("📥 [ACTIVITY] Respuesta - Status: ${response.statusCode}");
+
+    if (response.statusCode == 200) {
       final List<Map<String, dynamic>> data =
           List<Map<String, dynamic>>.from(response.data);
-
-      debugPrint("Respuesta del backend: ${response.data}");
-
+      debugPrint("✅ [ACTIVITY] Actividades parseadas: ${data.length} actividades");
       final activities = ActivityMapper.fromMapList(data);
       return activities;
-    } catch (e) {
-      throw Exception(
-          "ActivityDataSourceImpl get Error al obtener actividades: $e");
+    } else if (response.statusCode == 400) {
+      debugPrint("⚠️ [ACTIVITY] Status 400 para materiaId=$materiaId - Data: ${response.data}");
+      // Para errores 400, retornamos lista vacía pero logueamos el error
+      return [];
+    } else {
+      debugPrint("🚨 [ACTIVITY] Status inesperado ${response.statusCode} para materiaId=$materiaId");
+      throw Exception("Error obteniendo actividades: Status ${response.statusCode}");
     }
   }
 
@@ -132,23 +143,24 @@ class ActivityDataSourceImpl implements ActivityDataSource {
 
   @override
   Future<List<Submission>> getSubmissions(int activityId) async {
-    try {
-      const uri = "/Alumnos/ObtenerEnviosActividadesAlumno";
-      final id = await storageService.getId();
+    const uri = "/Alumnos/ObtenerEnviosActividadesAlumno";
+    final id = await storageService.getId();
 
-      final res = await dio.get(uri,
-          queryParameters: {"ActividadId": activityId, "AlumnoId": id});
-      if (res.statusCode == 200) {
-        final resList = Map<String, dynamic>.from(res.data);
+    final res = await dio.get(
+      uri,
+      queryParameters: {"ActividadId": activityId, "AlumnoId": id},
+      options: Options(validateStatus: (status) => true),
+    );
 
-        final list = Submission.submissionJsonToEntity(resList, activityId);
-
-        return list;
-      }
-
+    if (res.statusCode == 200) {
+      final resList = Map<String, dynamic>.from(res.data);
+      final list = Submission.submissionJsonToEntity(resList, activityId);
+      return list;
+    } else if (res.statusCode == 400) {
+      debugPrint("⚠️ [SUBMISSION] Status 400 para activityId=$activityId - Data: ${res.data}");
       return [];
-    } catch (e) {
-      debugPrint(e.toString());
+    } else {
+      debugPrint("🚨 [SUBMISSION] Status inesperado ${res.statusCode} para activityId=$activityId");
       return [];
     }
   }

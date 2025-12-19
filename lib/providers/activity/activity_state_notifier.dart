@@ -35,6 +35,8 @@ class ActivityNotifier extends StateNotifier<ActivityState> {
       _setActivities(activities);
     } catch (e) {
       state = state.copyWith(errorMessage: e.toString());
+      // Re-throw para que auth_state_notifier pueda capturar el error
+      rethrow;
     } finally {
       state = state.copyWith(isLoading: false);
     }
@@ -49,6 +51,8 @@ class ActivityNotifier extends StateNotifier<ActivityState> {
       _setActivities(lsActivities);
     } catch (e) {
       debugPrint(e.toString());
+      // Re-throw para que auth_state_notifier pueda capturar el error
+      rethrow;
     } finally {
       state = state.copyWith(isLoading: false);
     }

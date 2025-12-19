@@ -296,9 +296,12 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
           activeDueDate: date7Days.toString(),
           role: user.role);
 
+      debugPrint("🔄 [LOGIN] Iniciando carga de datos del usuario...");
       List<Group> lsGroups = await groups.getGroupsSubjects();
+      debugPrint("✅ [LOGIN] Grupos obtenidos: ${lsGroups.length}");
       List<Subject> lsSubjectsWithoutGroup =
           await subjects.getSubjectsWithoutGroup();
+      debugPrint("✅ [LOGIN] Materias obtenidas: ${lsSubjectsWithoutGroup.length}");
 
       //& actualizamos los state del usuario (grupos, materias, actividades, entregables)
       _saveUserAndUpdateState(activeUser, lsGroups, lsSubjectsWithoutGroup);
@@ -306,9 +309,12 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
       //& TOKEN FIREBASE
     } else if (caller == "checkAuthStatus") {
       authUserOffline.updateUser(date7Days.toString());
+      debugPrint("🔄 [LOGIN] Iniciando carga de datos del usuario...");
       List<Group> lsGroups = await groups.getGroupsSubjects();
+      debugPrint("✅ [LOGIN] Grupos obtenidos: ${lsGroups.length}");
       List<Subject> lsSubjectsWithoutGroup =
           await subjects.getSubjectsWithoutGroup();
+      debugPrint("✅ [LOGIN] Materias obtenidas: ${lsSubjectsWithoutGroup.length}");
 
       await _submissionsPending(lsGroups, lsSubjectsWithoutGroup);
 
@@ -360,11 +366,19 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
 
               submissionFutures.add(
                 getSubmissionsCallback(activityId!).then((submissions) async {
-                  await activityOffline.saveSubmissions(submissions, activityId);
+                  try {
+                    await activityOffline.saveSubmissions(submissions, activityId);
+                  } catch (e) {
+                    debugPrint("⚠️ [LOGIN] Error guardando submissions para actividad $activityId: $e");
+                  }
                 }),
               );
             }
             await Future.wait(submissionFutures);
+          }).catchError((error) {
+            debugPrint("🚨 [LOGIN] DioException en carga de actividades para materiaId=$subjectId: $error");
+            // Continuar sin detener el login
+            return null;
           }),
         );
       }
@@ -375,19 +389,29 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
       final subjectId = subject.materiaId;
 
       allFutures.add(
-        getAllActivitiesCallback(subjectId).then((_) async {
-          List<Future<void>> submissionFutures = [];
-          for (var act in subject.actividades ?? []) {
-            final activity = act as Activity;
-            final activityId = activity.activityId;
+        Future(() async {
+          try {
+            await getAllActivitiesCallback(subjectId);
+            List<Future<void>> submissionFutures = [];
+            for (var act in subject.actividades ?? []) {
+              final activity = act as Activity;
+              final activityId = activity.activityId;
 
-            submissionFutures.add(
-              getSubmissionsCallback(activityId!).then((submissions) async {
-                await activityOffline.saveSubmissions(submissions, activityId);
-              }),
-            );
+              submissionFutures.add(
+                getSubmissionsCallback(activityId!).then((submissions) async {
+                  try {
+                    await activityOffline.saveSubmissions(submissions, activityId);
+                  } catch (e) {
+                    debugPrint("⚠️ [LOGIN] Error guardando submissions para actividad $activityId: $e");
+                  }
+                }),
+              );
+            }
+            await Future.wait(submissionFutures);
+          } catch (error) {
+            debugPrint("⚠️ [LOGIN] Error cargando actividades para materia $subjectId: $error");
+            // Continuar sin detener el login
           }
-          await Future.wait(submissionFutures);
         }),
       );
     }
@@ -409,16 +433,21 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
       for (var sub in group.materias ?? []) {
         final subject = sub as Subject;
         final subjectId = subject.materiaId;
-        
+
         allFutures.add(
-          getAllActivitiesCallback(subjectId).then((_) async {
-            List<Future<void>> submissionFutures = [];
-            for (var act in sub.actividades ?? []) {
-              final activity = act as Activity;
-              final activityId = activity.activityId;
-              submissionFutures.add(getSubmissionsCallback(activityId!));
+          Future(() async {
+            try {
+              await getAllActivitiesCallback(subjectId);
+              List<Future<void>> submissionFutures = [];
+              for (var act in sub.actividades ?? []) {
+                final activity = act as Activity;
+                final activityId = activity.activityId;
+                submissionFutures.add(getSubmissionsCallback(activityId!));
+              }
+              await Future.wait(submissionFutures);
+            } catch (error) {
+              debugPrint("⚠️ [LOGIN] Error cargando actividades para materia $subjectId: $error");
             }
-            await Future.wait(submissionFutures);
           }),
         );
       }
@@ -426,16 +455,21 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
 
     for (var subject in lsSubjectsWithoutGroup) {
       final subjectId = subject.materiaId;
-      
+
       allFutures.add(
-        getAllActivitiesCallback(subjectId).then((_) async {
-          List<Future<void>> submissionFutures = [];
-          for (var act in subject.actividades ?? []) {
-            final activity = act as Activity;
-            final activityId = activity.activityId;
-            submissionFutures.add(getSubmissionsCallback(activityId!));
+        Future(() async {
+          try {
+            await getAllActivitiesCallback(subjectId);
+            List<Future<void>> submissionFutures = [];
+            for (var act in subject.actividades ?? []) {
+              final activity = act as Activity;
+              final activityId = activity.activityId;
+              submissionFutures.add(getSubmissionsCallback(activityId!));
+            }
+            await Future.wait(submissionFutures);
+          } catch (error) {
+            debugPrint("⚠️ [LOGIN] Error cargando actividades para materia $subjectId: $error");
           }
-          await Future.wait(submissionFutures);
         }),
       );
     }
@@ -564,16 +598,21 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
       for (var sub in group.materias ?? []) {
         final subject = sub as Subject;
         final subjectId = subject.materiaId;
-        
+
         allFutures.add(
-          getAllActivitiesOfflineCallback(subjectId).then((_) async {
-            List<Future<void>> submissionFutures = [];
-            for (var act in sub.actividades ?? []) {
-              final activity = act as Activity;
-              final activityId = activity.activityId;
-              submissionFutures.add(getSubmissionsOfflineCallback(activityId!));
+          Future(() async {
+            try {
+              await getAllActivitiesOfflineCallback(subjectId);
+              List<Future<void>> submissionFutures = [];
+              for (var act in sub.actividades ?? []) {
+                final activity = act as Activity;
+                final activityId = activity.activityId;
+                submissionFutures.add(getSubmissionsOfflineCallback(activityId!));
+              }
+              await Future.wait(submissionFutures);
+            } catch (error) {
+              debugPrint("⚠️ [LOGIN] Error cargando actividades offline para materia $subjectId: $error");
             }
-            await Future.wait(submissionFutures);
           }),
         );
       }
@@ -581,16 +620,21 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
 
     for (var subject in lsSubjectsWithoutGroup) {
       final subjectId = subject.materiaId;
-      
+
       allFutures.add(
-        getAllActivitiesOfflineCallback(subjectId).then((_) async {
-          List<Future<void>> submissionFutures = [];
-          for (var act in subject.actividades ?? []) {
-            final activity = act as Activity;
-            final activityId = activity.activityId;
-            submissionFutures.add(getSubmissionsOfflineCallback(activityId!));
+        Future(() async {
+          try {
+            await getAllActivitiesOfflineCallback(subjectId);
+            List<Future<void>> submissionFutures = [];
+            for (var act in subject.actividades ?? []) {
+              final activity = act as Activity;
+              final activityId = activity.activityId;
+              submissionFutures.add(getSubmissionsOfflineCallback(activityId!));
+            }
+            await Future.wait(submissionFutures);
+          } catch (error) {
+            debugPrint("⚠️ [LOGIN] Error cargando actividades offline para materia $subjectId: $error");
           }
-          await Future.wait(submissionFutures);
         }),
       );
     }
@@ -698,9 +742,12 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
     await _saveUserDataKeyValue(
         user.token, user.userId, user.role, user.userName, authType);
 
+    debugPrint("🔄 [LOGIN] Iniciando carga de datos del usuario (Google)...");
     List<Group> lsGroups = await groups.getGroupsSubjects();
+    debugPrint("✅ [LOGIN] Grupos obtenidos: ${lsGroups.length}");
     List<Subject> lsSubjectsWithoutGroup =
         await subjects.getSubjectsWithoutGroup();
+    debugPrint("✅ [LOGIN] Materias obtenidas: ${lsSubjectsWithoutGroup.length}");
 
     _setUserDataGoogleState(lsGroups, lsSubjectsWithoutGroup);
 
@@ -729,17 +776,22 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
 
         //& Actualizamos el state de actividades en paralelo
         allFutures.add(
-          getAllActivitiesCallback(subjectId).then((_) async {
-            List<Future<void>> submissionFutures = [];
-            for (var act in subj.actividades ?? []) {
-              final activity = act as Activity;
-              final activityId = activity.activityId;
+          Future(() async {
+            try {
+              await getAllActivitiesCallback(subjectId);
+              List<Future<void>> submissionFutures = [];
+              for (var act in subj.actividades ?? []) {
+                final activity = act as Activity;
+                final activityId = activity.activityId;
 
-              submissionFutures.add(
-                getSubmissionsCallback(activityId!),
-              );
+                submissionFutures.add(
+                  getSubmissionsCallback(activityId!),
+                );
+              }
+              await Future.wait(submissionFutures);
+            } catch (error) {
+              debugPrint("⚠️ [LOGIN] Error cargando actividades para materia $subjectId: $error");
             }
-            await Future.wait(submissionFutures);
           }),
         );
       }
@@ -750,17 +802,22 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
       final subjectId = subject.materiaId;
 
       allFutures.add(
-        getAllActivitiesCallback(subjectId).then((_) async {
-          List<Future<void>> submissionFutures = [];
-          for (var act in subject.actividades ?? []) {
-            final activity = act as Activity;
-            final activityId = activity.activityId;
+        Future(() async {
+          try {
+            await getAllActivitiesCallback(subjectId);
+            List<Future<void>> submissionFutures = [];
+            for (var act in subject.actividades ?? []) {
+              final activity = act as Activity;
+              final activityId = activity.activityId;
 
-            submissionFutures.add(
-              getSubmissionsCallback(activityId!),
-            );
+              submissionFutures.add(
+                getSubmissionsCallback(activityId!),
+              );
+            }
+            await Future.wait(submissionFutures);
+          } catch (error) {
+            debugPrint("⚠️ [LOGIN] Error cargando actividades para materia $subjectId: $error");
           }
-          await Future.wait(submissionFutures);
         }),
       );
     }

@@ -17,18 +17,54 @@ class SubjectsDataSourceImpl implements SubjectsDataSource {
 
       if (role == cn.getRoleTeacherName) {
         const uri = "/Materias/ObtenerMateriasDocente";
-        final res = await dio.get(uri, queryParameters: {'docenteId': id});
-        resList = List<Map<String, dynamic>>.from(res.data);
-        debugPrint("SubjectsDataSourceImpl: ${res.data}");
+        debugPrint("🔍 [LOGIN] Solicitando materias del docente: $uri?docenteId=$id");
+        final res = await dio.get(
+          uri,
+          queryParameters: {'docenteId': id},
+          options: Options(validateStatus: (status) => true),
+        );
+        debugPrint("📥 [LOGIN] Respuesta docente - Status: ${res.statusCode}");
+        if (res.statusCode == 200) {
+          resList = List<Map<String, dynamic>>.from(res.data);
+        } else if (res.statusCode == 400) {
+          debugPrint("⚠️ [LOGIN] Status 400 para docente - Data: ${res.data}");
+          resList = [];
+        } else {
+          debugPrint("🚨 [LOGIN] Status inesperado ${res.statusCode} para docente");
+          resList = [];
+        }
       } else if (role == cn.getRoleStudentName) {
         const uri = "/Materias/ObtenerMateriasAlumno";
-        final res = await dio.get(uri, queryParameters: {'alumnoId': id});
-        resList = List<Map<String, dynamic>>.from(res.data);
+        debugPrint("🔍 [LOGIN] Solicitando materias del alumno: $uri?alumnoId=$id");
+        final res = await dio.get(
+          uri,
+          queryParameters: {'alumnoId': id},
+          options: Options(validateStatus: (status) => true),
+        );
+        debugPrint("📥 [LOGIN] Respuesta alumno - Status: ${res.statusCode}");
+        if (res.statusCode == 200) {
+          resList = List<Map<String, dynamic>>.from(res.data);
+        } else if (res.statusCode == 400) {
+          debugPrint("⚠️ [LOGIN] Status 400 para alumno - Data: ${res.data}");
+          resList = [];
+        } else {
+          debugPrint("🚨 [LOGIN] Status inesperado ${res.statusCode} para alumno");
+          resList = [];
+        }
       }
-      
+
       final lsSubjects = Subject.subjectsJsonToEntityList(resList);
+      debugPrint("✅ [LOGIN] Materias parseadas exitosamente: ${lsSubjects.length} materias");
       return lsSubjects;
+    } on DioException catch (e) {
+      debugPrint("🚨 [LOGIN] DioException en getSubjectsWithoutGroup: ${e.message}");
+      debugPrint("🚨 [LOGIN] Status Code: ${e.response?.statusCode}");
+      debugPrint("🚨 [LOGIN] Response Data: ${e.response?.data}");
+      debugPrint("🚨 [LOGIN] Request: ${e.requestOptions.method} ${e.requestOptions.path}");
+      // Re-throw DioException para que sea capturado por catchError en auth_state_notifier
+      rethrow;
     } catch (e) {
+      debugPrint("🚨 [LOGIN] Error inesperado en getSubjectsWithoutGroup: $e");
       throw Exception(e);
     }
   }
