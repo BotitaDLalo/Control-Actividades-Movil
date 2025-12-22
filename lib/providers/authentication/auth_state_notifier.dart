@@ -336,11 +336,9 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
     await authUserOffline.insertUser(
         user.userId, user.userName, user.email, user.activeDueDate, user.role);
 
-    //& Guardar los grupos, materias y actividades offline (paralelizado)
-    await Future.wait([
-      groupsOffline.saveGroupSubjects(lsGroups),
-      subjectsOffline.saveSubjectsWithoutGroup(lsSubjectsWithoutGroup),
-    ]);
+    //& Guardar los grupos, materias y actividades offline (secuencial para evitar conflictos de BD)
+    await groupsOffline.saveGroupSubjects(lsGroups);
+    await subjectsOffline.saveSubjectsWithoutGroup(lsSubjectsWithoutGroup);
 
     //& set para groups y subjects (no son async, ejecutar en paralelo lógico)
     setGroupsSubjectsState(lsGroups);
