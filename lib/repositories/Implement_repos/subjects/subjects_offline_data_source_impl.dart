@@ -111,10 +111,11 @@ class SubjectsOfflineDataSourceImpl extends SubjectsOfflineDataSource {
               'FechaLimite': activity.fechaLimite.toString(),
               'MateriaId': subjectId,
               'Puntaje': activity.puntaje
-            });
+            }, conflictAlgorithm: ConflictAlgorithm.replace);
 
             await db.insert('tbMateriasActividades',
-                {'MateriaId': subjectId, 'ActividadId': activity.activityId});
+                {'MateriaId': subjectId, 'ActividadId': activity.activityId},
+                conflictAlgorithm: ConflictAlgorithm.ignore);
           }
         }
       }

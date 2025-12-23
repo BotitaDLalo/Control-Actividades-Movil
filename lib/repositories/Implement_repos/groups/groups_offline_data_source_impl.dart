@@ -98,7 +98,7 @@ class GroupsOfflineDataSourceImpl implements GroupsOfflineDataSource {
               'NombreGrupo': group.nombreGrupo,
               'Descripcion': group.descripcion,
               'CodigoAcceso': group.codigoAcceso
-            });
+            }, conflictAlgorithm: ConflictAlgorithm.replace);
           },
         );
 
@@ -111,10 +111,11 @@ class GroupsOfflineDataSourceImpl implements GroupsOfflineDataSource {
               'NombreMateria': subject.nombreMateria,
               'Descripcion': subject.descripcion,
               'CodigoAcceso': subject.codigoAcceso
-            });
+            }, conflictAlgorithm: ConflictAlgorithm.replace);
 
             await db.insert('tbGruposMaterias',
-                {'GrupoId': groupId, 'MateriaId': subject.materiaId});
+                {'GrupoId': groupId, 'MateriaId': subject.materiaId},
+                conflictAlgorithm: ConflictAlgorithm.ignore);
 
             int subjectId = subject.materiaId;
 
@@ -129,12 +130,12 @@ class GroupsOfflineDataSourceImpl implements GroupsOfflineDataSource {
                   'FechaLimite': activity.fechaLimite.toString(),
                   'MateriaId': subjectId,
                   'Puntaje': activity.puntaje
-                });
+                }, conflictAlgorithm: ConflictAlgorithm.replace);
 
                 await db.insert('tbMateriasActividades', {
                   'MateriaId': subjectId,
                   'ActividadId': activity.activityId
-                });
+                }, conflictAlgorithm: ConflictAlgorithm.ignore);
               }
             }
           }
