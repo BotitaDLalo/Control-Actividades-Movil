@@ -7,6 +7,7 @@ class CustomDropdown extends StatelessWidget {
   final String? label;
   final String? hint;
   final String? errorMessage;
+  final String? value;
   final Function(dynamic)? onChanged;
   final FormFieldValidator? validator;
   final bool capitalizeFirstLetter;
@@ -18,6 +19,7 @@ class CustomDropdown extends StatelessWidget {
     this.label,
     this.hint,
     this.errorMessage,
+    this.value,
     this.onChanged,
     this.validator,
     this.capitalizeFirstLetter = false,
@@ -29,6 +31,7 @@ class CustomDropdown extends StatelessWidget {
     final colors = Theme.of(context);
 
     return DropdownButtonFormField(
+      value: value,
       validator: validator,
       style: TextStyle(
         fontSize: context.fontSize(20), // Tamaño base 20, escalado responsive

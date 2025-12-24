@@ -48,6 +48,9 @@ class VerifyEmailSigninForm extends ConsumerWidget {
       (previous, next) {
         if (next.isFormPosted && !next.isPosting) {
           saveEmailUser();
+          // Limpiar formulario de signin antes de navegar
+          final signinFormNotifier = ref.read(signinFormProvider.notifier);
+          signinFormNotifier.clearFormSigninState();
           context.push('/signin-user');
         }
       },

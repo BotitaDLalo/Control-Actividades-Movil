@@ -3,6 +3,7 @@ import 'package:aprende_mas/config/utils/utils.dart';
 import 'package:aprende_mas/providers/authentication/auth_provider.dart';
 import 'package:aprende_mas/providers/authentication/signin_form_provider.dart';
 import 'package:aprende_mas/views/views.dart';
+import 'package:aprende_mas/views/widgets/alerts/error_dialog.dart';
 import 'package:aprende_mas/views/widgets/buttons/button_login.dart';
 import 'package:aprende_mas/views/widgets/inputs/custom_dropdown.dart';
 
@@ -15,6 +16,8 @@ class FormSingin extends ConsumerWidget {
     final List<String> users = [cn.getRoleStudentName, cn.getRoleTeacherName];
     final signinForm = ref.watch(signinFormProvider);
     final signinFormNotifier = ref.read(signinFormProvider.notifier);
+
+    // Formulario se limpia desde verify_email antes de navegar
 
     // hideSnackBar() {
     //   ScaffoldMessenger.of(context).clearSnackBars();
@@ -180,6 +183,17 @@ class FormSingin extends ConsumerWidget {
                   if (signinForm.isPosting) {
                     return;
                   }
+
+                  // Marcar campos como tocados y validar
+                  signinFormNotifier.touchFields();
+                  if (!signinForm.isValid) {
+                    ErrorDialog.show(
+                      context,
+                      message: "Por favor, complete todos los campos del formulario",
+                    );
+                    return;
+                  }
+
                   signinFormNotifier.onFormSigninSubmit();
                 },
                 //buttonStyle: AppTheme.buttonPrimary,
