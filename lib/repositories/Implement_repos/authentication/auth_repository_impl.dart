@@ -72,7 +72,7 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<bool> verifyEmailSignin(String email) {
+  Future<void> verifyEmailSignin(String email) {
     return dataSource.verifyEmailSignin(email);
   }
 }

@@ -101,13 +101,13 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
         }
       }
     } on WrongCredentials catch (e) {
-      badResponseLogin(e.errorMessage);
+      badResponseDialog("Error de credenciales", e.errorMessage ?? "Correo o contraseña incorrectos");
     } on FcmTokenVerificatioFailed catch (e) {
-      badResponseLogin(e.message);
+      badResponseDialog("Error de configuración", e.message ?? "Error con el token de notificaciones");
     } on ConnectionTimeout catch (e) {
-      connectionTimeoutLogin(e.message);
+      badResponseDialog("Error de conexión", e.message ?? "Tiempo de espera agotado");
     } on UncontrolledError catch (e) {
-      badResponseLogin(e.message);
+      badResponseDialog("Error en login", e.message ?? "Error inesperado al iniciar sesión");
     }
   }
 
@@ -227,18 +227,8 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
     return false;
   }
 
-  Future<bool> verifyEmailSignin(String email) async {
-    try {
-      bool res = await authRepository.verifyEmailSignin(email);
-      return res;
-    } on InvalidEmailSignin catch (e) {
-      badResponseDialog(e.errorMessage, e.errorComment);
-    } on ConnectionTimeout catch (e) {
-      badReponseSnackBar(e.message);
-    } on UncontrolledError catch (e) {
-      badReponseSnackBar(e.message);
-    }
-    return false;
+  Future<void> verifyEmailSignin(String email) async {
+    return authRepository.verifyEmailSignin(email);
   }
 
   Future<void> verifyConfirmationCode(String code) async {
@@ -263,15 +253,15 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
         }
       }
     } on InvalidAuthorizationCode catch (e) {
-      badReponseSnackBar(e.errorMessage);
+      badResponseDialog("Código inválido", e.errorMessage ?? "El código de autorización no es válido");
     } on ExpiredAuthorizationCode catch (e) {
-      badReponseSnackBar(e.errorMessage);
+      badResponseDialog("Código expirado", e.errorMessage ?? "El código de autorización ha expirado");
     } on FcmTokenVerificatioFailed catch (e) {
-      badReponseSnackBar(e.message);
+      badResponseDialog("Error de configuración", e.message ?? "Error con el token de notificaciones");
     } on ConnectionTimeout catch (e) {
-      badReponseSnackBar(e.message);
+      badResponseDialog("Error de conexión", e.message ?? "Tiempo de espera agotado");
     } on UncontrolledError catch (e) {
-      badReponseSnackBar(e.message);
+      badResponseDialog("Error en verificación", e.message ?? "Error al verificar el código");
     }
   }
 
@@ -663,11 +653,11 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
         }
       }
     } on FcmTokenVerificatioFailed catch (e) {
-      badResponseLogin(e.message);
+      badResponseDialog("Error de configuración", e.message ?? "Error con el token de notificaciones");
     } on ConnectionTimeout catch (e) {
-      connectionTimeoutLoginGoogle(e.message);
+      badResponseDialog("Error de conexión", e.message ?? "Tiempo de espera agotado");
     } on UncontrolledError catch (e) {
-      badResponseLogin(e.message);
+      badResponseDialog("Error en login", e.message ?? "Error al iniciar sesión con Google");
     }
   }
 
@@ -708,7 +698,7 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
       }
       return false;
     } on UncontrolledError catch (e) {
-      badReponseSnackBar(e.message);
+      badResponseDialog("Error en registro", e.message ?? "Error al completar registro con Google");
       return false;
     }
   }

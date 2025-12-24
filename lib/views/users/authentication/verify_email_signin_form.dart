@@ -1,9 +1,11 @@
 import 'package:aprende_mas/config/data/data.dart';
 import 'package:aprende_mas/config/utils/packages.dart';
+import 'package:aprende_mas/models/authentication/auth_errors.dart';
 import 'package:aprende_mas/providers/authentication/form_email_provider.dart';
 import 'package:aprende_mas/providers/providers.dart';
 import 'package:aprende_mas/views/views.dart';
 import 'package:aprende_mas/views/widgets/alerts/custom_alert_dialog.dart';
+import 'package:aprende_mas/views/widgets/alerts/error_dialog.dart';
 import 'package:aprende_mas/views/widgets/buttons/button_login.dart';
 import 'package:aprende_mas/config/utils/utils.dart';
 
@@ -51,16 +53,7 @@ class VerifyEmailSigninForm extends ConsumerWidget {
       },
     );
 
-    ref.listen(
-      authProvider,
-      (previous, next) {
-        if (next.errorMessage.isNotEmpty &&
-            next.errorComment.isNotEmpty &&
-            next.errorHandlingStyle == ErrorHandlingStyle.dialog) {
-          showErrorAlertDialog(next.errorMessage, next.errorComment);
-        }
-      },
-    );
+    // Removido: Este listener no debería estar en el form de verificación de email
 
     return Form(
         child: Padding(
@@ -118,23 +111,42 @@ class VerifyEmailSigninForm extends ConsumerWidget {
                 if (formEmail.isPosting) return;
 
                 if (!formEmail.email.isValid) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: const Text("El correo no es válido"),
-                      duration: const Duration(seconds: 3),
-                    ),
+                  ErrorDialog.show(
+                    context,
+                    message: "El formato del correo electrónico no es válido",
                   );
                   return; // Detener la ejecución si el formulario no es válido
                 }
 
                 try {
+                  debugPrint('🚀 Iniciando verificación de email: ${formEmailNotifier.state.email.value}');
                   await formEmailNotifier.onVerifyEmailSigninSubmit();
+                  debugPrint('✅ Verificación exitosa - navegando a registro');
+                } on InvalidEmailSignin catch (e) {
+                  debugPrint('❌ InvalidEmailSignin capturado: ${e.errorMessage}');
+                  debugPrint('❌ InvalidEmailSignin errorComment: ${e.errorComment}');
+                  ErrorDialog.show(
+                    context,
+                    message: "Este correo ya está asociado a otra cuenta",
+                  );
+                } on ConnectionTimeout catch (e) {
+                  debugPrint('❌ ConnectionTimeout capturado');
+                  ErrorDialog.show(
+                    context,
+                    message: "Tiempo de espera agotado. Verifica tu conexión a internet.",
+                  );
+                } on UncontrolledError catch (e) {
+                  debugPrint('❌ UncontrolledError capturado: ${e.message}');
+                  ErrorDialog.show(
+                    context,
+                    message: e.message ?? "Error al verificar el correo electrónico",
+                  );
                 } catch (e) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text("Error: $e"),
-                      duration: const Duration(seconds: 3),
-                    ),
+                  debugPrint('❌ Exception general capturada: $e');
+                  debugPrint('❌ Tipo de excepción: ${e.runtimeType}');
+                  ErrorDialog.show(
+                    context,
+                    message: "Error inesperado al verificar el correo electrónico",
                   );
                 }
               },
