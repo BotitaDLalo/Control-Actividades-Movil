@@ -1,8 +1,10 @@
 //import 'package:aprende_mas/config/data/data.dart';
 //import 'package:aprende_mas/config/utils/app_theme.dart';
 import 'package:aprende_mas/config/utils/packages.dart';
+import 'package:aprende_mas/config/utils/utils.dart';
 import 'package:aprende_mas/providers/providers.dart';
 import 'package:aprende_mas/views/views.dart';
+import 'package:aprende_mas/views/widgets/alerts/error_dialog.dart';
 
 
 class FormLogin extends ConsumerStatefulWidget {
@@ -111,6 +113,11 @@ class FormLoginState extends ConsumerState<FormLogin> {
                   ),
                   onPressed: () {
                     if (loginForm.isPosting) {
+                      return;
+                    }
+                    // Validar campos vacíos
+                    if (loginFormNotifier.emailController.text.isEmpty || loginFormNotifier.passwordController.text.isEmpty) {
+                      ErrorDialog.show(context, message: "Por favor, ingrese correo y contraseña");
                       return;
                     }
                     if (fcm.status == AuthorizationStatus.authorized) {

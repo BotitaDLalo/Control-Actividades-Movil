@@ -24,6 +24,9 @@ class FormConfirmationCode extends ConsumerWidget {
             Navigator.of(context).pop();
             ScaffoldMessenger.of(context).clearSnackBars();
             ErrorDialog.show(context, message: next.errorMessage);
+          } else if (next.errorHandlingStyle == ErrorHandlingStyle.dialog) {
+            Navigator.of(context).pop();
+            ErrorDialog.show(context, message: next.errorMessage);
           }
         }
       },

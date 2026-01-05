@@ -85,23 +85,32 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
       final user = await authRepository.login(email, password);
 
       if (user.estaAutorizado == AuthorizationUserStatus.pending.value) {
+        print('User pending authorization');
         await storageService.saveEmail(email);
         state = state.copyWith(isPendingAuthorizationUser: true);
       } else if (user.estaAutorizado == AuthorizationUserStatus.denied.value) {
-        //TODO: VISTA PARA NOTIFICAR QUE FUE DENEGADO
+        print('User denied, throwing WrongCredentials');
+        throw WrongCredentials(errorMessage: "Usuario denegado");
       } else if (user.estaAutorizado ==
           AuthorizationUserStatus.authorized.value) {
+        print('User authorized, verifying FCM');
         int id = user.userId;
         String role = user.role;
         final isFcmTokenValid = await verifyExistingFcmToken(id, role);
         if (isFcmTokenValid) {
+          print('FCM valid, setting logged user');
           _setLoggedUser(caller, user);
         } else {
+          print('FCM invalid, throwing FcmTokenVerificatioFailed');
           throw FcmTokenVerificatioFailed();
         }
+      } else {
+        print('User status unknown, throwing WrongCredentials');
+        throw WrongCredentials(errorMessage: "Credenciales incorrectas");
       }
     } on WrongCredentials catch (e) {
-      badResponseDialog("Error de credenciales", e.errorMessage ?? "Correo o contraseña incorrectos");
+      //badResponseDialog("Error de credenciales", e.errorMessage ?? "Correo o contraseña incorrectos");
+      badResponseDialog("Correo o contraseña incorrectos", e.errorMessage ?? "Correo o contraseña incorrectos");
     } on FcmTokenVerificatioFailed catch (e) {
       badResponseDialog("Error de configuración", e.message ?? "Error con el token de notificaciones");
     } on ConnectionTimeout catch (e) {
@@ -211,6 +220,7 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
   }
 
   void badResponseDialog([String? errorMessage, String? errorComment]) {
+    print('badResponseDialog called: errorMessage=$errorMessage, errorComment=$errorComment');
     state = state.copyWith(
         errorMessage: errorMessage,
         errorComment: errorComment,

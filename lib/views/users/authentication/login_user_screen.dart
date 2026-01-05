@@ -10,6 +10,7 @@ class LoginUserScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     void showErrorMessage(String message) {
+      print('showErrorMessage called with: $message');
       ErrorDialog.show(context, message: message);
     }
 
@@ -38,13 +39,22 @@ class LoginUserScreen extends ConsumerWidget {
     ref.listen(
       authProvider,
       (previous, next) {
+        print('AuthProvider listener: errorMessage=${next.errorMessage}, style=${next.errorHandlingStyle}');
         if (next.errorMessage.isNotEmpty) {
+          print('Error message not empty, handling');
           if (next.errorHandlingStyle == ErrorHandlingStyle.snackBar) {
+            print('Handling as snackBar');
             if (Navigator.of(context).canPop()) {
               Navigator.of(context).pop();
             }
             hideSnackBar();
             showErrorMessage(next.errorMessage);
+          } else if (next.errorHandlingStyle == ErrorHandlingStyle.dialog) {
+            print('Handling as dialog');
+            if (Navigator.of(context).canPop()) {
+              Navigator.of(context).pop();
+            }
+            ErrorDialog.show(context, message: next.errorMessage);
           }
         }
       },
