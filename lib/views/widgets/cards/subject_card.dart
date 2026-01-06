@@ -7,6 +7,8 @@ import 'package:aprende_mas/models/models.dart';
 import 'package:aprende_mas/config/utils/packages.dart';
 import 'package:aprende_mas/providers/subjects/subjects_provider.dart';
 import 'package:aprende_mas/providers/groups/groups_provider.dart';
+import 'package:aprende_mas/views/widgets/alerts/error_dialog.dart';
+import 'package:aprende_mas/views/widgets/alerts/success_dialog.dart';
 
 class SubjectCard extends ConsumerWidget {
   final int? groupId;
@@ -76,12 +78,11 @@ class SubjectCard extends ConsumerWidget {
                 Navigator.of(context).pop();
                 bool success = await ref.read(subjectsProvider.notifier).deleteSubject(subjectData.materiaId!);
                 if (success) {
+                  SuccessDialog.show(context, message: "Materia eliminada exitosamente");
                   // Refrescar la lista de grupos para que no muestre la materia eliminada
                   await ref.read(groupsProvider.notifier).getGroupsSubjects();
                 } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('No se eliminó la materia')),
-                  );
+                  ErrorDialog.show(context, message: "Error al eliminar la materia");
                 }
               },
               child: const Text('Eliminar'),
@@ -123,23 +124,17 @@ class SubjectCard extends ConsumerWidget {
                 final newName = nameController.text.trim();
                 final newDescription = descriptionController.text.trim();
                 if (newName.isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('El nombre no puede estar vacío')),
-                  );
+                  ErrorDialog.show(context, message: "El nombre no puede estar vacío");
                   return;
                 }
                 Navigator.of(context).pop();
                 bool success = await ref.read(subjectsProvider.notifier).updateSubject(subjectData.materiaId!, newName, newDescription);
                 if (success) {
+                  SuccessDialog.show(context, message: "Materia actualizada exitosamente");
                   // Refrescar la lista de grupos
                   await ref.read(groupsProvider.notifier).getGroupsSubjects();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Materia actualizada')),
-                  );
                 } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Error al actualizar la materia')),
-                  );
+                  ErrorDialog.show(context, message: "Error al actualizar la materia");
                 }
               },
               child: const Text('Actualizar'),

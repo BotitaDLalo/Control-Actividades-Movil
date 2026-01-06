@@ -4,6 +4,8 @@ import 'package:aprende_mas/views/views.dart';
 import '../../../config/utils/app_theme.dart';
 import '../../../providers/subjects/form_subjects_provider.dart';
 import '../../widgets/buttons/button_form.dart';
+import '../../widgets/alerts/error_dialog.dart';
+import '../../widgets/alerts/success_dialog.dart';
 
 class FormCreateSubject extends ConsumerStatefulWidget {
   const FormCreateSubject({super.key});
@@ -202,11 +204,15 @@ class FormCreateSubjectState extends ConsumerState<FormCreateSubject> {
                       return;
                     }
                     debugPrint("🔘 Botón Crear materia presionado");
-                    await formCreateSubjectNotifier.onFormSubmit();
-                    debugPrint("🔄 Refrescando lista de grupos...");
-                    await ref.read(groupsProvider.notifier).getGroupsSubjects();
-                    debugPrint("✅ Refresco completado, cerrando formulario");
-                    goRouterPop();
+                    try {
+                      await formCreateSubjectNotifier.onFormSubmit();
+                      SuccessDialog.show(context, message: "Materia creada exitosamente", onOkPressed: goRouterPop);
+                      debugPrint("🔄 Refrescando lista de grupos...");
+                      await ref.read(groupsProvider.notifier).getGroupsSubjects();
+                      debugPrint("✅ Refresco completado");
+                    } catch (e) {
+                      ErrorDialog.show(context, message: "Error al crear la materia");
+                    }
                   }),
             )
           ],

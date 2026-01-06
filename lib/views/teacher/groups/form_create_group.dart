@@ -2,6 +2,8 @@ import 'package:aprende_mas/config/utils/app_theme.dart';
 import 'package:aprende_mas/config/utils/packages.dart';
 import 'package:aprende_mas/providers/groups/form_groups_provider.dart';
 import 'package:aprende_mas/views/widgets/buttons/button_form.dart';
+import 'package:aprende_mas/views/widgets/alerts/error_dialog.dart';
+import 'package:aprende_mas/views/widgets/alerts/success_dialog.dart';
 import 'package:aprende_mas/views/views.dart';
 
 class FormCreateGroup extends ConsumerWidget {
@@ -237,7 +239,9 @@ class FormCreateGroup extends ConsumerWidget {
                   }
                   await formCreateGroupNotifier.onFormSubmit();
                   if (formCreateGroup.isFormPosted) {
-                    goRouterPop();
+                    SuccessDialog.show(context, message: "Grupo creado exitosamente", onOkPressed: goRouterPop);
+                  } else {
+                    ErrorDialog.show(context, message: "Error al crear el grupo");
                   }
                 }),
           )

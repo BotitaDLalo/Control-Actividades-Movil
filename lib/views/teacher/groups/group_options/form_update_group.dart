@@ -3,6 +3,8 @@ import 'package:aprende_mas/providers/providers.dart';
 import 'package:aprende_mas/views/views.dart';
 import 'package:aprende_mas/config/utils/app_theme.dart';
 import 'package:aprende_mas/views/widgets/buttons/button_form.dart';
+import 'package:aprende_mas/views/widgets/alerts/error_dialog.dart';
+import 'package:aprende_mas/views/widgets/alerts/success_dialog.dart';
 
 class FormUpdateGroup extends ConsumerStatefulWidget {
   final int id;
@@ -63,7 +65,9 @@ class _FormUpdateGroupState extends ConsumerState<FormUpdateGroup> {
 
     ref.listen(formGroupsProvider, (previous, next) {
       if (next.isFormPosted && !next.isPosting) {
-        goRouterPop();
+        SuccessDialog.show(context, message: "Grupo actualizado exitosamente", onOkPressed: goRouterPop);
+      } else if (!next.isFormPosted && !next.isPosting && previous?.isPosting == true) {
+        ErrorDialog.show(context, message: "Error al actualizar el grupo");
       }
     });
     
