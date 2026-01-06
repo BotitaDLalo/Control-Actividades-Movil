@@ -106,6 +106,7 @@ class _ActivitySectionSubmissionState
           actions: [
             TextButton(
                 onPressed: () {
+                  print('Intentando enviar respuesta: ${activitiesForm.answer}');
                   if (authConectionType == AuthConnectionType.online) {
                     ref
                         .read(activityFormProvider.notifier)

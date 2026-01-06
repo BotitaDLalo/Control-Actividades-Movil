@@ -4,6 +4,7 @@ import 'package:aprende_mas/config/utils/packages.dart';
 import 'package:aprende_mas/models/activities/activity/activity_mapper.dart';
 import 'package:aprende_mas/repositories/Interface_repos/activity/activty_datasource.dart';
 import 'package:aprende_mas/config/data/data.dart';
+import 'package:intl/intl.dart';
 
 class ActivityDataSourceImpl implements ActivityDataSource {
   final storageService = KeyValueStorageServiceImpl();
@@ -101,34 +102,36 @@ class ActivityDataSourceImpl implements ActivityDataSource {
     }
   }
 
-  @override
-  Future<List<Submission>> sendSubmission(int activityId, String answer) async {
-    try {
-      const uri = "/Alumnos/RegistrarEnvioActividadAlumno";
-      DateTime dateNow = DateTime.now();
-      final id = await storageService.getId();
+@override
+Future<List<Submission>> sendSubmission(int activityId, String answer) async {
+  try {
+    const uri = "/Alumnos/RegistrarEnvioActividadAlumno";
+    final fechaEntregaStr = DateTime.now().toUtc().toIso8601String();
+    final id = await storageService.getId();
 
-      final res = await dio.post(uri, data: {
-        "ActividadId": activityId,
-        "AlumnoId": id,
-        "Respuesta": answer,
-        "FechaEntrega": dateNow.toString()
-      });
+    final res = await dio.post(uri, data: {
+      "ActividadId": activityId,
+      "AlumnoId": id,
+      "Respuesta": answer,
+      "FechaEntrega": fechaEntregaStr
+    });
 
-      if (res.statusCode == 200) {
-        final resList = Map<String, dynamic>.from(res.data);
-
-        final list = Submission.submissionJsonToEntity(resList, activityId);
-
-        return list;
-      }
-
-      return [];
-    } catch (e) {
-      debugPrint(e.toString());
-      return [];
+    if (res.statusCode == 200) {
+      final resList = Map<String, dynamic>.from(res.data);
+      final list = Submission.submissionJsonToEntity(resList, activityId);
+      return list;
     }
+
+    return [];
+} catch (e) {
+  if (e is DioException) {
+    debugPrint("DATA ERROR: ${e.response?.data}");
   }
+  debugPrint(e.toString());
+  return [];
+}
+}
+
 
   @override
   Future<List<Submission>> getSubmissions(int activityId) async {

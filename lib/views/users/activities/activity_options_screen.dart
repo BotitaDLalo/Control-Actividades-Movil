@@ -136,7 +136,7 @@ class _ActivityOptionState extends ConsumerState<ActivityOptionScreen> {
                                       ),
                                       SizedBox(height: 24),
                                       Text(
-                                        'Sin Actividades, espera a que \ntu docente te asigne actividades',
+                                        'Sin Actividades, espera a que \ntu profesor te asigne actividades',
                                         textAlign: TextAlign.center,
                                         style: TextStyle(fontSize: 16),
                                       ),
