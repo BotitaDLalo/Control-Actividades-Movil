@@ -9,6 +9,7 @@ import 'package:aprende_mas/providers/subjects/subjects_provider.dart';
 import 'package:aprende_mas/providers/groups/groups_provider.dart';
 import 'package:aprende_mas/views/widgets/alerts/error_dialog.dart';
 import 'package:aprende_mas/views/widgets/alerts/success_dialog.dart';
+import 'package:aprende_mas/views/widgets/alerts/warning_confirmation_dialog.dart';
 
 class SubjectCard extends ConsumerWidget {
   final int? groupId;
@@ -63,34 +64,21 @@ class SubjectCard extends ConsumerWidget {
     }
 
     void _showDeleteConfirmation(BuildContext context, Subject subjectData) {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Eliminar materia'),
-          content: const Text('¿Estás seguro de que deseas eliminar esta materia? Esta acción no se puede deshacer.'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancelar'),
-            ),
-            TextButton(
-              onPressed: () async {
-                Navigator.of(context).pop();
-                bool success = await ref.read(subjectsProvider.notifier).deleteSubject(subjectData.materiaId!);
-                if (success) {
-                  SuccessDialog.show(context, message: "Materia eliminada exitosamente");
-                  // Refrescar la lista de grupos para que no muestre la materia eliminada
-                  await ref.read(groupsProvider.notifier).getGroupsSubjects();
-                } else {
-                  ErrorDialog.show(context, message: "Error al eliminar la materia");
-                }
-              },
-              child: const Text('Eliminar'),
-            ),
-          ],
-        ),
-      );
-    }
+    WarningConfirmationDialog.show(
+      context,
+      message: '¿Estás seguro de que deseas eliminar esta materia? Esta acción no se puede deshacer.',
+      onConfirmPressed: () async {
+        bool success = await ref.read(subjectsProvider.notifier).deleteSubject(subjectData.materiaId!);
+        if (success) {
+          SuccessDialog.show(context, message: "Materia eliminada exitosamente");
+          await ref.read(groupsProvider.notifier).getGroupsSubjects();
+        } else {
+          ErrorDialog.show(context, message: "Error al eliminar la materia");
+        }
+      },
+    );
+  }
+
 
     void _showEditDialog(BuildContext context, Subject subjectData) {
       final nameController = TextEditingController(text: subjectData.nombreMateria);

@@ -7,6 +7,7 @@ import 'package:aprende_mas/providers/data/key_value_storage_service_providers.d
 import 'package:aprende_mas/config/utils/catalog_names.dart';
 import 'package:aprende_mas/views/widgets/alerts/error_dialog.dart';
 import 'package:aprende_mas/views/widgets/alerts/success_dialog.dart';
+import 'package:aprende_mas/views/widgets/alerts/warning_confirmation_dialog.dart';
 
 class GroupCard extends ConsumerStatefulWidget {
   final int id;
@@ -58,35 +59,21 @@ class CustomExpansionTileState extends ConsumerState<GroupCard>
   }
 
   void _showDeleteConfirmation(BuildContext context, Group groupData) {
-     showDialog(
-       context: context,
-       builder: (context) => AlertDialog(
-         title: const Text('Eliminar grupo'),
-         content: const Text('¿Estás seguro de que deseas eliminar este grupo? Esta acción no se puede deshacer.'),
-         actions: [
-           TextButton(
-             onPressed: () => Navigator.of(context).pop(),
-             child: const Text('Cancelar'),
-           ),
-           TextButton(
-             onPressed: () async {
-               Navigator.of(context).pop();
-               bool success = await ref.read(groupsProvider.notifier).deleteGroup(groupData.grupoId!);
-               if (success) {
-                  SuccessDialog.show(context, message: "Grupo eliminado exitosamente");
-                  await ref.read(groupsProvider.notifier).getGroupsSubjects();
-                } else {
-                 ScaffoldMessenger.of(context).showSnackBar(
-                   const SnackBar(content: Text('No se eliminó el grupo')),
-                 );
-               }
-             },
-             child: const Text('Eliminar'),
-           ),
-         ],
-       ),
-     );
-   }
+  WarningConfirmationDialog.show(
+    context,
+    message: '¿Estás seguro de que deseas eliminar este grupo? Esta acción no se puede deshacer.',
+    onConfirmPressed: () async {
+      bool success = await ref.read(groupsProvider.notifier).deleteGroup(groupData.grupoId!);
+      if (success) {
+        SuccessDialog.show(context, message: "Grupo eliminado exitosamente");
+        await ref.read(groupsProvider.notifier).getGroupsSubjects();
+      } else {
+        ErrorDialog.show(context, message: "Error al eliminar el grupo");
+      }
+    },
+  );
+}
+
 
   @override
   void dispose() {
