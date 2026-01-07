@@ -9,6 +9,9 @@ import 'package:aprende_mas/providers/groups/groups_provider.dart';
 import 'package:aprende_mas/providers/subjects/subjects_provider.dart';
 import 'package:aprende_mas/views/views.dart';
 import 'package:aprende_mas/views/widgets/structure/app_bar_home.dart';
+import 'package:aprende_mas/views/widgets/alerts/success_dialog.dart';
+import 'package:aprende_mas/views/widgets/alerts/error_dialog.dart';
+import 'package:aprende_mas/views/widgets/alerts/warning_confirmation_dialog.dart';
 
 class EventDetailsScreen extends ConsumerWidget {
   final Event event;
@@ -57,26 +60,7 @@ class EventDetailsScreen extends ConsumerWidget {
         ).nombreMateria
       : null;
 
-    Future<bool?> showDeleteConfirmationDialog(BuildContext context) async {
-      return await showDialog<bool>(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text("Eliminar Evento"),
-          content:
-              const Text("¿Estás seguro de que deseas eliminar este evento?"),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: const Text("Cancelar"),
-            ),
-            TextButton(
-              onPressed: () => Navigator.pop(context, true),
-              child: const Text("Eliminar"),
-            ),
-          ],
-        ),
-      );
-    }
+    // No necesitamos esta función ya que usaremos WarningConfirmationDialog
 
     return Scaffold(
       appBar: AppBarHome(title: 'Detalles del Evento', showSettings: false, leading: IconButton(icon: SvgPicture.asset('assets/icons/retroceder.svg', width: 30, height: 30, color: Colors.white), onPressed: () => context.pop())),
@@ -332,29 +316,38 @@ class EventDetailsScreen extends ConsumerWidget {
           const SizedBox(height: 16),
           FloatingActionButton(
             onPressed: () async {
-              final confirm = await showDeleteConfirmationDialog(context);
-
-              if (confirm == true) {
-                try {
-                  // Llamar al método deleteEvent del EventNotifier
-                  await eventNotifier.deleteEvent(
-                      event.teacherId, event.eventId!);
-                  // Mostrar un mensaje de éxito
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                        content: Text("Evento eliminado correctamente")),
-                  );
-
-                  // Navegar de regreso a la pantalla anterior
-                  context.pop();
-                  ref.read(eventProvider.notifier).getEvents();
-                } catch (e) {
-                  // Mostrar un mensaje de error
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text("Error al eliminar el evento: $e")),
-                  );
-                }
-              }
+              // Mostrar diálogo de confirmación antes de eliminar
+              WarningConfirmationDialog.show(
+                context,
+                message: '¿Está seguro de que desea eliminar este evento?',
+                onConfirmPressed: () async {
+                  try {
+                    // Llamar al método deleteEvent del EventNotifier
+                    await eventNotifier.deleteEvent(
+                        event.teacherId, event.eventId!);
+                    
+                    // Mostrar mensaje de éxito
+                    SuccessDialog.show(
+                      context,
+                      message: 'Evento eliminado exitosamente',
+                      onOkPressed: () {
+                        // Navegar de regreso a la pantalla anterior
+                        context.pop();
+                        ref.read(eventProvider.notifier).getEvents();
+                      },
+                    );
+                  } catch (e) {
+                    // Mostrar mensaje de error
+                    ErrorDialog.show(
+                      context,
+                      message: 'Error al eliminar el evento: $e',
+                    );
+                  }
+                },
+                onCancelPressed: () {
+                  // No hacer nada, solo cerrar el diálogo
+                },
+              );
             },
             child: SvgPicture.asset('assets/icons/eliminar4.svg', width: 28, height: 28),
           ),

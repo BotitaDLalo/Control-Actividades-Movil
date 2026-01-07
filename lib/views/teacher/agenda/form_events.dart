@@ -5,6 +5,9 @@ import 'package:aprende_mas/views/teacher/agenda/button_event_form.dart';
 import 'package:aprende_mas/views/teacher/agenda/option_dropdown.dart';
 import 'package:aprende_mas/views/widgets/inputs/custom_text_form_field.dart';
 import 'package:aprende_mas/views/widgets/inputs/custom_time_form_field.dart';
+import 'package:aprende_mas/views/widgets/alerts/success_dialog.dart';
+import 'package:aprende_mas/views/widgets/alerts/error_dialog.dart';
+import 'package:aprende_mas/views/widgets/alerts/warning_confirmation_dialog.dart';
 
 class FormEvents extends ConsumerStatefulWidget {
   const FormEvents({super.key});
@@ -140,22 +143,48 @@ class _FormEventsState extends ConsumerState<FormEvents> {
             onPressed: () async {
               // Verifica si no está enviando ya el formulario
               if (!ref.read(formEventProvider).isPosting) {
-                try {
-                  print("Formulario enviado");
-                  await formCreatedEventNotifier.onFormSubmit();
+                // Mostrar diálogo de confirmación antes de crear
+                WarningConfirmationDialog.show(
+                  context,
+                  message: '¿Está seguro de que desea crear este evento?',
+                  onConfirmPressed: () async {
+                    try {
+                      print("Formulario enviado");
+                      await formCreatedEventNotifier.onFormSubmit();
 
-                  if (formCreateEvent.isFormPosted) {
-                    print("Formulario posteado exitosamente");
-                    goRouterPop(); // Regresar después de éxito
-                  } else {
-                    print("El formulario no fue posteado");
-                  }
-                } catch (e) {
-                  // Captura cualquier error en la creación del evento
-                  print("Error al crear el evento: $e");
-                }
+                      if (formCreateEvent.isFormPosted) {
+                        print("Formulario posteado exitosamente");
+                        // Mostrar mensaje de éxito
+                        SuccessDialog.show(
+                          context,
+                          message: 'Evento creado exitosamente',
+                          onOkPressed: () {
+                            goRouterPop(); // Regresar después de éxito
+                          },
+                        );
+                      } else {
+                        print("El formulario no fue posteado");
+                        // Mostrar mensaje de error
+                        ErrorDialog.show(
+                          context,
+                          message: 'No se pudo crear el evento. Por favor, intente de nuevo.',
+                        );
+                      }
+                    } catch (e) {
+                      // Captura cualquier error en la creación del evento
+                      print("Error al crear el evento: $e");
+                      // Mostrar mensaje de error
+                      ErrorDialog.show(
+                        context,
+                        message: 'Error al crear el evento: $e',
+                      );
+                    }
+                  },
+                  onCancelPressed: () {
+                    // No hacer nada, solo cerrar el diálogo
+                  },
+                );
               }
-              goRouterPop();
             },
           )
         ]),
