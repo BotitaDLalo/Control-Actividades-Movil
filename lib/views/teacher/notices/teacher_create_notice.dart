@@ -9,6 +9,9 @@ import 'package:aprende_mas/views/widgets/alerts/error_snackbar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart'; // Asegurar importación de Material/Widget
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:aprende_mas/views/widgets/alerts/success_dialog.dart';
+import 'package:aprende_mas/views/widgets/alerts/error_dialog.dart';
+import 'package:aprende_mas/views/widgets/alerts/warning_confirmation_dialog.dart';
 
 class TeacherCreateNotice extends ConsumerStatefulWidget {
   final NoticeModel notice;
@@ -89,13 +92,67 @@ class _TeacherCreateNoticeState extends ConsumerState<TeacherCreateNotice> {
           onPressed: formNotice.isPosting || !formNotice.isValid
               ? null
               : () {
-                  if (isEditing) {
-                    // Si estamos editando, llamamos a onUpdateSubmit y le pasamos el modelo con ID
-                    formNoticeNotifier.onUpdateSubmit(notice);
-                  } else {
-                    // Si estamos creando, llamamos a onFormSubmit y le pasamos el modelo base
-                    formNoticeNotifier.onFormSubmit(notice);
-                  }
+                  // Mostrar diálogo de confirmación antes de crear/editar
+                  WarningConfirmationDialog.show(
+                    context,
+                    message: isEditing
+                      ? '¿Está seguro de que desea actualizar este aviso?'
+                      : '¿Está seguro de que desea crear este aviso?',
+                    onConfirmPressed: () async {
+                      try {
+                        if (isEditing) {
+                          // Si estamos editando, llamamos a onUpdateSubmit y le pasamos el modelo con ID
+                          final success = await formNoticeNotifier.onUpdateSubmit(notice);
+                          if (success) {
+                            // Mostrar mensaje de éxito
+                            SuccessDialog.show(
+                              context,
+                              message: 'Aviso actualizado exitosamente',
+                              onOkPressed: () {
+                                context.pop();
+                              },
+                            );
+                          } else {
+                            // Mostrar mensaje de error
+                            ErrorDialog.show(
+                              context,
+                              message: 'No se pudo actualizar el aviso. Por favor, intente de nuevo.',
+                            );
+                          }
+                        } else {
+                          // Si estamos creando, llamamos a onFormSubmit y le pasamos el modelo base
+                          final success = await formNoticeNotifier.onFormSubmit(notice);
+                          if (success) {
+                            // Mostrar mensaje de éxito
+                            SuccessDialog.show(
+                              context,
+                              message: 'Aviso creado exitosamente',
+                              onOkPressed: () {
+                                context.pop();
+                              },
+                            );
+                          } else {
+                            // Mostrar mensaje de error
+                            ErrorDialog.show(
+                              context,
+                              message: 'No se pudo crear el aviso. Por favor, intente de nuevo.',
+                            );
+                          }
+                        }
+                      } catch (e) {
+                        // Captura cualquier error en la creación/actualización del aviso
+                        print("Error al crear/actualizar el aviso: $e");
+                        // Mostrar mensaje de error
+                        ErrorDialog.show(
+                          context,
+                          message: 'Error al crear/actualizar el aviso: $e',
+                        );
+                      }
+                    },
+                    onCancelPressed: () {
+                      // No hacer nada, solo cerrar el diálogo
+                    },
+                  );
                 },
         ),
       ),
