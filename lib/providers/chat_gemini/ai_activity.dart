@@ -1,4 +1,4 @@
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:aprende_mas/config/environment/environment.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import '../../config/utils/packages.dart';
 
@@ -25,8 +25,8 @@ class AIActivity extends ChangeNotifier {
 
     try {
       final model = GenerativeModel(
-        model: 'gemini-1.5-flash',
-        apiKey: dotenv.env['GOOGLE_API_KEY']!,
+        model: Environment.apiGeminiModel,
+        apiKey: Environment.apiKeyGoogle,
       );
 
 final content = [
