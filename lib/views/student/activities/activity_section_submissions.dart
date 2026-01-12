@@ -297,9 +297,9 @@ class _ActivitySectionSubmissionState
 
                                     return GestureDetector(
                                       onLongPress: () {
-                                        if (submission.status) {
+                                        if (submission.status!) {
                                           showModalBottomCancelSubmit(
-                                              submission.studentActivityId);
+                                              submission.submissionActivityStudentId);
                                         }
                                       },
                                       child: ElementTile(
@@ -334,7 +334,7 @@ class _ActivitySectionSubmissionState
                                               ),
                                             );
                                           },
-                                          trailingString: submission.status
+                                          trailingString: submission.status!
                                               ? (submission.grade == null
                                                   ? "Enviado"
                                                   : "${submission.grade} /${widget.activity.puntaje}")

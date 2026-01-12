@@ -123,13 +123,15 @@ class ActivityDataSourceImpl implements ActivityDataSource {
         "ActividadId": activityId,
         "AlumnoId": id,
         "Respuesta": answer,
-        "FechaEntrega": dateNow.toString()
+        "FechaEntrega": dateNow.toString(),
+        "TipoEntregaId": 1
       });
 
       if (res.statusCode == 200) {
-        final resList = Map<String, dynamic>.from(res.data);
+        // final resList = Map<String, dynamic>.from(res.data);
+        final resList = List<Map<String, dynamic>>.from(res.data);
 
-        final list = Submission.submissionJsonToEntity(resList, activityId);
+        final list = Submission.lsSubmissionJsonToLsEntity(resList, activityId);
 
         return list;
       }
@@ -153,8 +155,9 @@ class ActivityDataSourceImpl implements ActivityDataSource {
     );
 
     if (res.statusCode == 200) {
-      final resList = Map<String, dynamic>.from(res.data);
-      final list = Submission.submissionJsonToEntity(resList, activityId);
+      // final resList = Map<String, dynamic>.from(res.data);
+      final resList = List<Map<String, dynamic>>.from(res.data);
+      final list = Submission.lsSubmissionJsonToLsEntity(resList, activityId);
       return list;
     } else if (res.statusCode == 400) {
       debugPrint("⚠️ [SUBMISSION] Status 400 para activityId=$activityId - Data: ${res.data}");
@@ -179,9 +182,10 @@ class ActivityDataSourceImpl implements ActivityDataSource {
       });
 
       if (res.statusCode == 200) {
-        final resList = Map<String, dynamic>.from(res.data);
+        // final resList = Map<String, dynamic>.from(res.data);
+        final resList = List<Map<String, dynamic>>.from(res.data);
 
-        final list = Submission.submissionJsonToEntity(resList, activityId);
+        final list = Submission.lsSubmissionJsonToLsEntity(resList, activityId);
 
         return list;
       }
@@ -220,7 +224,7 @@ class ActivityDataSourceImpl implements ActivityDataSource {
       const uri = "/Actividades/AsignarCalificacion";
 
       final res = await dio
-          .post(uri, data: {"EntregaId": submissionId, "Calificacion": grade});
+          .post(uri, data: {"EntregableId": submissionId, "Calificacion": grade});
 
       if (res.statusCode == 200) {
         return true;
