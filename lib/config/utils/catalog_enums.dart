@@ -10,6 +10,17 @@ enum AuthConnectionType { online, offline, unverified }
 
 enum ErrorHandlingStyle { snackBar, dialog, undefined }
 
+enum AuthCallers {
+  loginUser,
+  signIn,
+  checkAuthStatus,
+  verifyConfirmationCode,
+  verifyConfirmationCodeGoogle,
+  loginGoogleUser,
+  missingDataGoogleUser,
+  checkAuthGoogleStatus
+}
+
 enum AuthorizationUserStatus {
   authorized("Autorizado"),
   denied("Denegado"),

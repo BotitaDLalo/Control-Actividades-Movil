@@ -35,6 +35,7 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
   final SubjectsOfflineRepositoryImpl subjectsOffline;
   final Function(int) getAllActivitiesOfflineCallback;
   final Function(int, String) sendSubmission;
+  final CatalogNames cn;
 
   AuthStateNotifier(
       {required this.authUserOffline,
@@ -54,7 +55,8 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
       required this.subjects,
       required this.groupsOffline,
       required this.subjectsOffline,
-      required this.sendSubmission
+      required this.sendSubmission,
+      required this.cn
       // required this.activity,
       })
       : super(AuthState()) {
@@ -81,42 +83,43 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
 
   Future<void> loginUser(String email, String password) async {
     try {
-      const caller = "loginUser";
+      // const caller = "loginUser";
+      const authType = AuthenticatedType.auth;
+      const caller = AuthCallers.loginUser;
+
       final user = await authRepository.login(email, password);
 
       if (user.estaAutorizado == AuthorizationUserStatus.pending.value) {
-        print('User pending authorization');
         await storageService.saveEmail(email);
         state = state.copyWith(isPendingAuthorizationUser: true);
       } else if (user.estaAutorizado == AuthorizationUserStatus.denied.value) {
-        print('User denied, throwing WrongCredentials');
         throw WrongCredentials(errorMessage: "Usuario denegado");
       } else if (user.estaAutorizado ==
           AuthorizationUserStatus.authorized.value) {
-        print('User authorized, verifying FCM');
         int id = user.userId;
         String role = user.role;
         final isFcmTokenValid = await verifyExistingFcmToken(id, role);
         if (isFcmTokenValid) {
-          print('FCM valid, setting logged user');
-          _setLoggedUser(caller, user);
+          _setLoggedUser(authType, caller, user);
         } else {
-          print('FCM invalid, throwing FcmTokenVerificatioFailed');
           throw FcmTokenVerificatioFailed();
         }
       } else {
-        print('User status unknown, throwing WrongCredentials');
         throw WrongCredentials(errorMessage: "Credenciales incorrectas");
       }
     } on WrongCredentials catch (e) {
       //badResponseDialog("Error de credenciales", e.errorMessage ?? "Correo o contraseña incorrectos");
-      badResponseDialog("Correo o contraseña incorrectos", e.errorMessage ?? "Correo o contraseña incorrectos");
+      badResponseDialog("Correo o contraseña incorrectos",
+          e.errorMessage ?? "Correo o contraseña incorrectos");
     } on FcmTokenVerificatioFailed catch (e) {
-      badResponseDialog("Error de configuración", e.message ?? "Error con el token de notificaciones");
+      badResponseDialog("Error de configuración",
+          e.message ?? "Error con el token de notificaciones");
     } on ConnectionTimeout catch (e) {
-      badResponseDialog("Error de conexión", e.message ?? "Tiempo de espera agotado");
+      badResponseDialog(
+          "Error de conexión", e.message ?? "Tiempo de espera agotado");
     } on UncontrolledError catch (e) {
-      badResponseDialog("Error en login", e.message ?? "Error inesperado al iniciar sesión");
+      badResponseDialog(
+          "Error en login", e.message ?? "Error inesperado al iniciar sesión");
     }
   }
 
@@ -127,7 +130,10 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
       required String password,
       required String role}) async {
     try {
-      const caller = "siginUser";
+      // const caller = "siginUser";
+      const authType = AuthenticatedType.auth;
+      const caller = AuthCallers.signIn;
+
       final fcmToken = await FirebaseCM.getFcmToken();
 
       if (fcmToken != null) {
@@ -140,7 +146,7 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
             fcmToken: fcmToken);
 
         if (user.estaAutorizado == AuthorizationUserStatus.authorized.value) {
-          _setLoggedUser(caller, user);
+          _setLoggedUser(authType, caller, user);
         } else if (user.estaAutorizado ==
             AuthorizationUserStatus.pending.value) {
           return true;
@@ -180,7 +186,10 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
 
   void checkAuthStatus() async {
     try {
-      const caller = "checkAuthStatus";
+      // const caller = "checkAuthStatus";
+      const authType = AuthenticatedType.auth;
+      const caller = AuthCallers.checkAuthStatus;
+
       final token = await storageService.getToken();
       if (token == "") return logout();
       final user = await authRepository.checkAuthStatus(token);
@@ -189,7 +198,7 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
       String role = user.role;
       await verifyExistingFcmToken(id, role);
 
-      _setLoggedUser(caller, user);
+      _setLoggedUser(authType, caller, user);
     } on FcmTokenVerificatioFailed catch (e) {
       logout(e.message);
     } catch (e) {
@@ -220,7 +229,6 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
   }
 
   void badResponseDialog([String? errorMessage, String? errorComment]) {
-    print('badResponseDialog called: errorMessage=$errorMessage, errorComment=$errorComment');
     state = state.copyWith(
         errorMessage: errorMessage,
         errorComment: errorComment,
@@ -243,7 +251,7 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
 
   Future<void> verifyConfirmationCode(String code) async {
     try {
-      const caller = "verifyConfirmationCode";
+      // const caller = "verifyConfirmationCode";
       final idToken = await storageService.getToken();
 
       final user =
@@ -253,31 +261,46 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
       if (user.estaAutorizado == AuthorizationUserStatus.authorized.value) {
         final isFcmTokenValid = await verifyExistingFcmToken(id, role);
         if (isFcmTokenValid) {
+          AuthCallers caller;
+          AuthenticatedType authType;
+
           if (idToken.isEmpty) {
-            _setLoggedUser(caller, user);
+            authType = AuthenticatedType.auth;
+            caller = AuthCallers.verifyConfirmationCode;
+            // _setLoggedUser(caller, user);
           } else {
-            _setLoggedGoogleUser(user);
+            authType = AuthenticatedType.authGoogle;
+            caller = AuthCallers.verifyConfirmationCodeGoogle;
+            // _setLoggedGoogleUser(user);
           }
+
+          _setLoggedUser(authType, caller, user);
         } else {
           throw FcmTokenVerificatioFailed();
         }
       }
     } on InvalidAuthorizationCode catch (e) {
-      badResponseDialog("Código inválido", e.errorMessage ?? "El código de autorización no es válido");
+      badResponseDialog("Código inválido",
+          e.errorMessage ?? "El código de autorización no es válido");
     } on ExpiredAuthorizationCode catch (e) {
-      badResponseDialog("Código expirado", e.errorMessage ?? "El código de autorización ha expirado");
+      badResponseDialog("Código expirado",
+          e.errorMessage ?? "El código de autorización ha expirado");
     } on FcmTokenVerificatioFailed catch (e) {
-      badResponseDialog("Error de configuración", e.message ?? "Error con el token de notificaciones");
+      badResponseDialog("Error de configuración",
+          e.message ?? "Error con el token de notificaciones");
     } on ConnectionTimeout catch (e) {
-      badResponseDialog("Error de conexión", e.message ?? "Tiempo de espera agotado");
+      badResponseDialog(
+          "Error de conexión", e.message ?? "Tiempo de espera agotado");
     } on UncontrolledError catch (e) {
-      badResponseDialog("Error en verificación", e.message ?? "Error al verificar el código");
+      badResponseDialog(
+          "Error en verificación", e.message ?? "Error al verificar el código");
     }
   }
 
-  void _setLoggedUser(String caller, AuthUser user) async {
+  void _setLoggedUser(
+      AuthenticatedType authType, AuthCallers caller, AuthUser user) async {
+    // const authType = AuthenticatedType.auth;
     const limit = 7;
-    const authType = AuthenticatedType.auth;
     DateTime dateNow = DateTime.now();
     DateTime date7Days = dateNow.add(const Duration(days: limit));
 
@@ -286,193 +309,86 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
     await _saveUserDataKeyValue(
         user.token, user.userId, user.role, user.userName, authType);
 
-    if (caller == "loginUser" ||
-        caller == "siginUser" ||
-        caller == "verifyConfirmationCode") {
-      ActiveUser activeUser = ActiveUser(
-          userId: user.userId,
-          userName: user.userName,
-          email: user.email,
-          activeDueDate: date7Days.toString(),
-          role: user.role);
+    List<Group> lsGroups = await groups.getGroupsSubjects();
 
-      debugPrint("🔄 [LOGIN] Iniciando carga de datos del usuario...");
-      List<Group> lsGroups = await groups.getGroupsSubjects();
-      debugPrint("✅ [LOGIN] Grupos obtenidos: ${lsGroups.length}");
-      List<Subject> lsSubjectsWithoutGroup =
-          await subjects.getSubjectsWithoutGroup();
-      debugPrint("✅ [LOGIN] Materias obtenidas: ${lsSubjectsWithoutGroup.length}");
+    List<Subject> lsSubjectsWithoutGroup =
+        await subjects.getSubjectsWithoutGroup();
 
-      //& actualizamos los state del usuario (grupos, materias, actividades, entregables)
-      _saveUserAndUpdateState(activeUser, lsGroups, lsSubjectsWithoutGroup);
+    ActiveUser activeUser = ActiveUser(
+        userId: user.userId,
+        userName: user.userName,
+        email: user.email,
+        activeDueDate: date7Days.toString(),
+        role: user.role);
 
-      //& TOKEN FIREBASE
-    } else if (caller == "checkAuthStatus") {
+    if (caller == AuthCallers.checkAuthStatus &&
+        authType == AuthenticatedType.auth) {
       authUserOffline.updateUser(date7Days.toString());
-      debugPrint("🔄 [LOGIN] Iniciando carga de datos del usuario...");
-      List<Group> lsGroups = await groups.getGroupsSubjects();
-      debugPrint("✅ [LOGIN] Grupos obtenidos: ${lsGroups.length}");
-      List<Subject> lsSubjectsWithoutGroup =
-          await subjects.getSubjectsWithoutGroup();
-      debugPrint("✅ [LOGIN] Materias obtenidas: ${lsSubjectsWithoutGroup.length}");
 
-      await _submissionsPending(lsGroups, lsSubjectsWithoutGroup);
-
-      await _updateUserState(lsGroups, lsSubjectsWithoutGroup);
+      if (user.role == cn.getRoleStudentName) {
+        await _submissionsPending(lsGroups, lsSubjectsWithoutGroup);
+      }
     }
+
+    //& actualizamos los state del usuario (grupos, materias, actividades, entregables)
+    await _saveUserAndUpdateState(
+        activeUser, lsGroups, lsSubjectsWithoutGroup, caller, authType);
+
+    // if (authType == AuthenticatedType.auth) {
+    //   state = state.copyWith(
+    //     authUser: user,
+    //     authenticatedType: authType,
+    //     authStatus: AuthStatus.authenticated,
+    //     authConectionType: AuthConnectionType.online,
+    //     errorMessage: '',
+    //   );
+    // } else if (authType == AuthenticatedType.authGoogle) {
+    //   state = state.copyWith(
+    //       authUser: user,
+    //       authenticatedType: authType,
+    //       authGoogleStatus: AuthGoogleStatus.authenticated,
+    //       authConectionType: AuthConnectionType.offline,
+    //       errorMessage: '');
+    // }
 
     state = state.copyWith(
       authUser: user,
       authenticatedType: authType,
-      authStatus: AuthStatus.authenticated,
-      authConectionType: AuthConnectionType.online,
+      authStatus:
+          authType == AuthenticatedType.auth ? AuthStatus.authenticated : null,
+      authGoogleStatus: authType == AuthenticatedType.authGoogle
+          ? AuthGoogleStatus.authenticated
+          : null,
+      authConectionType: authType == AuthenticatedType.auth
+          ? AuthConnectionType.online
+          : AuthConnectionType.offline,
       errorMessage: '',
     );
   }
 
-  void _saveUserAndUpdateState(ActiveUser user, List<Group> lsGroups,
-      List<Subject> lsSubjectsWithoutGroup) async {
-    //& Guardar el usuario offline
-    await authUserOffline.insertUser(
-        user.userId, user.userName, user.email, user.activeDueDate, user.role);
+  Future<void> _saveUserAndUpdateState(
+      ActiveUser user,
+      List<Group> lsGroups,
+      List<Subject> lsSubjectsWithoutGroup,
+      AuthCallers caller,
+      AuthenticatedType authType) async {
 
-    //& Guardar los grupos, materias y actividades offline (secuencial para evitar conflictos de BD)
-    await groupsOffline.saveGroupSubjects(lsGroups);
-    await subjectsOffline.saveSubjectsWithoutGroup(lsSubjectsWithoutGroup);
+    if (authType == AuthenticatedType.auth && caller != AuthCallers.checkAuthStatus) {
+      //& Guardar el usuario offline
+      await authUserOffline.insertUser(user.userId, user.userName, user.email,
+          user.activeDueDate, user.role);
+
+      //& Guardar los grupos, materias y actividades offline (secuencial para evitar conflictos de BD)
+      await groupsOffline.saveGroupSubjects(lsGroups);
+      await subjectsOffline.saveSubjectsWithoutGroup(lsSubjectsWithoutGroup);
+    }
 
     //& set para groups y subjects (no son async, ejecutar en paralelo lógico)
     setGroupsSubjectsState(lsGroups);
     setSubjectsWithoutGroupState(lsSubjectsWithoutGroup);
 
-    //& Recolectar todas las actividades y entregables para cargar en paralelo
-    List<Future<void>> allFutures = [];
-
-    //& set para activity state grupos y materias (paralelizado)
-    for (var group in lsGroups) {
-      for (var subj in group.materias ?? []) {
-        final subject = subj as Subject;
-        final subjectId = subject.materiaId;
-
-        //& Cargar actividades en paralelo
-        allFutures.add(
-          getAllActivitiesCallback(subjectId).then((_) async {
-            //& Cargar entregables en paralelo para cada actividad
-            List<Future<void>> submissionFutures = [];
-            for (var act in subj.actividades ?? []) {
-              final activity = act as Activity;
-              final activityId = activity.activityId;
-
-              submissionFutures.add(
-                getSubmissionsCallback(activityId!).then((submissions) async {
-                  try {
-                    await activityOffline.saveSubmissions(submissions, activityId);
-                  } catch (e) {
-                    debugPrint("⚠️ [LOGIN] Error guardando submissions para actividad $activityId: $e");
-                  }
-                }),
-              );
-            }
-            await Future.wait(submissionFutures);
-          }).catchError((error) {
-            debugPrint("🚨 [LOGIN] DioException en carga de actividades para materiaId=$subjectId: $error");
-            // Continuar sin detener el login
-            return null;
-          }),
-        );
-      }
-    }
-
-    //& set para activity state materias sin grupo (paralelizado)
-    for (var subject in lsSubjectsWithoutGroup) {
-      final subjectId = subject.materiaId;
-
-      allFutures.add(
-        Future(() async {
-          try {
-            await getAllActivitiesCallback(subjectId);
-            List<Future<void>> submissionFutures = [];
-            for (var act in subject.actividades ?? []) {
-              final activity = act as Activity;
-              final activityId = activity.activityId;
-
-              submissionFutures.add(
-                getSubmissionsCallback(activityId!).then((submissions) async {
-                  try {
-                    await activityOffline.saveSubmissions(submissions, activityId);
-                  } catch (e) {
-                    debugPrint("⚠️ [LOGIN] Error guardando submissions para actividad $activityId: $e");
-                  }
-                }),
-              );
-            }
-            await Future.wait(submissionFutures);
-          } catch (error) {
-            debugPrint("⚠️ [LOGIN] Error cargando actividades para materia $subjectId: $error");
-            // Continuar sin detener el login
-          }
-        }),
-      );
-    }
-
-    //& Ejecutar todas las operaciones en paralelo
-    await Future.wait(allFutures);
-  }
-
-  Future<void> _updateUserState(
-      List<Group> lsGroups, List<Subject> lsSubjectsWithoutGroup) async {
-    //& set para groups y subject
-    setGroupsSubjectsState(lsGroups);
-    setSubjectsWithoutGroupState(lsSubjectsWithoutGroup);
-
-    //& Recolectar todas las operaciones para ejecutar en paralelo
-    List<Future<void>> allFutures = [];
-
-    for (var group in lsGroups) {
-      for (var sub in group.materias ?? []) {
-        final subject = sub as Subject;
-        final subjectId = subject.materiaId;
-
-        allFutures.add(
-          Future(() async {
-            try {
-              await getAllActivitiesCallback(subjectId);
-              List<Future<void>> submissionFutures = [];
-              for (var act in sub.actividades ?? []) {
-                final activity = act as Activity;
-                final activityId = activity.activityId;
-                submissionFutures.add(getSubmissionsCallback(activityId!));
-              }
-              await Future.wait(submissionFutures);
-            } catch (error) {
-              debugPrint("⚠️ [LOGIN] Error cargando actividades para materia $subjectId: $error");
-            }
-          }),
-        );
-      }
-    }
-
-    for (var subject in lsSubjectsWithoutGroup) {
-      final subjectId = subject.materiaId;
-
-      allFutures.add(
-        Future(() async {
-          try {
-            await getAllActivitiesCallback(subjectId);
-            List<Future<void>> submissionFutures = [];
-            for (var act in subject.actividades ?? []) {
-              final activity = act as Activity;
-              final activityId = activity.activityId;
-              submissionFutures.add(getSubmissionsCallback(activityId!));
-            }
-            await Future.wait(submissionFutures);
-          } catch (error) {
-            debugPrint("⚠️ [LOGIN] Error cargando actividades para materia $subjectId: $error");
-          }
-        }),
-      );
-    }
-
-    await Future.wait(allFutures);
+    await _getGroupsAndSubjects(
+        caller, user.role, authType, lsGroups, lsSubjectsWithoutGroup);
   }
 
   Future<void> _submissionsPending(
@@ -605,11 +521,13 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
               for (var act in sub.actividades ?? []) {
                 final activity = act as Activity;
                 final activityId = activity.activityId;
-                submissionFutures.add(getSubmissionsOfflineCallback(activityId!));
+                submissionFutures
+                    .add(getSubmissionsOfflineCallback(activityId!));
               }
               await Future.wait(submissionFutures);
             } catch (error) {
-              debugPrint("⚠️ [LOGIN] Error cargando actividades offline para materia $subjectId: $error");
+              debugPrint(
+                  "⚠️ [LOGIN] Error cargando actividades offline para materia $subjectId: $error");
             }
           }),
         );
@@ -631,7 +549,8 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
             }
             await Future.wait(submissionFutures);
           } catch (error) {
-            debugPrint("⚠️ [LOGIN] Error cargando actividades offline para materia $subjectId: $error");
+            debugPrint(
+                "⚠️ [LOGIN] Error cargando actividades offline para materia $subjectId: $error");
           }
         }),
       );
@@ -644,6 +563,9 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
 
   Future<void> loginGoogleUser() async {
     try {
+      const authType = AuthenticatedType.authGoogle;
+      const caller = AuthCallers.loginGoogleUser;
+
       final user = await authRepository.loginGoogle();
 
       if (user.estaAutorizado == AuthorizationUserStatus.authorized.value) {
@@ -653,7 +575,8 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
         final isFcmTokenValid = await verifyExistingFcmToken(id, role);
         if (!isFcmTokenValid) throw FcmTokenVerificatioFailed();
 
-        _setLoggedGoogleUser(user);
+        // _setLoggedGoogleUser(user);
+        _setLoggedUser(authType, caller, user);
       } else if (user.estaAutorizado == AuthorizationUserStatus.pending.value) {
         _saveUserDataLoginGoogle(user.email, user.token);
         if (user.requiereDatosAdicionales == true) {
@@ -663,11 +586,14 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
         }
       }
     } on FcmTokenVerificatioFailed catch (e) {
-      badResponseDialog("Error de configuración", e.message ?? "Error con el token de notificaciones");
+      badResponseDialog("Error de configuración",
+          e.message ?? "Error con el token de notificaciones");
     } on ConnectionTimeout catch (e) {
-      badResponseDialog("Error de conexión", e.message ?? "Tiempo de espera agotado");
+      badResponseDialog(
+          "Error de conexión", e.message ?? "Tiempo de espera agotado");
     } on UncontrolledError catch (e) {
-      badResponseDialog("Error en login", e.message ?? "Error al iniciar sesión con Google");
+      badResponseDialog(
+          "Error en login", e.message ?? "Error al iniciar sesión con Google");
     }
   }
 
@@ -689,6 +615,9 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
   Future<bool> missingDataGoogleUser(
       String names, String lastname, String secondLastname, String role) async {
     try {
+      const authType = AuthenticatedType.authGoogle;
+      const caller = AuthCallers.missingDataGoogleUser;
+
       final fcmToken = await FirebaseCM.getFcmToken();
       if (fcmToken != null) {
         final user = await authRepository.registerMissingDataGoogle(
@@ -699,7 +628,8 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
             fcmToken: fcmToken);
 
         if (user.estaAutorizado == AuthorizationUserStatus.authorized.value) {
-          _setLoggedGoogleUser(user);
+          // _setLoggedGoogleUser(user);
+          _setLoggedUser(authType, caller, user);
         } else if (user.estaAutorizado ==
             AuthorizationUserStatus.pending.value) {
           return true;
@@ -708,7 +638,8 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
       }
       return false;
     } on UncontrolledError catch (e) {
-      badResponseDialog("Error en registro", e.message ?? "Error al completar registro con Google");
+      badResponseDialog("Error en registro",
+          e.message ?? "Error al completar registro con Google");
       return false;
     }
   }
@@ -716,6 +647,9 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
   void checkAuthGoogleStatus() async {
     try {
       // final currentUser = await googleSigninApi.verifyExistingUser();
+      const authType = AuthenticatedType.authGoogle;
+      const caller = AuthCallers.checkAuthGoogleStatus;
+
       final token = await storageService.getToken();
       if (token == "") return logoutGoogle();
       final user = await googleSigninApi.checkSignInStatus(token);
@@ -723,7 +657,8 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
       String role = user.role;
       final isFcmTokenValid = await verifyExistingFcmToken(id, role);
       if (isFcmTokenValid) {
-        _setLoggedGoogleUser(user);
+        // _setLoggedGoogleUser(user);
+        _setLoggedUser(authType, caller, user);
       } else {
         throw FcmTokenVerificatioFailed();
       }
@@ -735,94 +670,42 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
     }
   }
 
-  void _setLoggedGoogleUser(AuthUser user) async {
-    const authType = AuthenticatedType.authGoogle;
-    await _saveUserDataKeyValue(
-        user.token, user.userId, user.role, user.userName, authType);
+  // void _setLoggedGoogleUser(AuthUser user) async {
+  //   const authType = AuthenticatedType.authGoogle;
 
-    debugPrint("🔄 [LOGIN] Iniciando carga de datos del usuario (Google)...");
-    List<Group> lsGroups = await groups.getGroupsSubjects();
-    debugPrint("✅ [LOGIN] Grupos obtenidos: ${lsGroups.length}");
-    List<Subject> lsSubjectsWithoutGroup =
-        await subjects.getSubjectsWithoutGroup();
-    debugPrint("✅ [LOGIN] Materias obtenidas: ${lsSubjectsWithoutGroup.length}");
+  //   await _saveUserDataKeyValue(
+  //       user.token, user.userId, user.role, user.userName, authType);
 
-    _setUserDataGoogleState(lsGroups, lsSubjectsWithoutGroup);
+  //   List<Group> lsGroups = await groups.getGroupsSubjects();
 
-    state = state.copyWith(
-        authUser: user,
-        authenticatedType: authType,
-        authGoogleStatus: AuthGoogleStatus.authenticated,
-        authConectionType: AuthConnectionType.offline,
-        errorMessage: '');
-  }
+  //   List<Subject> lsSubjectsWithoutGroup =
+  //       await subjects.getSubjectsWithoutGroup();
 
-  void _setUserDataGoogleState(
-      List<Group> lsGroups, List<Subject> lsSubjectsWithoutGroup) async {
-    //& set para groups y subjects y activities state
-    setGroupsSubjectsState(lsGroups);
-    setSubjectsWithoutGroupState(lsSubjectsWithoutGroup);
+  //   _setUserDataGoogleState(
+  //       lsGroups, lsSubjectsWithoutGroup, user.role, "", authType);
 
-    //& Recolectar todas las actividades y entregables para cargar en paralelo
-    List<Future<void>> allFutures = [];
+  //   state = state.copyWith(
+  //       authUser: user,
+  //       authenticatedType: authType,
+  //       authGoogleStatus: AuthGoogleStatus.authenticated,
+  //       authConectionType: AuthConnectionType.offline,
+  //       errorMessage: '');
+  // }
 
-    //& set para activity state (paralelizado)
-    for (var group in lsGroups) {
-      for (var subj in group.materias ?? []) {
-        final subject = subj as Subject;
-        final subjectId = subject.materiaId;
+  // void _setUserDataGoogleState(
+  //     List<Group> lsGroups,
+  //     List<Subject> lsSubjectsWithoutGroup,
+  //     String role,
+  //     String caller,
+  //     AuthenticatedType authType) async {
 
-        //& Actualizamos el state de actividades en paralelo
-        allFutures.add(
-          Future(() async {
-            try {
-              await getAllActivitiesCallback(subjectId);
-              List<Future<void>> submissionFutures = [];
-              for (var act in subj.actividades ?? []) {
-                final activity = act as Activity;
-                final activityId = activity.activityId;
+  //   //& set para groups y subjects y activities state
+  //   setGroupsSubjectsState(lsGroups);
+  //   setSubjectsWithoutGroupState(lsSubjectsWithoutGroup);
 
-                submissionFutures.add(
-                  getSubmissionsCallback(activityId!),
-                );
-              }
-              await Future.wait(submissionFutures);
-            } catch (error) {
-              debugPrint("⚠️ [LOGIN] Error cargando actividades para materia $subjectId: $error");
-            }
-          }),
-        );
-      }
-    }
-
-    //& set para activity state materias sin grupo (paralelizado)
-    for (var subject in lsSubjectsWithoutGroup) {
-      final subjectId = subject.materiaId;
-
-      allFutures.add(
-        Future(() async {
-          try {
-            await getAllActivitiesCallback(subjectId);
-            List<Future<void>> submissionFutures = [];
-            for (var act in subject.actividades ?? []) {
-              final activity = act as Activity;
-              final activityId = activity.activityId;
-
-              submissionFutures.add(
-                getSubmissionsCallback(activityId!),
-              );
-            }
-            await Future.wait(submissionFutures);
-          } catch (error) {
-            debugPrint("⚠️ [LOGIN] Error cargando actividades para materia $subjectId: $error");
-          }
-        }),
-      );
-    }
-
-    //& Ejecutar todas las operaciones en paralelo
-    await Future.wait(allFutures);
-  }
+  //   _getGroupsAndSubjects(
+  //       caller, role, authType, lsGroups, lsSubjectsWithoutGroup);
+  // }
 
   Future<void> logoutGoogle([String? errorMessage]) async {
     try {
@@ -843,7 +726,7 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
     bool isSignedIn = await googleSigninApi.isSignedIn();
     if (isSignedIn) {
       await googleSigninApi.handlerGoogleLogout();
-    }else{
+    } else {
       storageService.removeEmail();
     }
     state = AuthState();
@@ -867,5 +750,97 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
     await storageService.removeRole();
     await storageService.removeToken();
     await storageService.removeUserName();
+  }
+
+  Future<void> _getGroupsAndSubjects(
+      AuthCallers caller,
+      String role,
+      AuthenticatedType authType,
+      List<Group> lsGroups,
+      List<Subject> lsSubjectsWithoutGroup) async {
+    //& Recolectar todas las actividades y entregables para cargar en paralelo
+    List<Future<void>> allFutures = [];
+
+    //& set para activity state grupos y materias (paralelizado)
+    for (var group in lsGroups) {
+      for (var subj in group.materias ?? []) {
+        final subject = subj as Subject;
+        final subjectId = subject.materiaId;
+
+        //& Cargar actividades en paralelo
+        allFutures.add(
+          getAllActivitiesCallback(subjectId).then((_) async {
+            //& Cargar entregables en paralelo para cada actividad
+            List<Future<void>> submissionFutures = [];
+            for (var act in subj.actividades ?? []) {
+              final activity = act as Activity;
+              final activityId = activity.activityId;
+
+              submissionFutures.add(
+                getSubmissionsCallback(activityId!).then((submissions) async {
+                  if (caller != AuthCallers.checkAuthStatus &&
+                      authType == AuthenticatedType.auth) {
+                    try {
+                      await activityOffline.saveSubmissions(
+                          submissions, activityId);
+                    } catch (e) {
+                      debugPrint(
+                          "⚠️ [LOGIN] Error guardando submissions para actividad $activityId: $e");
+                    }
+                  }
+                }),
+              );
+            }
+            await Future.wait(submissionFutures);
+          }).catchError((error) {
+            debugPrint(
+                "🚨 [LOGIN] DioException en carga de actividades para materiaId=$subjectId: $error");
+            // Continuar sin detener el login
+            return null;
+          }),
+        );
+      }
+    }
+
+    //& set para activity state materias sin grupo (paralelizado)
+    for (var subject in lsSubjectsWithoutGroup) {
+      final subjectId = subject.materiaId;
+
+      allFutures.add(
+        Future(() async {
+          try {
+            await getAllActivitiesCallback(subjectId);
+            List<Future<void>> submissionFutures = [];
+            for (var act in subject.actividades ?? []) {
+              final activity = act as Activity;
+              final activityId = activity.activityId;
+
+              submissionFutures.add(
+                getSubmissionsCallback(activityId!).then((submissions) async {
+                  if (caller != AuthCallers.checkAuthStatus &&
+                      authType == AuthenticatedType.auth) {
+                    try {
+                      await activityOffline.saveSubmissions(
+                          submissions, activityId);
+                    } catch (e) {
+                      debugPrint(
+                          "⚠️ [LOGIN] Error guardando submissions para actividad $activityId: $e");
+                    }
+                  }
+                }),
+              );
+            }
+            await Future.wait(submissionFutures);
+          } catch (error) {
+            debugPrint(
+                "⚠️ [LOGIN] Error cargando actividades para materia $subjectId: $error");
+            // Continuar sin detener el login
+          }
+        }),
+      );
+    }
+
+    //& Ejecutar todas las operaciones en paralelo
+    await Future.wait(allFutures);
   }
 }
