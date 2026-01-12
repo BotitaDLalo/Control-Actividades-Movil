@@ -1,7 +1,7 @@
 import 'package:aprende_mas/config/utils/packages.dart';
 import 'package:aprende_mas/config/utils/catalog_names.dart';
 import 'package:aprende_mas/providers/providers.dart';
-import 'package:aprende_mas/views/widgets/alerts/custom_alert_dialog.dart';
+import 'package:aprende_mas/views/widgets/alerts/warning_confirmation_dialog.dart';
 import 'package:aprende_mas/models/models.dart';
 import 'package:aprende_mas/views/widgets/widgets.dart';
 import 'package:intl/intl.dart';
@@ -75,25 +75,16 @@ class _ActivityListState extends ConsumerState<ActivityList> {
     }
 
     void showDialogDeleteConfirmation(int activityId) {
-      showDialog(
-        context: context,
-        builder: (context) {
-          return CustomAlertDialog(
-            message: '¿Desea eliminar la actividad?',
-            comment: 'Todas las entregas y calificaciones serán eliminadas',
-            buttonCancelName: 'Cancelar',
-            onPressedContinue: () async {
-              await ref
-                  .read(activityProvider.notifier)
-                  .deleteActivity(activityId);
-
-              ref.invalidate(
-                  activitiesBySubjectProvider(widget.subjectId));
-              closeDialog();
-            },
-            buttonContinueName: 'Eliminar',
-            onPressedCancel: closeDialog,
-          );
+      WarningConfirmationDialog.show(
+        context,
+        message: '¿Desea eliminar la actividad? Todas las entregas y calificaciones serán eliminadas',
+        onConfirmPressed: () async {
+          await ref
+              .read(activityProvider.notifier)
+              .deleteActivity(activityId);
+ 
+          ref.invalidate(
+              activitiesBySubjectProvider(widget.subjectId));
         },
       );
     }
