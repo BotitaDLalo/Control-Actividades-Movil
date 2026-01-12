@@ -87,7 +87,7 @@ class SubjectCard extends ConsumerWidget {
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text('Editar materia'),
+          title: Text('Editar materia', style: TextStyle(color: Colors.black, fontWeight: FontWeight.w500)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -103,11 +103,12 @@ class SubjectCard extends ConsumerWidget {
             ],
           ),
           actions: [
+            SizedBox(height: 20),
             TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancelar'),
-            ),
-            TextButton(
+              style: TextButton.styleFrom(
+                backgroundColor: Colors.green,
+                minimumSize: Size(100, 50),
+              ),
               onPressed: () async {
                 final newName = nameController.text.trim();
                 final newDescription = descriptionController.text.trim();
@@ -125,7 +126,16 @@ class SubjectCard extends ConsumerWidget {
                   ErrorDialog.show(context, message: "Error al actualizar la materia");
                 }
               },
-              child: const Text('Actualizar'),
+              child: Text('Actualizar', style: TextStyle(color: Colors.white)),
+            ),
+            SizedBox(height: 20),
+            TextButton(
+              style: TextButton.styleFrom(
+                backgroundColor: Colors.red,
+                minimumSize: Size(100, 45),
+              ),
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text('Cancelar', style: TextStyle(color: Colors.white)),
             ),
           ],
         ),

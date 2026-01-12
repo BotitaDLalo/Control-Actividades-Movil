@@ -26,7 +26,7 @@ class GroupCard extends ConsumerStatefulWidget {
       required this.description,
       required this.children,
       this.accessCode,
-      this.animationDuration = const Duration(milliseconds: 600)});
+      this.animationDuration = const Duration(milliseconds: 250)});
 
   @override
   CustomExpansionTileState createState() => CustomExpansionTileState();
@@ -129,14 +129,14 @@ class CustomExpansionTileState extends ConsumerState<GroupCard>
                 children: [
                   // Watermark en la esquina inferior izquierda
                   Positioned(
-                    right: context.width(0.05), // 5% del ancho
-                    bottom: -context.height(0.013), // 1.3% del alto (negativo)
+                    right: context.width(0.02), // 5% del ancho
+                    bottom: -context.height(0), // 1.3% del alto (negativo)
                     child: Opacity(
                       opacity: 0.30,
                       child: SvgPicture.asset(
                         'assets/icons/grupo2.svg',
-                        width: context.width(0.25), // 25% del ancho
-                        height: context.width(0.25), // 25% del ancho (mantiene proporción)
+                        width: context.width(0.28), // 25% del ancho
+                        height: context.width(0.28), // 25% del ancho (mantiene proporción)
                         color: Colors.white,
                       ),
                     ),
@@ -152,7 +152,7 @@ class CustomExpansionTileState extends ConsumerState<GroupCard>
                           onTap: _toggleExpand,
                           borderRadius: BorderRadius.circular(context.radius(0.052)), // 5.2%
                           child: SizedBox(
-                            height: context.height(0.1), // 10% del alto
+                            height: context.height(0.15), // 12% del alto
                             child: Row(
                               children: [
                                 SizedBox(width: context.width(0.03)), // 3% del ancho
