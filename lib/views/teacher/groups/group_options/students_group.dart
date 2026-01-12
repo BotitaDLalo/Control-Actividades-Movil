@@ -3,6 +3,8 @@ import 'package:aprende_mas/providers/groups/groups_provider.dart';
 import 'package:aprende_mas/providers/groups/students_group_provider.dart';
 import 'package:aprende_mas/views/teacher/groups_subjects/students_groups_subjects.dart';
 import 'package:aprende_mas/views/widgets/alerts/success_dialog.dart';
+import 'package:aprende_mas/views/widgets/alerts/error_dialog.dart';
+import 'package:aprende_mas/views/widgets/alerts/warning_confirmation_dialog.dart';
 import 'package:flutter/material.dart'; // Importante para TextField
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -68,56 +70,49 @@ class _StudentsGroupState extends ConsumerState<StudentsGroup> {
       // Leer el notifier ANTES de la operación async para evitar el error de ref disposed
       final groupNotifier = ref.read(studentsGroupProvider.notifier);
 
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text(
-            '¿Deseas eliminar el alumno?',
-            style: TextStyle(fontWeight: FontWeight.w500, fontSize: 20),
-          ),
-          content: ListTile(
-            leading: IconButton(
-              onPressed: () {},
-              icon: const Icon(Icons.person),
-              iconSize: 30,
-            ),
-            title: Text(username),
-            subtitle: Text("$name $lastName $lastName2"),
-          ),
-          contentPadding: const EdgeInsets.all(10),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context); // Cerrar solo el diálogo
-              },
-              child: const Text('Cancelar'),
-            ),
-            TextButton(
-              onPressed: () async {
-                // 3. IMPLEMENTACIÓN DE LA LÓGICA
+      // Mostrar diálogo de confirmación antes de eliminar
+      WarningConfirmationDialog.show(
+        context,
+        message: '¿Está seguro de que desea eliminar a este alumno del grupo?',
+        onConfirmPressed: () async {
+          try {
+            // 3. IMPLEMENTACIÓN DE LA LÓGICA
 
-                // Usar el notifier ya leído
-                final success = await groupNotifier.removeStudentFromGroup(
-                  groupId: widget.id,
-                  studentId: studentId,
-                );
+            // Usar el notifier ya leído
+            final success = await groupNotifier.removeStudentFromGroup(
+              groupId: widget.id,
+              studentId: studentId,
+            );
 
-                if (context.mounted) {
-                  Navigator.pop(context); // Cerrar el diálogo
-                  // Cerrar el ModalBottomSheet después de la eliminación
-                  Navigator.pop(context);
-
-                  // Mostrar diálogo de éxito
-                  SuccessDialog.show(
-                    context,
-                    message: 'Alumno eliminado correctamente',
-                  );
-                }
-              },
-              child: const Text('Eliminar'),
-            )
-          ],
-        ),
+            if (success) {
+              // Mostrar mensaje de éxito
+              SuccessDialog.show(
+                context,
+                message: 'Alumno eliminado del grupo exitosamente',
+                onOkPressed: () {
+                  // No es necesario hacer nada, el diálogo se cierra automáticamente
+                },
+              );
+            } else {
+              // Mostrar mensaje de error
+              ErrorDialog.show(
+                context,
+                message: 'No se pudo eliminar al alumno del grupo. Por favor, intente de nuevo.',
+              );
+            }
+          } catch (e) {
+            // Captura cualquier error en la eliminación del alumno
+            print("Error al eliminar al alumno del grupo: $e");
+            // Mostrar mensaje de error
+            ErrorDialog.show(
+              context,
+              message: 'Error al eliminar al alumno del grupo: $e',
+            );
+          }
+        },
+        onCancelPressed: () {
+          // No hacer nada, solo cerrar el diálogo
+        },
       );
     }
 

@@ -75,22 +75,43 @@ return Scaffold(
               final name = lsStudents[index].name;
 
               return ElementTile(
-                icon: Icons.person,
+                iconWidget: SvgPicture.asset(
+                  'assets/icons/user2.svg',
+                  width: 32,
+                  height: 32,
+                  colorFilter: const ColorFilter.mode(Colors.black, BlendMode.srcIn),
+                ),
                 iconColor: Colors.white,
                 iconSize: 32,
                 title: username,
                 subtitle: "$lastname $lastname2 $name",
-                trailingIcon: Icons.more_vert,
-                trailingColor: Colors.black,
-                trailingVoidCallback: () {
-                  widget.studentOptionsFunction!(
-                    studentId: studentId,
-                    username: username,
-                    lastName: lastname,
-                    lastName2: lastname2,
-                    name: name,
-                  );
-                },
+                trailingWidget: IconButton(
+                  onPressed: () {
+                    widget.studentOptionsFunction!(
+                      studentId: studentId,
+                      username: username,
+                      lastName: lastname,
+                      lastName2: lastname2,
+                      name: name,
+                    );
+                  },
+                  icon: Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: Colors.red,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Center(
+                      child: SvgPicture.asset(
+                        'assets/icons/eliminar4.svg',
+                        width: 20,
+                        height: 20,
+                        colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+                      ),
+                    ),
+                  ),
+                ),
               );
             },
           ),

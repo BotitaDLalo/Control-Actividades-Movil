@@ -1,4 +1,5 @@
 import 'package:aprende_mas/config/utils/packages.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class ElementTile extends ConsumerWidget {
   // final Notice notification;
@@ -56,9 +57,14 @@ Widget build(BuildContext context, WidgetRef ref) {
                           color: trailingColor,
                           size: 25,
                         ))
-                    : Text(
-                        trailingString ?? "",
-                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    : IconButton(
+                        onPressed: trailingVoidCallback,
+                        icon: SvgPicture.asset(
+                          'assets/icons/eliminarUsuario.svg',
+                          width: 24,
+                          height: 24,
+                          colorFilter: const ColorFilter.mode(Colors.black, BlendMode.srcIn),
+                        ),
                       )
             ),
             
