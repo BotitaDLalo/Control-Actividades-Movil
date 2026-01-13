@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:aprende_mas/views/teacher/activities/options/create_activies/form_activities.dart'; // Asegúrate de importar tu formulario
+import 'package:aprende_mas/views/teacher/activities/options/create_activies/form_activities.dart';
+import 'package:aprende_mas/views/teacher/activities/options/create_activies/button_ai.dart';
 import 'package:aprende_mas/models/models.dart'; // Asegúrate de importar el modelo Activity
 
 class CreateActivitiesScreen extends StatelessWidget {
@@ -18,9 +19,13 @@ class CreateActivitiesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Ejemplo: se asume que los controladores se obtienen de alguna forma
+    final nombreController = TextEditingController();
+    final descripcionController = TextEditingController();
+    // Si tienes otra forma de obtenerlos (por ejemplo, desde un provider), reemplaza esto
+
     return Scaffold(
       appBar: AppBar(
-        // Cambiamos el título dinámicamente dependiendo si es editar o crear
         title: Text(activity == null ? 'Crear Actividad' : 'Editar Actividad'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios),
@@ -30,15 +35,17 @@ class CreateActivitiesScreen extends StatelessWidget {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // Aquí llamas a tu formulario
             FormActivities(
               subjectId: subjectId,
               nombreMateria: nombreMateria,
-              // 3. PASAR LA ACTIVIDAD AL FORMULARIO
-              activity: activity, 
+              activity: activity,
             ),
           ],
         ),
+      ),
+      floatingActionButton: ButtonAI(
+        tituloController: nombreController,
+        descripcionController: descripcionController,
       ),
     );
   }

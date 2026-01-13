@@ -25,7 +25,7 @@ class AIActivity extends ChangeNotifier {
 
     try {
       final model = GenerativeModel(
-        model: 'gemini-1.5-flash',
+        model: 'gemini-1.5-flash-latest',
         apiKey: dotenv.env['GOOGLE_API_KEY']!,
       );
 
