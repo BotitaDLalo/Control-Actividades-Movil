@@ -24,7 +24,8 @@ class NotificationModel {
             messageId: e['MensajeId'] as String,
             title: e['Titulo'] as String,
             body: e['Descripcion'] as String,
-            sentDate: formatDate(e['FechaEnvio'] as String),
+            //sentDate: formatDate(e['FechaEnvio'] as String),
+            sentDate: e['FechaEnvio'] as String,
             data: e['Data'] as String,
             imageUrl: e['ImagenURL'] as String);
       },

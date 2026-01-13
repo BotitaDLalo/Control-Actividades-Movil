@@ -2,6 +2,7 @@ import 'package:aprende_mas/config/utils/packages.dart';
 import 'package:aprende_mas/models/models.dart';
 import 'package:aprende_mas/providers/providers.dart';
 import 'package:aprende_mas/views/widgets/widgets.dart';
+import 'package:intl/intl.dart';
 
 class NotificationsScreen extends ConsumerStatefulWidget {
   const NotificationsScreen({super.key});
@@ -17,6 +18,21 @@ class NoticesScreenState extends ConsumerState<NotificationsScreen> {
 
     ref.read(notificationsProvider.notifier).getLsNotices();
   }
+
+
+String formatDateFriendly(String dateString) {
+  final date = DateTime.parse(dateString);
+  final now = DateTime.now();
+
+  if (DateUtils.isSameDay(date, now)) {
+    return 'Hoy a las ${DateFormat('HH:mm').format(date)}';
+  } else {
+    return '${DateFormat('dd/MM/yyyy').format(date)} a las ${DateFormat('HH:mm').format(date)}';
+  }
+}
+
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -71,7 +87,7 @@ class NoticesScreenState extends ConsumerState<NotificationsScreen> {
                       iconSize: 28,
                       iconColor: Colors.white,
                       title: notification.title,
-                      subtitle: notification.sentDate,
+                      subtitle: formatDateFriendly(notification.sentDate),
                       onTapFunction: () {
                         NotificationModel notice = NotificationModel(
                             messageId: notification.messageId,
