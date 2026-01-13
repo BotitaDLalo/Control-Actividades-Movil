@@ -46,7 +46,8 @@ class _StudentsSubjectState extends ConsumerState<StudentsSubject> {
     }).toList();
 
     void showStudentOptions({
-      required int studentId,
+      required int alumnoMateriaId,
+      //required int studentId,
       required String username,
       required String name,
       required String lastName,
@@ -71,10 +72,10 @@ class _StudentsSubjectState extends ConsumerState<StudentsSubject> {
                 final subjectNotifier =
                     ref.read(studentsSubjectProvider.notifier);
 
-                await subjectNotifier.removeStudentFromSubject(
-                  subjectId: widget.id,
-                  studentId: studentId,
-                );
+                  await subjectNotifier.removeStudentFromSubject(
+                    alumnoMateriaId: alumnoMateriaId,
+                  );
+
 
                 if (context.mounted) {
                   Navigator.pop(context);

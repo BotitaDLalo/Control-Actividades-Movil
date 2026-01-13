@@ -59,14 +59,12 @@ class SubjectsRespositoryImpl implements SubjectsRepository {
     return subjectsDataSource.addStudentsSubject(subjectId, emails);
   }
 
-@override
+  @override
   Future<bool> removeStudentFromSubject({
-    required int subjectId, 
-    required int studentId
+    required int alumnoMateriaId,
   }) {
     return subjectsDataSource.removeStudentFromSubject(
-      subjectId: subjectId, 
-      studentId: studentId
+      alumnoMateriaId: alumnoMateriaId,
     );
   }
 

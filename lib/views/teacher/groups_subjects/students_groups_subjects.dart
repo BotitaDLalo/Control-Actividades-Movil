@@ -7,12 +7,15 @@ import 'package:aprende_mas/providers/providers.dart';
 class StudentsGroupsSubjects extends ConsumerStatefulWidget {
   final List<StudentGroupSubject> lsStudents;
   final VoidCallback? voidCallback;
-  final void Function(
-      {required int studentId,
-      required String username,
-      required String name,
-      required String lastName,
-      required String lastName2})? studentOptionsFunction;
+  final void Function({
+  required int alumnoMateriaId,
+  //required int studentId,
+  required String username,
+  required String name,
+  required String lastName,
+  required String lastName2,
+              })? studentOptionsFunction;
+
 
   const StudentsGroupsSubjects(
       {super.key,
@@ -68,7 +71,8 @@ return Scaffold(
           child: ListView.builder(
             itemCount: lsStudents.length,
             itemBuilder: (context, index) {
-              final studentId = lsStudents[index].alumnoId;
+              //final studentId = lsStudents[index].alumnoId;
+              final alumnoMateriaId = lsStudents[index].alumnoMateriaId;
               final username = lsStudents[index].username;
               final lastname = lsStudents[index].lastName;
               final lastname2 = lsStudents[index].lastName2;
@@ -84,7 +88,8 @@ return Scaffold(
                 trailingColor: Colors.black,
                 trailingVoidCallback: () {
                   widget.studentOptionsFunction!(
-                    studentId: studentId,
+                    //studentId: studentId,
+                    alumnoMateriaId: alumnoMateriaId,
                     username: username,
                     lastName: lastname,
                     lastName2: lastname2,

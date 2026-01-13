@@ -21,7 +21,6 @@ abstract class SubjectsDataSource {
 
   Future<List<StudentGroupSubject>> getStudentsSubject(int? groupId,int subjectId);
   Future<bool> removeStudentFromSubject({
-    required int subjectId, 
-    required int studentId
+  required int alumnoMateriaId,
   });
 }

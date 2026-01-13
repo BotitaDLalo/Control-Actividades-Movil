@@ -84,33 +84,36 @@ Future<bool> addStudentsSubject(int subjectId) async {
   }
 
 
-        Future<bool> removeStudentFromSubject({
-            required int subjectId,
-            required int studentId,
-        }) async {
-            try {
-                final success = await subjectsRepository.removeStudentFromSubject( 
-                    subjectId: subjectId,
-                    studentId: studentId,
-                );
+ Future<bool> removeStudentFromSubject({
+  required int alumnoMateriaId,
+}) async {
+  try {
+    final success = await subjectsRepository.removeStudentFromSubject(
+      alumnoMateriaId: alumnoMateriaId,
+    );
 
-                if (success) {
-                    final updatedList = state.lsStudentsSubject
-                        .where((student) => student.alumnoId != studentId)
-                        .toList();
+    if (success) {
+      final updatedList = state.lsStudentsSubject
+          .where(
+            (student) =>
+                student.alumnoMateriaId != alumnoMateriaId,
+          )
+          .toList();
 
-                    state = state.copyWith(
-                        lsStudentsSubject: updatedList,
-                    );
+      state = state.copyWith(
+        lsStudentsSubject: updatedList,
+      );
 
-                    return true;
-                }
-                return false;
-            } catch (e) {
-                // ...
-                return false;
-            }
-        }
+      return true;
+    }
+
+    return false;
+  } catch (e) {
+    debugPrint('Error en provider removeStudentFromSubject: $e');
+    return false;
+  }
+}
+
 
   void clearSubjectTeacherOptionsLs() {
     state = state.copyWith(lsEmails: [], lsStudentsSubject: []);

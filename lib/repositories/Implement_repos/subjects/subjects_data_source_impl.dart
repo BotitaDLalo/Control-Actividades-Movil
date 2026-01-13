@@ -186,22 +186,23 @@ try {
 
 @override
 Future<bool> removeStudentFromSubject({
-    required int subjectId, 
-    required int studentId
+  required int alumnoMateriaId,
 }) async {
     try {
         debugPrint('--- [DEBUG ELIMINACIÓN] ---');
-        debugPrint('MateriaId a enviar: $subjectId');
-        debugPrint('AlumnoId a enviar: $studentId');
+        debugPrint('AlumnoMateriaId: $alumnoMateriaId');
         debugPrint('---------------------------');
+        debugPrint('BODY ENVIADO: ${{
+          'AlumnoMateriaId': alumnoMateriaId,
+        }}');
+
         
         const uri = "/Alumnos/EliminarAlumnoMateria"; 
 
         final res = await dio.post(
             uri, 
             data: {
-                "MateriaId": subjectId, 
-                "AlumnoId": studentId, 
+            'AlumnoMateriaId': alumnoMateriaId,
             }
         );
 
@@ -213,7 +214,7 @@ Future<bool> removeStudentFromSubject({
 
     } catch (e) {
         // Si hay una excepción de red (DioException), se registra y se relanza.
-        debugPrint('Error en SubjectsDataSourceImpl.removeStudent: $e');
+        debugPrint('Error en SubjectsDataSourceImpl.removeStudentFromSubject: $e');
         
         throw Exception(e); 
     }

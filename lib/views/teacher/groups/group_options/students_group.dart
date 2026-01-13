@@ -56,7 +56,8 @@ class _StudentsGroupState extends ConsumerState<StudentsGroup> {
 
     void showStudentOptions({
       // 2. AÑADIDO: Recibir el ID del alumno
-      required int studentId, 
+      required int alumnoMateriaId,
+      //required int studentId,
       required String username,
       required String name,
       required String lastName,
@@ -98,7 +99,7 @@ class _StudentsGroupState extends ConsumerState<StudentsGroup> {
                 final groupNotifier = ref.read(studentsGroupProvider.notifier);
 
                 // Llamar a la función de eliminación
-                final success = await groupNotifier.removeStudentFromGroup(
+                /*final success = await groupNotifier.removeStudentFromGroup(
                   groupId: widget.id,
                   studentId: studentId,
                 );
@@ -110,7 +111,7 @@ class _StudentsGroupState extends ConsumerState<StudentsGroup> {
                 if (success) {
                   // Opcional: Feedback visual
                   // print("Alumno eliminado del grupo correctamente");
-                }
+                }*/
               },
               child: const Text('Eliminar'),
             )
