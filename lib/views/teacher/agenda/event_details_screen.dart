@@ -63,7 +63,7 @@ class EventDetailsScreen extends ConsumerWidget {
     // No necesitamos esta función ya que usaremos WarningConfirmationDialog
 
     return Scaffold(
-      appBar: AppBarHome(title: 'Detalles del Evento', showSettings: false, leading: IconButton(icon: SvgPicture.asset('assets/icons/retroceder.svg', width: 30, height: 30, color: Colors.white), onPressed: () => context.pop())),
+      appBar: AppBarHome(title: 'Detalles del Evento', showSettings: false, leading: IconButton(icon: SvgPicture.asset('assets/icons/retroceder.svg', width: 35, height: 35, color: Colors.white), onPressed: () => context.pop())),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -356,3 +356,4 @@ class EventDetailsScreen extends ConsumerWidget {
     );
   }
 }
+

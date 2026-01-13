@@ -243,7 +243,7 @@ class CustomAppBar extends ConsumerWidget implements PreferredSizeWidget {
                     Transform.translate(
                       offset: const Offset(-14, 0),
                       child: IconButton(
-                        icon: SvgPicture.asset('assets/icons/retroceder.svg', width: 30, height: 30, color: Colors.black),
+                        icon: SvgPicture.asset('assets/icons/retroceder.svg', width: 35, height: 35, color: Colors.black),
                         onPressed: () => context.pop(),
                       ),
                     ),

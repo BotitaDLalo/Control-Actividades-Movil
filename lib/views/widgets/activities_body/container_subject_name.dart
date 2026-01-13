@@ -23,7 +23,7 @@ class ContainerNameGroupSubjects extends StatelessWidget {
             left: context.width(0.04), // 4% del ancho
             child: IconButton(
               onPressed: () => Navigator.of(context).maybePop(),
-              icon: SvgPicture.asset('assets/icons/retroceder.svg', width: 30, height: 30, color: Colors.white),
+              icon: SvgPicture.asset('assets/icons/retroceder.svg', width: 35, height: 35, color: Colors.white),
               tooltip: 'Regresar',
             ),
           ),
@@ -91,7 +91,7 @@ class ContainerNameGroupSubjects extends StatelessWidget {
               child: CircleAvatar(
                 radius: context.radius(0.07), // 7% del ancho
                 backgroundColor: Colors.white,
-                child: SvgPicture.asset('assets/icons/settings2.svg', width: 30, height: 30, color: Colors.blue[900],),
+                child: SvgPicture.asset('assets/icons/settings2.svg', width: 35, height: 35, color: Colors.blue[900],),
               ),
               */
             ),
@@ -101,3 +101,4 @@ class ContainerNameGroupSubjects extends StatelessWidget {
     );
   }
 }
+

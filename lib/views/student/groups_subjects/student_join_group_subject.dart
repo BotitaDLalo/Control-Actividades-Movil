@@ -82,7 +82,7 @@ class StudentJoinGroupSubject extends ConsumerWidget {
                   FocusScope.of(context).unfocus();
                   context.pop();
                 },
-                icon: SvgPicture.asset('assets/icons/retroceder.svg', width: 30, height: 30, color: Colors.white),
+                icon: SvgPicture.asset('assets/icons/retroceder.svg', width: 35, height: 35, color: Colors.white),
                 color: Colors.white,
               ),
             ),
@@ -161,3 +161,4 @@ class StudentJoinGroupSubject extends ConsumerWidget {
     );
   }
 }
+

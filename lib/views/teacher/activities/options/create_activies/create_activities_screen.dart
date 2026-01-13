@@ -24,7 +24,7 @@ class CreateActivitiesScreen extends StatelessWidget {
         // Cambiamos el título dinámicamente dependiendo si es editar o crear
         title: Text(activity == null ? 'Crear Actividad' : 'Editar Actividad'),
         leading: IconButton(
-          icon: SvgPicture.asset('assets/icons/retroceder.svg', width: 30, height: 30, color: Colors.black),
+          icon: SvgPicture.asset('assets/icons/retroceder.svg', width: 35, height: 35, color: Colors.black),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),

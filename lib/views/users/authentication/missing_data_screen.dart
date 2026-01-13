@@ -16,7 +16,7 @@ class MissingDataScreen extends ConsumerWidget {
           showSettings: false,
           titleFontSize: 20,
           leading: IconButton(
-            icon: SvgPicture.asset('assets/icons/retroceder.svg', width: 30, height: 30, color: Colors.white),
+            icon: SvgPicture.asset('assets/icons/retroceder.svg', width: 35, height: 35, color: Colors.white),
             onPressed: () {
               ref.read(authProvider.notifier).popAuth();
               context.go('/');
@@ -35,3 +35,4 @@ class MissingDataScreen extends ConsumerWidget {
     );
   }
 }
+
