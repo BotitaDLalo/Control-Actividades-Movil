@@ -1,4 +1,5 @@
 import 'package:aprende_mas/config/utils/packages.dart';
+import 'package:aprende_mas/config/utils/responsive_utils.dart';
 import 'package:aprende_mas/providers/providers.dart';
 import 'package:aprende_mas/providers/subjects/students_subject_provider.dart';
 import 'package:aprende_mas/views/teacher/groups_subjects/students_groups_subjects.dart';
@@ -40,6 +41,7 @@ class _StudentsSubjectState extends ConsumerState<StudentsSubject> {
   @override
   Widget build(BuildContext context) {
     final lsStudents = ref.watch(studentsSubjectProvider).lsStudentsSubject;
+    final subjectColor = getSubjectColor(widget.id);
 
     final filteredStudents = lsStudents.where((student) {
       final searchLower = _searchTerm.toLowerCase();
@@ -114,7 +116,7 @@ class _StudentsSubjectState extends ConsumerState<StudentsSubject> {
               'assets/icons/studentcap1.svg',
               height: 200,
               width: 200,
-              color: Colors.black,
+              colorFilter: ColorFilter.mode(subjectColor, BlendMode.srcIn),
             ),
             const SizedBox(height: 16),
             const Padding(
@@ -149,9 +151,13 @@ class _StudentsSubjectState extends ConsumerState<StudentsSubject> {
             controller: _searchController,
             decoration: InputDecoration(
               labelText: '  Buscar estudiantes por nombre o usuario',
-              prefixIconConstraints: BoxConstraints(maxWidth: 24, maxHeight: 24),
-              prefixIcon: SizedBox(width: 20, height: 20, child: SvgPicture.asset('assets/icons/buscar.svg', colorFilter: ColorFilter.mode(Colors.blue, BlendMode.srcIn))),
+              prefixIconConstraints: BoxConstraints(maxWidth: 40, maxHeight: 40),
+              prefixIcon: Padding(padding: EdgeInsets.only(left: 8, right: 8), child: SvgPicture.asset('assets/icons/buscar.svg', width: 24, height: 24, colorFilter: ColorFilter.mode(subjectColor, BlendMode.srcIn))),
               border: OutlineInputBorder(
+                borderRadius: BorderRadius.all(Radius.circular(25.0)),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: subjectColor, width: 2.0),
                 borderRadius: BorderRadius.all(Radius.circular(25.0)),
               ),
             ),

@@ -62,6 +62,8 @@ class _ActivityListState extends ConsumerState<ActivityList> {
     final activitiesAsync =
         ref.watch(filteredActivitiesProvider(widget.subjectId));
 
+    final subjectColor = getSubjectColor(widget.subjectId);
+
     void teacherActivityStudentsSubmissions(Activity activity) {
       context.push('/teacher-activities-students-options', extra: activity);
     }
@@ -145,9 +147,13 @@ class _ActivityListState extends ConsumerState<ActivityList> {
             controller: _searchController,
             decoration: InputDecoration(
               labelText: '  Buscar actividades',
-              prefixIconConstraints: BoxConstraints(maxWidth: 24, maxHeight: 24),
-              prefixIcon: SizedBox(width: 20, height: 20, child: SvgPicture.asset('assets/icons/buscar.svg', colorFilter: ColorFilter.mode(Colors.blue, BlendMode.srcIn))),
+              prefixIconConstraints: BoxConstraints(maxWidth: 40, maxHeight: 40),
+              prefixIcon: Padding(padding: EdgeInsets.only(left: 8, right: 8), child: SvgPicture.asset('assets/icons/buscar.svg', width: 24, height: 24, colorFilter: ColorFilter.mode(subjectColor, BlendMode.srcIn))),
               border: OutlineInputBorder(
+                borderRadius: BorderRadius.all(Radius.circular(25)),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: subjectColor, width: 2.0),
                 borderRadius: BorderRadius.all(Radius.circular(25)),
               ),
             ),

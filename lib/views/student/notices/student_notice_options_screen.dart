@@ -33,6 +33,7 @@ class _StudentNoticeOptionsScreenState
 
   @override
   Widget build(BuildContext context) {
+    final subjectColor = getSubjectColor(widget.subjectId);
     final futureNoticesls = ref.watch(futureNoticesProvider(notice));
     void requestAgain() {
       void _ = ref.refresh(futureNoticesProvider(notice));
@@ -57,6 +58,7 @@ class _StudentNoticeOptionsScreenState
                           height: 200,
                           width: 200,
                           fit: BoxFit.contain,
+                          colorFilter: ColorFilter.mode(subjectColor, BlendMode.srcIn),
                         ),
                         const SizedBox(height: 16),
                         const Text(

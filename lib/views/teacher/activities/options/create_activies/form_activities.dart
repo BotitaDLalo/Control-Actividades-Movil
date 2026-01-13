@@ -81,7 +81,8 @@ class _FormActivitiesState extends ConsumerState<FormActivities> {
   @override
   Widget build(BuildContext context) {
     final activityForm = ref.watch(activityFormProvider);
-    final activityNotifier = ref.read(activityFormProvider.notifier); 
+    final activityNotifier = ref.read(activityFormProvider.notifier);
+    final subjectColor = getSubjectColor(widget.subjectId);
 
     void goRouterPop() {
       context.pop();
@@ -118,27 +119,33 @@ class _FormActivitiesState extends ConsumerState<FormActivities> {
             ),
             const SizedBox(height: 20),
 
-            CustomTextFormField(
-                capitalizeFirstLetter: true,
-                textEditingController: activityNotifier.nombreController,
-                label: 'Nombre Actividad',
-                onChanged: activityNotifier.onNombreChanged,
-                errorMessage: activityForm.isFormPosted
-                    ? activityForm.nombre.errorMessage
-                    : null),
+            TextFormField(
+              controller: activityNotifier.nombreController,
+              onChanged: activityNotifier.onNombreChanged,
+              decoration: InputDecoration(
+                labelText: 'Nombre Actividad',
+                errorText: activityForm.isFormPosted ? activityForm.nombre.errorMessage : null,
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: subjectColor, width: 2.0),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            ),
             const SizedBox(
               height: 20,
             ),
-            CustomTextFormField(
-              enableLineBreak: true,
-              capitalizeFirstLetter: true,
-              customHeight: 60,
-              textEditingController: activityNotifier.descripcionController,
-              label: 'Descripción',
+            TextFormField(
+              controller: activityNotifier.descripcionController,
               onChanged: activityNotifier.onDescripcionChanged,
-              errorMessage: activityForm.isFormPosted
-                  ? activityForm.descripcion.errorMessage
-                  : null,
+              maxLines: null,
+              decoration: InputDecoration(
+                labelText: 'Descripción',
+                errorText: activityForm.isFormPosted ? activityForm.descripcion.errorMessage : null,
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: subjectColor, width: 2.0),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
             ),
             const SizedBox(
               height: 20,
@@ -180,12 +187,18 @@ class _FormActivitiesState extends ConsumerState<FormActivities> {
             const SizedBox(
               height: 20,
             ),
-            CustomTextFormField(
-                isNumericKeyboard: true,
-                textEditingController: activityNotifier.puntajeController,
-                label: 'Puntaje (Opcional)',
-                onChanged: activityNotifier.onPuntajeChanged,
+            TextFormField(
+              controller: activityNotifier.puntajeController,
+              onChanged: activityNotifier.onPuntajeChanged,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                labelText: 'Puntaje (Opcional)',
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: subjectColor, width: 2.0),
+                  borderRadius: BorderRadius.circular(10),
                 ),
+              ),
+            ),
             const SizedBox(
               height: 30, // Separación antes del botón
             ),
@@ -199,7 +212,7 @@ class _FormActivitiesState extends ConsumerState<FormActivities> {
                       : 'Actualizar actividad',
 
                   // CAMBIO 2: Añadimos estilos (ejemplo basado en tu otro archivo)
-                  backgroundColor: const Color(0xFF00569E),
+                  backgroundColor: subjectColor,
                   textColor: Colors.white,
                   borderRadius: 10,
                   

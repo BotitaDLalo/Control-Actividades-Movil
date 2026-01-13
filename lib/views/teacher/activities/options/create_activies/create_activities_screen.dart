@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:aprende_mas/config/utils/responsive_utils.dart';
 import 'package:aprende_mas/views/teacher/activities/options/create_activies/form_activities.dart'; // Asegúrate de importar tu formulario
 import 'package:aprende_mas/models/models.dart'; // Asegúrate de importar el modelo Activity
 
@@ -19,12 +20,13 @@ class CreateActivitiesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final subjectColor = getSubjectColor(subjectId);
     return Scaffold(
       appBar: AppBar(
         // Cambiamos el título dinámicamente dependiendo si es editar o crear
         title: Text(activity == null ? 'Crear Actividad' : 'Editar Actividad'),
         leading: IconButton(
-          icon: SvgPicture.asset('assets/icons/retroceder.svg', width: 35, height: 35, color: Colors.black),
+          icon: SvgPicture.asset('assets/icons/retroceder.svg', width: 35, height: 35, color: subjectColor),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),

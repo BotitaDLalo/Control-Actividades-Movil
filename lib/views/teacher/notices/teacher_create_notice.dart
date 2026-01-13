@@ -57,6 +57,7 @@ class _TeacherCreateNoticeState extends ConsumerState<TeacherCreateNotice> {
     final formNoticeNotifier = ref.read(noticesFormProvider.notifier);
     final formNotice = ref.watch(noticesFormProvider);
     NoticeModel notice = widget.notice;
+    final subjectColor = getSubjectColor(notice.subjectId ?? 0);
 
     ref.listen(
       noticesFormProvider,
@@ -82,6 +83,7 @@ class _TeacherCreateNoticeState extends ConsumerState<TeacherCreateNotice> {
       resizeToAvoidBottomInset: false, // Evita que el contenido suba con el teclado
       appBar: CustomAppBar( // ⬅️ SIN 'const' aquí
         title: appBarTitle, // Título dinámico
+        subjectColor: subjectColor,
       ),
 
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
@@ -89,6 +91,7 @@ class _TeacherCreateNoticeState extends ConsumerState<TeacherCreateNotice> {
         padding: const EdgeInsets.symmetric(horizontal: 70, vertical: 25),
         child: CustomRoundedButton(
           text: buttonText,
+          backgroundColor: subjectColor,
           // 🚨 LÓGICA DE SUBMIT: Llama a CREAR o ACTUALIZAR
           onPressed: formNotice.isPosting || !formNotice.isValid
               ? null
@@ -180,19 +183,29 @@ class _TeacherCreateNoticeState extends ConsumerState<TeacherCreateNotice> {
               ),
               const SizedBox(height: 30),
               // 3. Campos del formulario (Usando initialValue como solicitaste)
-              CustomTextFormField(
-                label: 'Título',
-                capitalizeFirstLetter: true,
-                initialValue: isEditing ? notice.title : null, // ✅ Se mantiene initialValue
+              TextFormField(
+                initialValue: isEditing ? notice.title : null,
                 onChanged: formNoticeNotifier.onTitleChanged,
+                decoration: InputDecoration(
+                  labelText: 'Título',
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: subjectColor, width: 2.0),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
               ),
               const SizedBox(height: 20),
-              CustomTextFormField(
-                label: 'Mensaje',
-                capitalizeFirstLetter: true,
-                enableLineBreak: true,
-                initialValue: isEditing ? notice.description : null, // ✅ Se mantiene initialValue
+              TextFormField(
+                initialValue: isEditing ? notice.description : null,
                 onChanged: formNoticeNotifier.onDescriptionChanged,
+                maxLines: null,
+                decoration: InputDecoration(
+                  labelText: 'Mensaje',
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: subjectColor, width: 2.0),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
               ),
             ],
           ),
@@ -208,11 +221,13 @@ class _TeacherCreateNoticeState extends ConsumerState<TeacherCreateNotice> {
 class CustomAppBar extends ConsumerWidget implements PreferredSizeWidget {
   final String title;
   final Widget? leading;
+  final Color subjectColor;
 
   CustomAppBar({ // Constructor sin const
     super.key,
     required this.title,
     this.leading,
+    required this.subjectColor,
   });
 
   // 🔴 ¡IMPLEMENTACIÓN CORRECTA DEL BUILD DE CONSUMERWIDGET!
@@ -228,10 +243,10 @@ class CustomAppBar extends ConsumerWidget implements PreferredSizeWidget {
               child: Center(
                 child: Text(
                   title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 18,
-                    color: Colors.black,
+                    color: subjectColor,
                   ),
                 ),
               ),
@@ -241,12 +256,12 @@ class CustomAppBar extends ConsumerWidget implements PreferredSizeWidget {
               children: [
                 leading ??
                     Transform.translate(
-                      offset: const Offset(-14, 0),
-                      child: IconButton(
-                        icon: SvgPicture.asset('assets/icons/retroceder.svg', width: 35, height: 35, color: Colors.black),
-                        onPressed: () => context.pop(),
-                      ),
-                    ),
+                  offset: const Offset(-14, 0),
+                  child: IconButton(
+                    icon: SvgPicture.asset('assets/icons/retroceder.svg', width: 35, height: 35, color: subjectColor),
+                    onPressed: () => context.pop(),
+                  ),
+                ),
               ],
             ),
           ],
