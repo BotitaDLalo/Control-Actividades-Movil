@@ -158,10 +158,10 @@ class _NoticeOptionsScreenState
                                         onPressed: () {
                                         context.push('/teacher-create-notice', extra: notice);
                                         },
-                                        backgroundColor: const Color(0xFF283043),
+                                        backgroundColor: const Color(0xFF00569E),
                                         textColor: Colors.white,
                                         borderRadius: 24,
-                                        height: 48,
+                                        height: 56,
                                         padding: const EdgeInsets.symmetric(horizontal: 32),
                                       ),
                                     ],

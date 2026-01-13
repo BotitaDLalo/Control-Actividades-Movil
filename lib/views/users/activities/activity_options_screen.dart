@@ -116,10 +116,10 @@ class _ActivityOptionState extends ConsumerState<ActivityOptionScreen> {
                                     onPressed: () {
                                       buttonModal();
                                     },
-                                    backgroundColor: Color(0xFF283043),
+                                    backgroundColor: Color(0xFF00569E),
                                     textColor: Colors.white,
                                     borderRadius: 24,
-                                    height: 48,
+                                    height: 56,
                                     padding: EdgeInsets.symmetric(horizontal: 32),
                                   ),
                                 ],

@@ -75,17 +75,19 @@ Widget build(BuildContext context) {
     }
   });
 
-  return Column( // El widget principal es ahora un Column
-    children: [
-      Expanded( // Esta sección crecerá y es la única que podrá desplazarse
-        child: SingleChildScrollView(
+  return Scaffold(
+    resizeToAvoidBottomInset: false, // Evita que el contenido suba con el teclado
+    body: Stack(
+      children: [
+        // Contenido scrollable
+        SingleChildScrollView(
+          padding: const EdgeInsets.only(bottom: 100), // Espacio para el botón fijo
           child: Column(
             children: [
               const SizedBox(height: 10),
               // --- SECCIÓN 1: INPUT Y SUGERENCIA (Altura dinámica) ---
               SizedBox(
                 width: 350,
-                // height: 150 fue eliminado en el paso anterior
                 child: Column(
                   children: [
                     CustomTextFormField(
@@ -125,11 +127,10 @@ Widget build(BuildContext context) {
                   ],
                 ),
               ),
-              
+
               // --- SECCIÓN 2: LISTADO DE ALUMNOS (Contenido scrollable) ---
-              // Nota: Mantuve el height: 350. Si quieres que la lista crezca infinitamente, puedes quitarlo.
               SizedBox(
-                height: 350, 
+                height: 350,
                 child: Column(
                   children: [
                     Padding(
@@ -139,7 +140,7 @@ Widget build(BuildContext context) {
                         style: Theme.of(context).textTheme.titleLarge,
                       ),
                     ),
-                    Expanded( // Aseguramos que el ListView ocupe el espacio restante
+                    Expanded(
                       child: SizedBox(
                         width: 360,
                         child: ListView.builder(
@@ -149,7 +150,6 @@ Widget build(BuildContext context) {
                             if (email.isEmailValid) {
                               return Container(
                                 margin: const EdgeInsets.only(bottom: 10),
-                                // ... contenido de ListTile ...
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(10),
                                   color: Colors.grey.shade200,
@@ -187,30 +187,31 @@ Widget build(BuildContext context) {
             ],
           ),
         ),
-      ),
-      
-      // --- SECCIÓN 3: BOTÓN FIJO (Fuera del scroll) ---
-      Padding(
-  padding: const EdgeInsets.only(right: 20, bottom: 20, top: 10),
-  child: Align(
-    alignment: Alignment.centerRight,
-    child: CustomRoundedButton(
-      text: "Agregar",
-      // Asignamos la función SÓLO si 'canSubmit' es verdadero.
-      // Si es falso, el botón será 'null' (deshabilitado).
-      onPressed: canSubmit 
-          ? () async {
-              // DEBUG: Agrega un print para confirmar que la función se ejecuta
-              print('--- INICIANDO ENVÍO DE ${lsEmails.length} ALUMNOS ---');
-              ref
-                  .read(formSubjectsProvider.notifier)
-                  .onAddStudentsSubjectWithoutGroup(widget.subjectId);
-            }
-          : null, // Deshabilita el botón si la lista está vacía o está enviando
+
+        // Botón fijo en la parte inferior
+        Positioned(
+          bottom: 20,
+          left: 0,
+          right: 0,
+          child: Center(
+            child: SizedBox(
+              width: 150,
+              child: CustomRoundedButton(
+                text: "Agregar",
+                onPressed: canSubmit
+                    ? () async {
+                        print('--- INICIANDO ENVÍO DE ${lsEmails.length} ALUMNOS ---');
+                        ref
+                            .read(formSubjectsProvider.notifier)
+                            .onAddStudentsSubjectWithoutGroup(widget.subjectId);
+                      }
+                    : null,
+              ),
+            ),
+          ),
+        ),
+      ],
     ),
-  ),
-),
-    ],
   );
 }
 }

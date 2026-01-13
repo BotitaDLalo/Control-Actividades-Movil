@@ -190,16 +190,16 @@ class _FormActivitiesState extends ConsumerState<FormActivities> {
               height: 30, // Separación antes del botón
             ),
             SizedBox(
-              height: 50,
+              height: 56,
               // 3. Botón Dinámico (Crear o Actualizar)
               child: CustomRoundedButton(
                   //  CAMBIO 1: Usamos 'text' en lugar de 'buttonName'
                   text: widget.activity == null
                       ? 'Crear actividad'
                       : 'Actualizar actividad',
-                  
+
                   // CAMBIO 2: Añadimos estilos (ejemplo basado en tu otro archivo)
-                  backgroundColor: const Color(0xFF283043), 
+                  backgroundColor: const Color(0xFF00569E),
                   textColor: Colors.white,
                   borderRadius: 10,
                   

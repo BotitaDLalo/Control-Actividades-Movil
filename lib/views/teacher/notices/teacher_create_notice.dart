@@ -79,6 +79,7 @@ class _TeacherCreateNoticeState extends ConsumerState<TeacherCreateNotice> {
     // 🛑 La clase CustomAppBar estaba aquí, causando el error. Ahora está fuera.
 
     return Scaffold( // ⬅️ SIN 'const' aquí
+      resizeToAvoidBottomInset: false, // Evita que el contenido suba con el teclado
       appBar: CustomAppBar( // ⬅️ SIN 'const' aquí
         title: appBarTitle, // Título dinámico
       ),
