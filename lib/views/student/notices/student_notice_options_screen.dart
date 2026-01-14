@@ -34,64 +34,103 @@ class _StudentNoticeOptionsScreenState
   @override
   Widget build(BuildContext context) {
     final subjectColor = getSubjectColor(widget.subjectId);
+
     final futureNoticesls = ref.watch(futureNoticesProvider(notice));
+
     void requestAgain() {
       void _ = ref.refresh(futureNoticesProvider(notice));
     }
 
     return Scaffold(
       body: futureNoticesls.when(
-        data: (data) => RefreshIndicator(
-          onRefresh: () async {
-            await Future.delayed(const Duration(seconds: 2));
-            requestAgain();
-          },
-          child: SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            child: data.isEmpty
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        SvgPicture.asset(
-                          'assets/icons/calendar2.svg',
-                          height: 200,
-                          width: 200,
-                          fit: BoxFit.contain,
-                          colorFilter: ColorFilter.mode(subjectColor, BlendMode.srcIn),
+        data: (data) {
+          if (data.isEmpty) {
+            return RefreshIndicator(
+              onRefresh: () async {
+                await Future.delayed(const Duration(seconds: 2));
+                requestAgain();
+              },
+              child: const SingleChildScrollView(
+                physics: AlwaysScrollableScrollPhysics(),
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SizedBox(height: 150),
+                      Icon(
+                        Icons.notifications_off_outlined,
+                        size: 200,
+                        color: Colors.grey,
+                      ),
+                      SizedBox(height: 10),
+                      Text(
+                        "Sin Avisos, \nespera a que tu profesor te envíe un Aviso",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.black,
                         ),
-                        const SizedBox(height: 16),
-                        const Text(
-                          'No tienes avisos en esta materia',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          }
+          return RefreshIndicator(
+            onRefresh: () async {
+              await Future.delayed(const Duration(seconds: 2));
+              requestAgain();
+            },
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: data.isEmpty
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          SvgPicture.asset(
+                            'assets/icons/calendar2.svg',
+                            height: 200,
+                            width: 200,
+                            fit: BoxFit.contain,
+                            colorFilter:
+                                ColorFilter.mode(subjectColor, BlendMode.srcIn),
                           ),
-                        ),
-                      ],
-                    ),
-                  )
-                : Column(
-                    children: data
-                        .map(
-                          (e) => Column(
-                            children: [
-                              NoticeBody(
-                                  optionsIsVisible: false,
-                                  noticeId: e.noticeId ?? 0,
-                                  teacherName: e.teacherFullName ?? "",
-                                  createdDate: e.createdDate.toString(),
-                                  title: e.title,
-                                  content: e.description),
-                              SizedBox(
-                                  height: MediaQuery.of(context).size.height * 0.02)
-                            ],
+                          const SizedBox(height: 16),
+                          const Text(
+                            'No tienes avisos en esta materia',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        )
-                        .toList()),
-          ),
-        ),
+                        ],
+                      ),
+                    )
+                  : Column(
+                      children: data
+                          .map(
+                            (e) => Column(
+                              children: [
+                                NoticeBody(
+                                    optionsIsVisible: false,
+                                    noticeId: e.noticeId ?? 0,
+                                    teacherName: e.teacherFullName ?? "",
+                                    createdDate: e.createdDate.toString(),
+                                    title: e.title,
+                                    content: e.description),
+                                SizedBox(
+                                    height: MediaQuery.of(context).size.height *
+                                        0.02)
+                              ],
+                            ),
+                          )
+                          .toList()),
+            ),
+          );
+        },
         error: (error, stackTrace) => Text(error.toString()),
         loading: () => const Center(
           child: CircularProgressIndicator(),

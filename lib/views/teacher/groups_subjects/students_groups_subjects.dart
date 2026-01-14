@@ -7,12 +7,17 @@ import 'package:aprende_mas/providers/providers.dart';
 class StudentsGroupsSubjects extends ConsumerStatefulWidget {
   final List<StudentGroupSubject> lsStudents;
   final VoidCallback? voidCallback;
-  final void Function(
-      {required int studentId,
-      required String username,
-      required String name,
-      required String lastName,
-      required String lastName2})? studentOptionsFunction;
+
+  final void Function({
+    // required int alumnoMateriaId,
+    required int studentId,
+    required String username,
+    required String name,
+    required String lastName,
+    required String lastName2,
+  })? studentOptionsFunction;
+
+
 
   const StudentsGroupsSubjects(
       {super.key,
@@ -56,70 +61,72 @@ class _StudentsGroupsSubjectsState
     //   ),
     // );
 
-return Scaffold(
-  resizeToAvoidBottomInset: false,
-  body: Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 10),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const SizedBox(height: 10),
-        Expanded(
-          child: ListView.builder(
-            itemCount: lsStudents.length,
-            itemBuilder: (context, index) {
-              final studentId = lsStudents[index].alumnoId;
-              final username = lsStudents[index].username;
-              final lastname = lsStudents[index].lastName;
-              final lastname2 = lsStudents[index].lastName2;
-              final name = lsStudents[index].name;
+    return Scaffold(
+      resizeToAvoidBottomInset: false,
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 10),
+            Expanded(
+              child: ListView.builder(
+                itemCount: lsStudents.length,
+                itemBuilder: (context, index) {
+                  //final studentId = lsStudents[index].alumnoId;
+                  final studentId = lsStudents[index].alumnoMateriaId;
+                  final username = lsStudents[index].username;
+                  final lastname = lsStudents[index].lastName;
+                  final lastname2 = lsStudents[index].lastName2;
+                  final name = lsStudents[index].name;
 
-              return ElementTile(
-                iconWidget: SvgPicture.asset(
-                  'assets/icons/user2.svg',
-                  width: 32,
-                  height: 32,
-                  colorFilter: const ColorFilter.mode(Colors.black, BlendMode.srcIn),
-                ),
-                iconColor: Colors.white,
-                iconSize: 32,
-                title: username,
-                subtitle: "$lastname $lastname2 $name",
-                trailingWidget: IconButton(
-                  onPressed: () {
-                    widget.studentOptionsFunction!(
-                      studentId: studentId,
-                      username: username,
-                      lastName: lastname,
-                      lastName2: lastname2,
-                      name: name,
-                    );
-                  },
-                  icon: Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: Colors.red,
-                      shape: BoxShape.circle,
+                  return ElementTile(
+                    iconWidget: SvgPicture.asset(
+                      'assets/icons/user2.svg',
+                      width: 32,
+                      height: 32,
+                      colorFilter:
+                          const ColorFilter.mode(Colors.black, BlendMode.srcIn),
                     ),
-                    child: Center(
-                      child: SvgPicture.asset(
-                        'assets/icons/eliminar4.svg',
-                        width: 20,
-                        height: 20,
-                        colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+                    iconColor: Colors.white,
+                    iconSize: 32,
+                    title: username,
+                    subtitle: "$lastname $lastname2 $name",
+                    trailingWidget: IconButton(
+                      onPressed: () {
+                        widget.studentOptionsFunction!(
+                          studentId: studentId,
+                          username: username,
+                          lastName: lastname,
+                          lastName2: lastname2,
+                          name: name,
+                        );
+                      },
+                      icon: Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Center(
+                          child: SvgPicture.asset(
+                            'assets/icons/eliminar4.svg',
+                            width: 20,
+                            height: 20,
+                            colorFilter: const ColorFilter.mode(
+                                Colors.white, BlendMode.srcIn),
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                ),
-              );
-            },
-          ),
+                  );
+                },
+              ),
+            ),
+          ],
         ),
-      ],
-    ),
-  ),
-);
-
+      ),
+    );
   }
 }

@@ -12,3 +12,4 @@ final studentsSubjectProvider = StateNotifierProvider<
     return StudentsSubjectStateNotifier(subjectsRepository: subjectRepository);
   },
 );
+

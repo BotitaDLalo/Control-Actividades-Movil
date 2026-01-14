@@ -4,13 +4,15 @@ import 'package:aprende_mas/config/utils/packages.dart';
 import 'package:aprende_mas/models/activities/activity/activity_mapper.dart';
 import 'package:aprende_mas/repositories/Interface_repos/activity/activty_datasource.dart';
 import 'package:aprende_mas/config/data/data.dart';
+import 'package:intl/intl.dart';
 
 class ActivityDataSourceImpl implements ActivityDataSource {
   final storageService = KeyValueStorageServiceImpl();
   @override
   Future<List<Activity>> getAllActivities(int materiaId) async {
     const uri = "/Actividades/ObtenerActividadesPorMateria";
-    debugPrint("🔍 [ACTIVITY] Solicitando actividades: $uri?materiaId=$materiaId");
+    debugPrint(
+        "🔍 [ACTIVITY] Solicitando actividades: $uri?materiaId=$materiaId");
 
     // Usar options para asegurar que no se lancen excepciones por status codes
     final response = await dio.get(
@@ -24,16 +26,20 @@ class ActivityDataSourceImpl implements ActivityDataSource {
     if (response.statusCode == 200) {
       final List<Map<String, dynamic>> data =
           List<Map<String, dynamic>>.from(response.data);
-      debugPrint("✅ [ACTIVITY] Actividades parseadas: ${data.length} actividades");
+      debugPrint(
+          "✅ [ACTIVITY] Actividades parseadas: ${data.length} actividades");
       final activities = ActivityMapper.fromMapList(data);
       return activities;
     } else if (response.statusCode == 400) {
-      debugPrint("⚠️ [ACTIVITY] Status 400 para materiaId=$materiaId - Data: ${response.data}");
+      debugPrint(
+          "⚠️ [ACTIVITY] Status 400 para materiaId=$materiaId - Data: ${response.data}");
       // Para errores 400, retornamos lista vacía pero logueamos el error
       return [];
     } else {
-      debugPrint("🚨 [ACTIVITY] Status inesperado ${response.statusCode} para materiaId=$materiaId");
-      throw Exception("Error obteniendo actividades: Status ${response.statusCode}");
+      debugPrint(
+          "🚨 [ACTIVITY] Status inesperado ${response.statusCode} para materiaId=$materiaId");
+      throw Exception(
+          "Error obteniendo actividades: Status ${response.statusCode}");
     }
   }
 
@@ -49,7 +55,8 @@ class ActivityDataSourceImpl implements ActivityDataSource {
       return activity;
     } catch (e) {
       debugPrint(e.toString());
-      throw Exception("ActivityDataSourceImpl get Error al crear actividades: $e");
+      throw Exception(
+          "ActivityDataSourceImpl get Error al crear actividades: $e");
       // throw Exception(
       //     "ActivityDataSourceImpl post Error al crear una actividad: $e");
     }
@@ -71,44 +78,42 @@ class ActivityDataSourceImpl implements ActivityDataSource {
 
       // Limpieza de fechas (seguridad extra para SQL Server)
       String fechaLimiteSegura = fechaLimite.toIso8601String().split('.').first;
-      String fechaCreacionSegura = DateTime.now().toIso8601String().split('.').first;
+      String fechaCreacionSegura =
+          DateTime.now().toIso8601String().split('.').first;
 
-      final response = await dio.put(
-        uri,
-        data: {
-          // --- Identificadores ---
-          "ActividadId": activityId,
-          "MateriaId": materiaId,
-          //"TipoActividadId": 1, 
-          "Puntaje": puntaje,
+      final response = await dio.put(uri, data: {
+        // --- Identificadores ---
+        "ActividadId": activityId,
+        "MateriaId": materiaId,
+        //"TipoActividadId": 1,
+        "Puntaje": puntaje,
 
-          "NombreActividad": nombreActividad,
+        "NombreActividad": nombreActividad,
 
-          // --- Enviamos AMBOS nombres para asegurar compatibilidad ---
-          
-          // 1. Nombres probables del modelo C# original
-          "Descripcion": descripcion, 
-          "FechaLimite": fechaLimiteSegura,
-          
-          // 2. Nombres según el Log del error anterior
-          "DescripcionActividad": descripcion, 
-          "FechaLimiteActividad": fechaLimiteSegura,
+        // --- Enviamos AMBOS nombres para asegurar compatibilidad ---
 
-          // Fecha de creación para evitar error de rango SQL
-          "FechaCreacionActividad": fechaCreacionSegura,
-        }
-      );
+        // 1. Nombres probables del modelo C# original
+        "Descripcion": descripcion,
+        "FechaLimite": fechaLimiteSegura,
+
+        // 2. Nombres según el Log del error anterior
+        "DescripcionActividad": descripcion,
+        "FechaLimiteActividad": fechaLimiteSegura,
+
+        // Fecha de creación para evitar error de rango SQL
+        "FechaCreacionActividad": fechaCreacionSegura,
+      });
 
       debugPrint("Update response: ${response.data}");
       final updatedActivity = ActivityMapper.jsonToEntity(response.data);
       return updatedActivity;
-
     } catch (e) {
       debugPrint("Error updateActivity: $e");
-      if(e is DioException && e.response != null) {
-          debugPrint("Detalle del error: ${e.response?.data}");
+      if (e is DioException && e.response != null) {
+        debugPrint("Detalle del error: ${e.response?.data}");
       }
-      throw Exception("ActivityDataSourceImpl error al actualizar actividad: $e");
+      throw Exception(
+          "ActivityDataSourceImpl error al actualizar actividad: $e");
     }
   }
 
@@ -160,10 +165,12 @@ class ActivityDataSourceImpl implements ActivityDataSource {
       final list = Submission.lsSubmissionJsonToLsEntity(resList, activityId);
       return list;
     } else if (res.statusCode == 400) {
-      debugPrint("⚠️ [SUBMISSION] Status 400 para activityId=$activityId - Data: ${res.data}");
+      debugPrint(
+          "⚠️ [SUBMISSION] Status 400 para activityId=$activityId - Data: ${res.data}");
       return [];
     } else {
-      debugPrint("🚨 [SUBMISSION] Status inesperado ${res.statusCode} para activityId=$activityId");
+      debugPrint(
+          "🚨 [SUBMISSION] Status inesperado ${res.statusCode} para activityId=$activityId");
       return [];
     }
   }
@@ -223,8 +230,8 @@ class ActivityDataSourceImpl implements ActivityDataSource {
     try {
       const uri = "/Actividades/AsignarCalificacion";
 
-      final res = await dio
-          .post(uri, data: {"EntregableId": submissionId, "Calificacion": grade});
+      final res = await dio.post(uri,
+          data: {"EntregableId": submissionId, "Calificacion": grade});
 
       if (res.statusCode == 200) {
         return true;

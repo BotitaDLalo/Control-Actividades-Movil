@@ -1,7 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:intl/intl.dart';
 
 class NotificationContentScreen extends StatelessWidget {
+    IconData _getNotificationIcon(String title) {
+      final lower = title.toLowerCase();
+      if (lower.contains('aviso')) {
+        return Icons.campaign; // Icono para avisos
+      } else if (lower.contains('actividad')) {
+        return Icons.assignment; // Icono para actividades
+      }
+      return Icons.notifications; // Icono por defecto
+    }
   final String messageId;
   final String title;
   final String body;
@@ -13,6 +23,26 @@ class NotificationContentScreen extends StatelessWidget {
       required this.title,
       required this.body,
       required this.sentDate});
+
+String _formatDate(String rawDate) {
+  try {
+    final inputFormat = DateFormat('yyyy-MM-dd HH:mm:ss.SSS');
+    final date = inputFormat.parse(rawDate).toLocal();
+
+    final outputFormat = DateFormat(
+      "d 'de' MMMM 'de' yyyy 'a las' h:mm a",
+      'es_ES',
+    );
+
+    return outputFormat
+        .format(date)
+        .replaceAll('AM', 'a. m.')
+        .replaceAll('PM', 'p. m.');
+  } catch (e) {
+    return rawDate;
+  }
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -37,22 +67,37 @@ class NotificationContentScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              title,
-              style: const TextStyle(
-                color: Colors.black,
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-              ),
+            Row(
+              children: [
+                Icon(
+                  _getNotificationIcon(title),
+                  color: Colors.blue,
+                  size: 32,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    title,
+                    style: const TextStyle(
+                      color: Colors.black,
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
             ),
+              // ...existing code...
             const SizedBox(height: 8),
             Text(
-              sentDate,
-              style: const TextStyle(
-                color: Colors.black,
-                fontSize: 18,
+              _formatDate(sentDate),
+              style: TextStyle(
+                color: Colors.grey[700],
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
               ),
             ),
+
             const SizedBox(height: 16),
             Text(
               body,

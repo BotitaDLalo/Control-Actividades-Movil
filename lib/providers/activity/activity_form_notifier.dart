@@ -201,13 +201,11 @@ Future<void> onFormUpdate(int subjectId, String nombreMateria, int activityId) a
       throw Exception("onFormUpdate Error: Fecha u hora inválida.");
     }
 
-    // 🔴 LÓGICA DE PUNTAJE OPCIONAL: Si el campo está vacío, usa 100.
     final int puntajeToSend = state.puntaje.value.isEmpty
         ? 100
         // Si no está vacío, asume que es un número válido (por el tryParse de onPuntajeChanged)
         : int.tryParse(state.puntaje.value) ?? 100;
         
-    // 🔴 ELIMINAR ESTO: Ya no se valida que puntajeInt no sea null
     // final puntajeInt = int.tryParse(state.puntaje.value);
     // if (puntajeInt == null) {
     //   throw Exception("onFormUpdate Error: Puntaje inválido.");
@@ -241,7 +239,6 @@ Future<void> onFormUpdate(int subjectId, String nombreMateria, int activityId) a
     }
 }
 
-// En activity_form_notifier.dart
 
 Future<void> onFormSubmit(int subjectId, String nombreMateria) async {
     if (state.isPosting) return;
@@ -272,7 +269,6 @@ Future<void> onFormSubmit(int subjectId, String nombreMateria) async {
     };
 
     try {
-      // 🎯 VERIFICACIÓN CRÍTICA: Aquí se llama a ActivityNotifier.createdActivity
       if (activityCallback == null) {
           throw Exception("Activity creation callback (activityCallback) is null");
       }
