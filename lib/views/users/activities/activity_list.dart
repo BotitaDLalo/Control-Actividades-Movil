@@ -215,7 +215,7 @@ class _ActivityListState extends ConsumerState<ActivityList> {
                               showModalBottomActivityOptions(activity);
                             },
                           )
-                        : null,
+                        : const SizedBox(),
                     onTapFunction: () async {
                       final activityData = Activity(
                         activityId: activity.activityId,
