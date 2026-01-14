@@ -11,7 +11,7 @@ class ActivityMapper {
           activityId: map['ActividadId'] as int,
           nombreActividad: map['NombreActividad'] as String,
           descripcion: map['DescripcionActividad'] as String,
-          tipoActividadId: map['TipoActividadId'] as int,
+          // tipoActividadId: map['TipoActividadId'] as int,
           fechaCreacion: formatDate(map['FechaCreacionActividad']),
           fechaLimite: formatDate(map['FechaLimiteActividad']),
           materiaId: map['MateriaId'] as int,

@@ -4,8 +4,14 @@ import 'package:aprende_mas/models/models.dart';
 import 'package:aprende_mas/providers/notices/notices_form_provider.dart';
 import 'package:aprende_mas/views/views.dart';
 import 'package:aprende_mas/views/widgets/buttons/custom_rounded_button.dart';
+// CAMBIO: Import agregado para mostrar mensajes de error con snackbar
+import 'package:aprende_mas/views/widgets/alerts/error_snackbar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart'; // Asegurar importación de Material/Widget
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:aprende_mas/views/widgets/alerts/success_dialog.dart';
+import 'package:aprende_mas/views/widgets/alerts/error_dialog.dart';
+import 'package:aprende_mas/views/widgets/alerts/warning_confirmation_dialog.dart';
 
 class TeacherCreateNotice extends ConsumerStatefulWidget {
   final NoticeModel notice;
@@ -51,12 +57,18 @@ class _TeacherCreateNoticeState extends ConsumerState<TeacherCreateNotice> {
     final formNoticeNotifier = ref.read(noticesFormProvider.notifier);
     final formNotice = ref.watch(noticesFormProvider);
     NoticeModel notice = widget.notice;
+    final subjectColor = getSubjectColor(notice.subjectId ?? 0);
 
     ref.listen(
       noticesFormProvider,
       (previous, next) {
         if (next.isFormPosted && !next.isPosting) {
+          // CAMBIO: Solo hacer pop cuando la creación fue exitosa
           context.pop();
+        }
+        // CAMBIO: Mostrar mensaje de error si la creación falló
+        if (next.errorMessage.isNotEmpty && !next.isPosting) {
+          errorMessage(context, next.errorMessage);
         }
       },
     );
@@ -68,8 +80,10 @@ class _TeacherCreateNoticeState extends ConsumerState<TeacherCreateNotice> {
     // 🛑 La clase CustomAppBar estaba aquí, causando el error. Ahora está fuera.
 
     return Scaffold( // ⬅️ SIN 'const' aquí
+      resizeToAvoidBottomInset: false, // Evita que el contenido suba con el teclado
       appBar: CustomAppBar( // ⬅️ SIN 'const' aquí
         title: appBarTitle, // Título dinámico
+        subjectColor: subjectColor,
       ),
 
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
@@ -77,17 +91,72 @@ class _TeacherCreateNoticeState extends ConsumerState<TeacherCreateNotice> {
         padding: const EdgeInsets.symmetric(horizontal: 70, vertical: 25),
         child: CustomRoundedButton(
           text: buttonText,
+          backgroundColor: subjectColor,
           // 🚨 LÓGICA DE SUBMIT: Llama a CREAR o ACTUALIZAR
           onPressed: formNotice.isPosting || !formNotice.isValid
               ? null
               : () {
-                  if (isEditing) {
-                    // Si estamos editando, llamamos a onUpdateSubmit y le pasamos el modelo con ID
-                    formNoticeNotifier.onUpdateSubmit(notice);
-                  } else {
-                    // Si estamos creando, llamamos a onFormSubmit y le pasamos el modelo base
-                    formNoticeNotifier.onFormSubmit(notice);
-                  }
+                  // Mostrar diálogo de confirmación antes de crear/editar
+                  WarningConfirmationDialog.show(
+                    context,
+                    message: isEditing
+                      ? '¿Está seguro de que desea actualizar este aviso?'
+                      : '¿Está seguro de que desea crear este aviso?',
+                    onConfirmPressed: () async {
+                      try {
+                        if (isEditing) {
+                          // Si estamos editando, llamamos a onUpdateSubmit y le pasamos el modelo con ID
+                          final success = await formNoticeNotifier.onUpdateSubmit(notice);
+                          if (success) {
+                            // Mostrar mensaje de éxito
+                            SuccessDialog.show(
+                              context,
+                              message: 'Aviso actualizado exitosamente',
+                              onOkPressed: () {
+                                context.pop();
+                              },
+                            );
+                          } else {
+                            // Mostrar mensaje de error
+                            ErrorDialog.show(
+                              context,
+                              message: 'No se pudo actualizar el aviso. Por favor, intente de nuevo.',
+                            );
+                          }
+                        } else {
+                          // Si estamos creando, llamamos a onFormSubmit y le pasamos el modelo base
+                          final success = await formNoticeNotifier.onFormSubmit(notice);
+                          if (success) {
+                            // Mostrar mensaje de éxito
+                            SuccessDialog.show(
+                              context,
+                              message: 'Aviso creado exitosamente',
+                              onOkPressed: () {
+                                context.pop();
+                              },
+                            );
+                          } else {
+                            // Mostrar mensaje de error
+                            ErrorDialog.show(
+                              context,
+                              message: 'No se pudo crear el aviso. Por favor, intente de nuevo.',
+                            );
+                          }
+                        }
+                      } catch (e) {
+                        // Captura cualquier error en la creación/actualización del aviso
+                        print("Error al crear/actualizar el aviso: $e");
+                        // Mostrar mensaje de error
+                        ErrorDialog.show(
+                          context,
+                          message: 'Error al crear/actualizar el aviso: $e',
+                        );
+                      }
+                    },
+                    onCancelPressed: () {
+                      // No hacer nada, solo cerrar el diálogo
+                    },
+                  );
                 },
         ),
       ),
@@ -114,19 +183,29 @@ class _TeacherCreateNoticeState extends ConsumerState<TeacherCreateNotice> {
               ),
               const SizedBox(height: 30),
               // 3. Campos del formulario (Usando initialValue como solicitaste)
-              CustomTextFormField(
-                label: 'Título',
-                capitalizeFirstLetter: true,
-                initialValue: isEditing ? notice.title : null, // ✅ Se mantiene initialValue
+              TextFormField(
+                initialValue: isEditing ? notice.title : null,
                 onChanged: formNoticeNotifier.onTitleChanged,
+                decoration: InputDecoration(
+                  labelText: 'Título',
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: subjectColor, width: 2.0),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
               ),
               const SizedBox(height: 20),
-              CustomTextFormField(
-                label: 'Mensaje',
-                capitalizeFirstLetter: true,
-                enableLineBreak: true,
-                initialValue: isEditing ? notice.description : null, // ✅ Se mantiene initialValue
+              TextFormField(
+                initialValue: isEditing ? notice.description : null,
                 onChanged: formNoticeNotifier.onDescriptionChanged,
+                maxLines: null,
+                decoration: InputDecoration(
+                  labelText: 'Mensaje',
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: subjectColor, width: 2.0),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
               ),
             ],
           ),
@@ -142,11 +221,13 @@ class _TeacherCreateNoticeState extends ConsumerState<TeacherCreateNotice> {
 class CustomAppBar extends ConsumerWidget implements PreferredSizeWidget {
   final String title;
   final Widget? leading;
+  final Color subjectColor;
 
   CustomAppBar({ // Constructor sin const
     super.key,
     required this.title,
     this.leading,
+    required this.subjectColor,
   });
 
   // 🔴 ¡IMPLEMENTACIÓN CORRECTA DEL BUILD DE CONSUMERWIDGET!
@@ -162,10 +243,10 @@ class CustomAppBar extends ConsumerWidget implements PreferredSizeWidget {
               child: Center(
                 child: Text(
                   title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 18,
-                    color: Colors.black,
+                    color: subjectColor,
                   ),
                 ),
               ),
@@ -175,12 +256,12 @@ class CustomAppBar extends ConsumerWidget implements PreferredSizeWidget {
               children: [
                 leading ??
                     Transform.translate(
-                      offset: const Offset(-14, 0),
-                      child: BackButton(
-                        color: Colors.black,
-                        onPressed: () => context.pop(),
-                      ),
-                    ),
+                  offset: const Offset(-14, 0),
+                  child: IconButton(
+                    icon: SvgPicture.asset('assets/icons/retroceder.svg', width: 35, height: 35, color: subjectColor),
+                    onPressed: () => context.pop(),
+                  ),
+                ),
               ],
             ),
           ],

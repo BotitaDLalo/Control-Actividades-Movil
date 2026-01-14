@@ -25,15 +25,13 @@ class SubjectsRespositoryImpl implements SubjectsRepository {
   }
 
   @override
-  Future<void> deleteSubject() {
-    // TODO: implement deleteSubject
-    throw UnimplementedError();
+  Future<bool> deleteSubject(int subjectId) {
+    return subjectsDataSource.deleteSubject(subjectId);
   }
 
   @override
-  Future<void> updateSubject() {
-    // TODO: implement updateSubject
-    throw UnimplementedError();
+  Future<Subject> updateSubject(int subjectId, String name, String description) {
+    return subjectsDataSource.updateSubject(subjectId, name, description);
   }
 
   @override

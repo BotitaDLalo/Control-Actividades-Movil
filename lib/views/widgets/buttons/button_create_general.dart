@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
 class ButtonCreateGeneral extends StatelessWidget {
@@ -12,8 +13,8 @@ class ButtonCreateGeneral extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: const Icon(Icons.create),
-              title: const Text("Actividad"),
+              leading: SvgPicture.asset('assets/icons/agregarActividad.svg', width: 24, height: 24),
+              title: const Text("Nueva actividad"),
               onTap: () {
                 context.go('/create-activities');
                 // Agregar lógica para crear Actividad
@@ -50,16 +51,12 @@ class ButtonCreateGeneral extends StatelessWidget {
         alignment: Alignment.centerLeft,
         child: FilledButton(
           onPressed: () => _showOptions(context), // Llama a _showOptions al presionar el botón
-          style: ButtonStyle(
-            backgroundColor: const WidgetStatePropertyAll(Colors.blue),
-            shape: WidgetStatePropertyAll(
-              RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            padding: const WidgetStatePropertyAll(
-              EdgeInsets.symmetric(horizontal: 40),
-            ),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF00569E),
+            foregroundColor: Colors.white,
+            elevation: 6,
+            padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(40)),
           ),
           child: const Text('Crear'),
         ),

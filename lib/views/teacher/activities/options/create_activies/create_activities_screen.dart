@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:aprende_mas/views/teacher/activities/options/create_activies/form_activities.dart';
 import 'package:aprende_mas/views/teacher/activities/options/create_activies/button_ai.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:aprende_mas/config/utils/responsive_utils.dart';
+import 'package:aprende_mas/views/teacher/activities/options/create_activies/form_activities.dart'; // Asegúrate de importar tu formulario
 import 'package:aprende_mas/models/models.dart'; // Asegúrate de importar el modelo Activity
 
 class CreateActivitiesScreen extends StatelessWidget {
@@ -24,11 +27,12 @@ class CreateActivitiesScreen extends StatelessWidget {
     final descripcionController = TextEditingController();
     // Si tienes otra forma de obtenerlos (por ejemplo, desde un provider), reemplaza esto
 
+    final subjectColor = getSubjectColor(subjectId);
     return Scaffold(
       appBar: AppBar(
         title: Text(activity == null ? 'Crear Actividad' : 'Editar Actividad'),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios),
+          icon: SvgPicture.asset('assets/icons/retroceder.svg', width: 35, height: 35, color: subjectColor),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),

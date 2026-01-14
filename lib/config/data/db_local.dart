@@ -2,93 +2,148 @@ import 'package:aprende_mas/config/data/querys.dart';
 import 'package:aprende_mas/config/utils/packages.dart';
 
 class DbLocal {
-  static Future<Database> initDatabase() async {
+  static Database? _database;
+  static const String _databaseName = 'Movil.db';
+  static const int _databaseVersion = 2;  // ✅ Incrementado para migración
+
+  // Singleton getter para la base de datos
+  static Future<Database> get database async {
+    if (_database != null && _database!.isOpen) {
+      return _database!;
+    }
+    _database = await _initDatabase();
+    return _database!;
+  }
+
+  // Método para cerrar la base de datos (usar con cuidado)
+  static Future<void> closeDatabase() async {
+    if (_database != null && _database!.isOpen) {
+      await _database!.close();
+      _database = null;
+    }
+  }
+
+  // Método para verificar si la BD está abierta
+  static bool get isDatabaseOpen {
+    return _database != null && _database!.isOpen;
+  }
+
+  static Future<Database> _initDatabase() async {
     try {
       final databasesPath = await getDatabasesPath();
-      String path = join(databasesPath, 'Movil.db');
-      // await deleteDatabase(path);
+      String path = join(databasesPath, _databaseName);
+
       bool exist = await File(path).exists();
 
       if (!exist) {
-        List<String> lsQuerys = Querys.querysCreateTables();
-        Database db =
-            await openDatabase(path, version: 1, onCreate: (db, version) async {
-          for (var q in lsQuerys) {
-            await db.execute(q);
-          }
-        });
+        Database db = await openDatabase(
+          path,
+          version: _databaseVersion,
+          onCreate: _onCreate,
+        );
 
-        final result = await db
-            .rawQuery('SELECT name FROM sqlite_master WHERE type="table"');
-        debugPrint("TABLAS CREADAS");
-        debugPrint(result.toString());
+        debugPrint("✅ BD CREADA: $_databaseName");
         return db;
       } else {
-        Database db = await openDatabase(path, version: 1);
+        Database db = await openDatabase(
+          path,
+          version: _databaseVersion,
+          onUpgrade: _onUpgrade,
+        );
 
-        final result = await db
-            .rawQuery('SELECT name FROM sqlite_master WHERE type="table"');
-        debugPrint("TABLAS CREADAS PERO LA BD EXISTE");
-        debugPrint(result.toString());
-        debugPrint("SU CONTENIDO: ");
-
-//& tbUsuarioActivo
-        final usuarioActivo =
-            await db.rawQuery('SELECT * FROM tbUsuarioActivo');
-        debugPrint("tbUsuarioActivo: ");
-
-        debugPrint(usuarioActivo.toString());
-
-//& tbGrupos
-        final grupos = await db.rawQuery('SELECT * FROM tbGrupos');
-        debugPrint("tbGrupos");
-        debugPrint(grupos.toString());
-
-//& tbMaterias
-        final materias = await db.rawQuery('SELECT * FROM tbMaterias');
-        debugPrint("tbMaterias");
-        debugPrint(materias.toString());
-
-//& tbActividades
-        final actividades = await db.rawQuery('SELECT * FROM tbActividades');
-        debugPrint("tbActividades");
-        debugPrint(actividades.toString());
-
-//& tbGruposMaterias
-        final gruposMaterias =
-            await db.rawQuery('SELECT * FROM tbGruposMaterias');
-        debugPrint("tbGruposMaterias");
-        debugPrint(gruposMaterias.toString());
-
-//& tbMateriasActividades
-        final materiasActividades =
-            await db.rawQuery('SELECT * FROM tbMateriasActividades');
-        debugPrint("tbMateriasActividades");
-        debugPrint(materiasActividades.toString());
-
-//& tbAlumnosActividades
-        final alumnosActividades =
-            await db.rawQuery('SELECT * FROM tbAlumnosActividades');
-        debugPrint("tbAlumnosActividades");
-        debugPrint(alumnosActividades.toString());
-
-//& tbEntregableActividades
-        final entregableActividades =
-            await db.rawQuery('SELECT * FROM tbEntregableActividades');
-        debugPrint("tbEntregableActividades");
-        debugPrint(entregableActividades.toString());
-
-//& tbNotificaciones
-        final notificaciones =
-            await db.rawQuery('SELECT * FROM tbNotificaciones');
-        debugPrint("tbNotificaciones");
-        debugPrint(notificaciones.toString());
-
+        debugPrint("✅ BD ABIERTA: $_databaseName");
         return db;
       }
     } catch (e) {
-      debugPrint(e.toString());
-      throw Exception(e);
+      debugPrint('❌ Error inicializando BD: $e');
+      throw Exception('Error inicializando base de datos: $e');
     }
+  }
+
+  static Future<void> _onCreate(Database db, int version) async {
+    try {
+      List<String> lsQuerys = Querys.querysCreateTables();
+      for (var query in lsQuerys) {
+        await db.execute(query);
+      }
+      debugPrint("✅ Tablas creadas exitosamente");
+    } catch (e) {
+      debugPrint('❌ Error creando tablas: $e');
+      throw Exception('Error creando tablas: $e');
+    }
+  }
+
+  static Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    debugPrint("🔄 Migrando BD de v$oldVersion a v$newVersion");
+
+    if (oldVersion < 2) {
+      // Migración v1 -> v2: Cambiar EstatusEntrega de BOOLEAN a INTEGER
+      try {
+        // SQLite no permite ALTER COLUMN directamente para cambiar tipos
+        // Necesitamos recrear la tabla con el nuevo esquema
+
+        // 1. Crear tabla temporal con nuevo esquema
+        await db.execute('''
+          CREATE TABLE tbAlumnosActividades_temp(
+            AlumnoActividadId INTEGER PRIMARY KEY,
+            ActividadId INTEGER,
+            AlumnoId INTEGER,
+            FechaEntrega TEXT,
+            EstatusEntrega INTEGER,
+            FOREIGN KEY (ActividadId) REFERENCES tbActividades(ActividadId)
+          );
+        ''');
+
+        // 2. Copiar datos convirtiendo booleanos a enteros
+        await db.execute('''
+          INSERT INTO tbAlumnosActividades_temp(AlumnoActividadId, ActividadId, AlumnoId, FechaEntrega, EstatusEntrega)
+          SELECT AlumnoActividadId, ActividadId, AlumnoId, FechaEntrega,
+                 CASE WHEN EstatusEntrega = 1 THEN 1 ELSE 0 END
+          FROM tbAlumnosActividades;
+        ''');
+
+        // 3. Eliminar tabla antigua
+        await db.execute('DROP TABLE tbAlumnosActividades;');
+
+        // 4. Renombrar tabla temporal
+        await db.execute('ALTER TABLE tbAlumnosActividades_temp RENAME TO tbAlumnosActividades;');
+
+        debugPrint("✅ Migración v1->v2 completada: BOOLEAN -> INTEGER");
+      } catch (e) {
+        debugPrint('❌ Error en migración v1->v2: $e');
+        // En caso de error, intentar recrear la tabla desde cero
+        await _recreateTableAlumnosActividades(db);
+      }
+    }
+  }
+
+  static Future<void> _recreateTableAlumnosActividades(Database db) async {
+    try {
+      // Eliminar tabla si existe
+      await db.execute('DROP TABLE IF EXISTS tbAlumnosActividades;');
+
+      // Recrear con esquema correcto
+      await db.execute('''
+        CREATE TABLE tbAlumnosActividades(
+          AlumnoActividadId INTEGER PRIMARY KEY,
+          ActividadId INTEGER,
+          AlumnoId INTEGER,
+          FechaEntrega TEXT,
+          EstatusEntrega INTEGER,
+          FOREIGN KEY (ActividadId) REFERENCES tbActividades(ActividadId)
+        );
+      ''');
+
+      debugPrint("✅ Tabla tbAlumnosActividades recreada con esquema correcto");
+    } catch (e) {
+      debugPrint('❌ Error recreando tabla tbAlumnosActividades: $e');
+      rethrow;
+    }
+  }
+
+  // Método legacy para compatibilidad (deprecated)
+  @deprecated
+  static Future<Database> initDatabase() async {
+    return await database;
   }
 }

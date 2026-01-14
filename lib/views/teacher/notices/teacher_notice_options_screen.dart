@@ -1,4 +1,5 @@
 import 'package:aprende_mas/config/utils/packages.dart';
+import 'package:aprende_mas/config/utils/responsive_utils.dart';
 import 'package:aprende_mas/models/models.dart';
 import 'package:aprende_mas/providers/notices/future_notices_provider.dart';
 import 'package:aprende_mas/providers/notices/notices_form_provider.dart';
@@ -6,7 +7,7 @@ import 'package:aprende_mas/views/widgets/buttons/floating_action_button_custom.
 import 'package:aprende_mas/views/widgets/buttons/custom_rounded_button.dart';
 import 'package:aprende_mas/views/widgets/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:flutter/material.dart'; 
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class TeacherNoticeOptionsScreen extends ConsumerStatefulWidget {
@@ -68,6 +69,7 @@ class _NoticeOptionsScreenState
     // 3. OBTENER DATOS: Pedimos TODOS los avisos al provider (sin filtrar en backend)
     final futureNoticesls = ref.watch(futureNoticesProvider(notice));
     final String appBarTitle = widget.subjectName ?? 'Avisos';
+    final subjectColor = getSubjectColor(widget.subjectId ?? 0);
 
 
     void requestAgain() {
@@ -77,6 +79,8 @@ class _NoticeOptionsScreenState
     ref.listen(
       noticesFormProvider,
       (previous, next) {
+        // CAMBIO: Refrescar la lista cuando se crea/elimina un aviso exitosamente
+        // Esto asegura que los cambios se reflejen inmediatamente en la UI
         if ((next.isFormPosted || next.isDeleted) && !next.isPosting) {
           requestAgain();
         }
@@ -104,6 +108,7 @@ class _NoticeOptionsScreenState
                   context.push('/teacher-create-notice', extra: notice);
                   },
                   icon: Icons.add,
+                  backgroundColor: subjectColor,
                 )
               : null,
                 body: SafeArea(
@@ -115,10 +120,15 @@ class _NoticeOptionsScreenState
                           padding: const EdgeInsets.all(8),
                           child: TextField(
                             controller: _searchController,
-                            decoration: const InputDecoration(
-                              labelText: 'Buscar avisos',
-                              prefixIcon: Icon(Icons.search),
+                            decoration: InputDecoration(
+                              labelText: '  Buscar avisos',
+                              prefixIconConstraints: BoxConstraints(maxWidth: 40, maxHeight: 40),
+                              prefixIcon: Padding(padding: EdgeInsets.only(left: 8, right: 8), child: SvgPicture.asset('assets/icons/buscar.svg', width: 24, height: 24, colorFilter: ColorFilter.mode(subjectColor, BlendMode.srcIn))),
                               border: OutlineInputBorder(
+                                borderRadius: BorderRadius.all(Radius.circular(25.0)),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderSide: BorderSide(color: subjectColor, width: 2.0),
                                 borderRadius: BorderRadius.all(Radius.circular(25.0)),
                               ),
                             ),
@@ -137,8 +147,11 @@ class _NoticeOptionsScreenState
                                       SizedBox(
                                         height: 180,
                                         child: SvgPicture.asset(
-                                          'assets/icons/new_notice.svg',
+                                          'assets/icons/nuevoanuncio.svg',
+                                          height: 180,
+                                          width: 180,
                                           fit: BoxFit.contain,
+                                          colorFilter: ColorFilter.mode(subjectColor, BlendMode.srcIn),
                                         ),
                                       ),
                                       const SizedBox(height: 24),
@@ -148,16 +161,19 @@ class _NoticeOptionsScreenState
                                         style: TextStyle(fontSize: 16),
                                       ),
                                       const SizedBox(height: 32),
-                                      CustomRoundedButton(
-                                        text: 'Crear primer aviso',
-                                        onPressed: () {
-                                        context.push('/teacher-create-notice', extra: notice);
-                                        },
-                                        backgroundColor: const Color(0xFF283043),
-                                        textColor: Colors.white,
-                                        borderRadius: 24,
-                                        height: 48,
-                                        padding: const EdgeInsets.symmetric(horizontal: 32),
+                                      SizedBox(
+                                        width: 200,
+                                        child: CustomRoundedButton(
+                                          text: 'Crear primer aviso',
+                                          onPressed: () {
+                                          context.push('/teacher-create-notice', extra: notice);
+                                          },
+                                          backgroundColor: subjectColor,
+                                          textColor: Colors.white,
+                                          borderRadius: 24,
+                                          height: 56,
+                                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                                        ),
                                       ),
                                     ],
                                   ),

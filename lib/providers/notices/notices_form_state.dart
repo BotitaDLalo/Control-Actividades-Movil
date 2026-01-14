@@ -8,7 +8,10 @@ class NoticesFormState {
   final bool isDeleted;
   final GenericInput title;
   final GenericInput description;
-  final int noticeId; // ⬅️ 1. CAMPO AÑADIDO para el ID del aviso
+  final int noticeId;
+  // CAMBIO: Campo agregado para mostrar mensajes de error al usuario
+  // cuando falla la creación/actualización de avisos
+  final String errorMessage;
 
   NoticesFormState(
       {this.isPosting = false,
@@ -17,7 +20,8 @@ class NoticesFormState {
       this.isDeleted = false,
       this.title = const GenericInput.pure(),
       this.description = const GenericInput.pure(),
-      this.noticeId = 0}); // ⬅️ 2. VALOR POR DEFECTO AÑADIDO (0 indica que no ha sido creado)
+      this.noticeId = 0,
+      this.errorMessage = ''});
 
   NoticesFormState copyWith({
     bool? isPosting,
@@ -26,7 +30,9 @@ class NoticesFormState {
     bool? isDeleted,
     GenericInput? title,
     GenericInput? description,
-    int? noticeId, // ⬅️ 3. PARÁMETRO AÑADIDO al copyWith
+    int? noticeId,
+    // CAMBIO: Parámetro agregado para actualizar errorMessage
+    String? errorMessage,
   }) =>
       NoticesFormState(
           isPosting: isPosting ?? this.isPosting,
@@ -35,5 +41,6 @@ class NoticesFormState {
           isDeleted: isDeleted ?? this.isDeleted,
           title: title ?? this.title,
           description: description ?? this.description,
-          noticeId: noticeId ?? this.noticeId); // ⬅️ 4. IMPLEMENTACIÓN AÑADIDA
+          noticeId: noticeId ?? this.noticeId,
+          errorMessage: errorMessage ?? this.errorMessage);
 }

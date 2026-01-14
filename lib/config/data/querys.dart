@@ -51,11 +51,11 @@ class Querys {
                                           );
         """,
         """
-        CREATE TABLE tbAlumnosActividades(AlumnoActividadId INTEGER PRIMARY KEY, 
-                                          ActividadId INTEGER, 
-                                          AlumnoId INTEGER, 
-                                          FechaEntrega TEXT, 
-                                          EstatusEntrega BOOLEAN,
+        CREATE TABLE tbAlumnosActividades(AlumnoActividadId INTEGER PRIMARY KEY,
+                                          ActividadId INTEGER,
+                                          AlumnoId INTEGER,
+                                          FechaEntrega TEXT,
+                                          EstatusEntrega INTEGER,
                      FOREIGN KEY (ActividadId) REFERENCES tbActividades(ActividadId)
                                          );
         """,

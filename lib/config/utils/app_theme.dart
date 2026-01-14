@@ -1,5 +1,6 @@
 import 'package:aprende_mas/config/utils/packages.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 const List<Color> _colorThemes = [
   Color.fromARGB(255, 255, 255, 255), //$White 0
@@ -23,7 +24,7 @@ class AppTheme {
   static final Color cardHeader = _colorThemes[5];
 
   static final Color pickedColor = _colorThemes[0];
-  static final BorderRadius borderRadius = BorderRadius.circular(10);
+  static final BorderRadius borderRadius = BorderRadius.circular(30);
 
 //#Color picker availableColors
   static final List<Color> availableColors = [
@@ -72,8 +73,8 @@ class AppTheme {
 
 //#Buttons styles
   static final ButtonStyle buttonPrimary = ElevatedButton.styleFrom(
-    backgroundColor: const Color(0xFF0d6efd),
-    // textStyle: const TextStyle(fontSize: 16),
+    backgroundColor: const Color.fromARGB(255, 15, 126, 217),
+    //textStyle: const TextStyle(fontSize: 16),
     fixedSize: const Size.fromHeight(45),
     shape: RoundedRectangleBorder(
       borderRadius: borderRadius, // border radius
@@ -114,7 +115,84 @@ class AppTheme {
       );
 
   ThemeData theme() {
-    return ThemeData(
-        textTheme: textThemes, scaffoldBackgroundColor: _colorThemes[0]);
+    // Aplicar la tipografía Inter a toda la aplicación, respetando los estilos
+    final base = ThemeData(
+      scaffoldBackgroundColor: _colorThemes[0],
+      useMaterial3: true, // Habilitar Material Design 3
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: mainColor,
+        brightness: Brightness.light,
+        surface: _colorThemes[0],
+        surfaceContainerHighest: Colors.white,
+        onSurface: Colors.black,
+        primary: mainColor,
+        onPrimary: Colors.white,
+        secondary: const Color(0xFF17B7F7),
+        onSecondary: Colors.white,
+        tertiary: const Color(0xFF086E9A),
+        onTertiary: Colors.white,
+      ),
+    );
+    return base.copyWith(
+      textTheme: GoogleFonts.interTextTheme(textThemes),
+      primaryTextTheme: GoogleFonts.interTextTheme(base.primaryTextTheme),
+      // también aplicamos a los textos de widgets elevados y botones donde corresponda
+      appBarTheme: AppBarTheme(
+        titleTextStyle: GoogleFonts.inter(textStyle: textThemes.titleLarge),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        surfaceTintColor: Colors.transparent,
+      ),
+      // Estilo global para todos los campos de texto: línea inferior (underline)
+      inputDecorationTheme: InputDecorationTheme(
+        
+        filled: false,
+        isDense: true,
+        contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+        floatingLabelBehavior: FloatingLabelBehavior.auto,
+        labelStyle: TextStyle(color: Colors.grey[700]),
+        hintStyle: TextStyle(color: Colors.grey[500]),
+        prefixIconColor: mainColor,
+        suffixIconColor: Colors.grey[600],
+        // Línea inferior por defecto
+        border: UnderlineInputBorder(
+          borderSide: BorderSide(color: Colors.grey.withOpacity(0.35)),
+        ),
+        enabledBorder: UnderlineInputBorder(
+          borderSide: BorderSide(color: Colors.grey.withOpacity(0.35)),
+        ),
+        focusedBorder: UnderlineInputBorder(
+          borderSide: BorderSide(color: mainColor, width: 2),
+        ),
+        errorBorder: UnderlineInputBorder(
+          borderSide: BorderSide(color: Colors.red.withOpacity(0.9)),
+        ),
+        focusedErrorBorder: UnderlineInputBorder(
+          borderSide: BorderSide(color: Colors.red.withOpacity(0.9), width: 2),
+        ),
+      ),
+      // Cursor y selección para campos de texto
+      textSelectionTheme: TextSelectionThemeData(cursorColor: mainColor),
+      // Hacer que los ElevatedButton usen por defecto el estilo de buttonPrimary
+      elevatedButtonTheme: ElevatedButtonThemeData(style: buttonPrimary),
+      // También proporcionar estilos coherentes para TextButton y OutlinedButton
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          foregroundColor: Colors.white,
+          backgroundColor: const Color.fromARGB(255, 15, 126, 217),
+          shape: RoundedRectangleBorder(borderRadius: borderRadius),
+          minimumSize: const Size.fromHeight(45),
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: _colorThemes[2],
+          backgroundColor: _colorThemes[0],
+          side: BorderSide(color: _colorThemes[3]),
+          shape: RoundedRectangleBorder(borderRadius: borderRadius),
+          minimumSize: const Size.fromHeight(45),
+        ),
+      ),
+    );
   }
 }

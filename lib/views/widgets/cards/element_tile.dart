@@ -1,10 +1,12 @@
 import 'package:aprende_mas/config/utils/packages.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class ElementTile extends ConsumerWidget {
   // final Notice notification;
   final String title;
   final String subtitle;
-  final IconData icon;
+  final IconData? icon;
+  final Widget? iconWidget;
   final IconData? trailingIcon;
   final String? trailingString;
   final Color iconColor;
@@ -16,7 +18,8 @@ class ElementTile extends ConsumerWidget {
 
   const ElementTile({
     super.key,
-    required this.icon,
+    this.icon,
+    this.iconWidget,
     required this.iconColor,
     this.trailingColor,
     this.trailingString,
@@ -54,17 +57,22 @@ Widget build(BuildContext context, WidgetRef ref) {
                           color: trailingColor,
                           size: 25,
                         ))
-                    : Text(
-                        trailingString ?? "",
-                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    : IconButton(
+                        onPressed: trailingVoidCallback,
+                        icon: SvgPicture.asset(
+                          'assets/icons/eliminarUsuario.svg',
+                          width: 24,
+                          height: 24,
+                          colorFilter: const ColorFilter.mode(Colors.black, BlendMode.srcIn),
+                        ),
                       )
             ),
             
             // --- Leading (Ícono de la actividad) ---
             leading: CircleAvatar(
-              backgroundColor: Colors.transparent, 
+              backgroundColor: Colors.transparent,
               radius: 22,
-              child: Icon(icon, color: Colors.black, size: iconSize),
+              child: iconWidget ?? (icon != null ? Icon(icon, color: Colors.black, size: iconSize) : const SizedBox()),
             ),
             
             // --- Title (Título de la actividad) ---

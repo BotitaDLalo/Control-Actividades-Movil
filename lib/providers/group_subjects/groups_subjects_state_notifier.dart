@@ -23,8 +23,9 @@ class GroupsSubjectsStateNotifier extends StateNotifier<GroupsSubjectsState> {
         addSubjectToState(res.subject!);
       }
       return true;
-    } on UncontrolledError catch (e) {
-      _errorMessage(e.message);
+    } catch (e) {
+      // Mostrar el mensaje específico del error en lugar del genérico
+      _errorMessage(e.toString().replaceFirst('Exception: ', ''));
       return false;
     }
   }

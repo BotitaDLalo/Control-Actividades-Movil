@@ -40,7 +40,7 @@ class EventDataSourceImpl implements EventDataSource {
       final String hexColor =
           color.value.toRadixString(16).substring(2).toUpperCase();
       final teacherId = await storageService.getId();
-
+  
       final response = await dio.post(uri, data: {
         "DocenteId": teacherId, // Incluimos el ID del docente automáticamente
         "FechaInicio": startDate.toIso8601String(),
@@ -51,38 +51,95 @@ class EventDataSourceImpl implements EventDataSource {
         "EventosGrupos": groupIds?.map((id) => {"GrupoId": id}).toList(),
         "EventosMaterias": subjectIds?.map((id) => {"MateriaId": id}).toList(),
       });
-
-      // Convertir la respuesta en una lista de eventos
-      final resList = List<Map<String, dynamic>>.from(response.data);
-      final events = EventMapper.fromMapList(resList);
-
-      return events;
+  
+      print("🔹 Respuesta del backend al crear evento: ${response.data}");
+  
+      // Manejar diferentes tipos de respuesta del backend
+      if (response.data is Map && response.data.containsKey('Message')) {
+        print("🔹 Respuesta es un mensaje de éxito, obteniendo datos actualizados...");
+        // Si el backend devuelve solo un mensaje, obtener los datos actualizados
+        final res = await dio.get("/EventosAgenda/ObtenerEventos", queryParameters: {'docenteId': teacherId});
+        print("🔹 Respuesta de ObtenerEventos: ${res.data}");
+  
+        if (res.data != null && res.data is List) {
+          final List<Map<String, dynamic>> responseList = List<Map<String, dynamic>>.from(res.data);
+          final events = EventMapper.fromMapList(responseList);
+          print("🔹 Eventos obtenidos después de creación: $events");
+          return events;
+        } else {
+          print("❌ Error: La respuesta de ObtenerEventos es nula o no es una lista");
+          return []; // Devolver lista vacía en lugar de null
+        }
+      } else if (response.data != null) {
+        // Si el backend devuelve datos de evento directamente
+        try {
+          final List<Map<String, dynamic>> resList = List<Map<String, dynamic>>.from(response.data);
+          final events = EventMapper.fromMapList(resList);
+          print("🔹 Eventos creados: $events");
+          return events;
+        } catch (e) {
+          print("❌ Error al convertir respuesta a lista de eventos: $e");
+          return []; // Devolver lista vacía en caso de error
+        }
+      } else {
+        print("❌ Error: La respuesta del backend es nula");
+        return []; // Devolver lista vacía en lugar de null
+      }
     } catch (e) {
-      throw Exception("EventDataSourceImpl post Error al crear un evento: $e");
+      print("❌ Error en createEvent: $e");
+      return []; // Devolver lista vacía en caso de excepción
     }
   }
 
   @override
   Future<Event> updateEvent(Map<String, dynamic> eventLike) async {
     try {
-      final int eventId = eventLike['eventoId'];
-      final String method = (eventId == null) ? 'POST' : 'PATCH';
-      final url = (eventId == null)
-          ? "/post"
-          : "/EventosAgenda/ActualizarEvento/$eventId";
+      print("🔹 Iniciando updateEvent con datos: $eventLike");
 
-      eventLike.remove('eventoId');
+      final int? eventId = eventLike['eventoId'] as int?;
+      print("🔹 eventId obtenido: $eventId (tipo: ${eventId?.runtimeType})");
+
+      if (eventId == null) {
+        print("❌ Error: eventoId es nulo");
+        throw Exception("eventoId no puede ser nulo");
+      }
+
+      final String method = 'PATCH';
+      final url = "/EventosAgenda/ActualizarEvento/$eventId";
+      print("🔹 URL de actualización: $url");
+      print("🔹 Método: $method");
+
+      final eventLikeCopy = Map<String, dynamic>.from(eventLike);
+      eventLikeCopy.remove('eventoId');
+      print("🔹 Datos a enviar: $eventLikeCopy");
+
       final response = await dio.request(url,
-          data: eventLike, options: Options(method: method));
+          data: eventLikeCopy, options: Options(method: method));
+      print("🔹 Respuesta del servidor: ${response.data}");
 
-      final updatedEvent = EventMapper.jsonToEntity(response.data);
-      return updatedEvent;
+      // Manejar diferentes tipos de respuesta del backend
+      if (response.data is Map && response.data.containsKey('Message')) {
+        print("🔹 Respuesta es un mensaje de éxito, obteniendo datos actualizados...");
+        // Si el backend devuelve solo un mensaje, obtener los datos actualizados
+        final teacherId = await storageService.getId();
+        final res = await dio.get("/EventosAgenda/ObtenerEventos", queryParameters: {'docenteId': teacherId});
+        final List<Map<String, dynamic>> responseList = List<Map<String, dynamic>>.from(res.data);
+        final events = EventMapper.fromMapList(responseList);
+        final updatedEvent = events.firstWhere((event) => event.eventId == eventId);
+        print("🔹 Evento actualizado obtenido: $updatedEvent");
+        return updatedEvent;
+      } else {
+        // Si el backend devuelve datos de evento directamente
+        final updatedEvent = EventMapper.jsonToEntity(response.data);
+        print("🔹 Evento actualizado: $updatedEvent");
+        return updatedEvent;
+      }
     } catch (e) {
-      //   if (e is DioException) {
-      //   // Imprimir el cuerpo de la respuesta y el código de error
-      //   print('Error al actualizar evento: ${e.response?.data}');
-      //   print('Código de estado: ${e.response?.statusCode}');
-      // }
+      print("❌ Excepción en updateEvent: $e");
+      print("❌ Tipo de excepción: ${e.runtimeType}");
+      if (e is Exception) {
+        print("❌ Mensaje de excepción: ${e.toString()}");
+      }
       throw Exception("Error en updateEvent: $e");
     }
   }

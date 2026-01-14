@@ -75,16 +75,14 @@ class _OptionDropdownFormState extends ConsumerState<OptionDropdownForm> {
           flex: 2,
           child: DropdownButtonFormField<String>(
             decoration: InputDecoration(
-              labelText: 'Tipo',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
+                labelText: 'Tipo',
+                // use global theme (underline) instead of forcing outline
+                isDense: true,
               ),
-              isDense: true,
-            ),
             items: ['Grupo', 'Materia']
                 .map((type) => DropdownMenuItem(
                       value: type,
-                      child: Text(type),
+                      child: Text(type, style: const TextStyle(color: Colors.black)),
                     ))
                 .toList(),
             value: _selectedType,
@@ -93,9 +91,10 @@ class _OptionDropdownFormState extends ConsumerState<OptionDropdownForm> {
                 _updateOptions(value);
               }
             },
+            style: const TextStyle(color: Colors.black87),
           ),
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: 7),
         Flexible(
           flex: 2,
           child: DropdownButtonFormField<int>(
@@ -103,9 +102,6 @@ class _OptionDropdownFormState extends ConsumerState<OptionDropdownForm> {
               labelText: _selectedType == null
                   ? 'Seleccione un tipo primero'
                   : 'Seleccione ${_selectedType!.toLowerCase()}',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
               isDense: true,
             ),
             items: _options.isEmpty
@@ -113,11 +109,12 @@ class _OptionDropdownFormState extends ConsumerState<OptionDropdownForm> {
                 : _options.map((option) {
                     return DropdownMenuItem(
                       value: int.parse(option['id']),
-                      child: Text(option['name']),
+                      child: Text(option['name'], style: const TextStyle(color: Colors.black)),
                     );
                   }).toList(),
             value: _selectedItemId,
             onChanged: _options.isNotEmpty ? _onItemSelected : null,
+            style: const TextStyle(color: Colors.black87),
           ),
         ),
       ],

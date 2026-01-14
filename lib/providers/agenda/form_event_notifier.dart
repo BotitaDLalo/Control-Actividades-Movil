@@ -3,6 +3,7 @@ import 'package:aprende_mas/models/agenda/event_model.dart';
 import 'package:aprende_mas/providers/agenda/form_event_state.dart';
 import 'package:aprende_mas/views/views.dart';
 import 'package:aprende_mas/views/widgets/inputs/color_input.dart';
+import 'package:intl/intl.dart';
 
 class FormEventNotifier extends StateNotifier<FormEventState>{
   final Function(String, String, Color, DateTime, DateTime, {List<int>? groupIds, List<int>? subjectIds}) eventCallback;
@@ -172,14 +173,15 @@ void onSubjectIdsChanged(List<int> ids) {
 
 DateTime? concatenarFechaHora(String fechaStr, String horaStr) {
   try {
+    print("🔹 Input fecha: $fechaStr, hora: $horaStr");
+
     // Validar la fecha
     if (fechaStr.isEmpty) {
       throw Exception("La fecha es nula o está vacía");
     }
-    final fecha = DateTime.tryParse(fechaStr);
-    if (fecha == null) {
-      throw Exception("Formato de fecha inválido: $fechaStr");
-    }
+
+    // Intentar parsear primero en formato dd-MM-yyyy
+    final fecha = DateFormat("dd-MM-yyyy").parse(fechaStr);
 
     // Validar la hora
     if (horaStr.isEmpty) {
@@ -193,9 +195,13 @@ DateTime? concatenarFechaHora(String fechaStr, String horaStr) {
     final minuto = int.tryParse(horaParts[1]) ?? 0;
 
     // Retornar la fecha y hora combinadas
-    return DateTime(fecha.year, fecha.month, fecha.day, hora, minuto);
+    final resultado = DateTime(fecha.year, fecha.month, fecha.day, hora, minuto);
+    print("✅ Fecha concatenada: $resultado");
+    return resultado;
   } catch (e) {
-    return null; // Retorna null si hay un error
+    print("❌ Error en concatenarFechaHora: $e");
+    // Si hay un error, devolver la fecha actual como valor por defecto
+    return DateTime.now();
   }
 }
 
@@ -211,14 +217,20 @@ Future<void> onFormSubmit() async {
   final fechaInicio = concatenarFechaHora(state.startDate.value, state.startTime.value);
   final fechaFinal = concatenarFechaHora(state.endDate.value, state.endTime.value);
 
+  print("🔹 fechaInicio: $fechaInicio, fechaFinal: $fechaFinal");
+
+  // Como ahora concatenarFechaHora siempre devuelve un DateTime (nunca null),
+  // podemos eliminar esta validación o dejarla como medida de seguridad
   if (fechaInicio == null || fechaFinal == null) {
+    print("❌ Error: Las fechas y horas no pueden ser nulas");
     throw Exception("Las fechas y horas no pueden ser nulas");
   }
 
   state = state.copyWith(isPosting: true);
 
   try {
-    bool res = await eventCallback(
+    // Llamar al callback que devuelve una lista de eventos
+    List<Event>? events = await eventCallback(
       state.title.value,
       state.description.value,
       state.colorCode.value,
@@ -228,10 +240,21 @@ Future<void> onFormSubmit() async {
       subjectIds: state.subjectIds!.isNotEmpty ? List<int>.from(state.subjectIds!) : null,
     );
 
+    print("Eventos recibidos: $events");
+
+    // Validar que events no sea nulo
+    if (events == null) {
+      print("❌ Error: events es nulo");
+      throw Exception("La lista de eventos es nula");
+    }
+
+    // Considerar exitoso si se recibieron eventos
+    bool res = events.isNotEmpty;
     print("res: $res");
 
     state = state.copyWith(isFormPosted: res);
   } catch (e) {
+    print("❌ Error durante la petición: $e");
     throw Exception("Error durante la petición: $e");
   } finally {
     // Marcar el fin de la petición y resetear el formulario si fue exitoso

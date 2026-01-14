@@ -1,5 +1,6 @@
 import 'package:aprende_mas/config/utils/general_utils.dart';
 import 'package:aprende_mas/config/utils/packages.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:aprende_mas/models/models.dart';
 import 'package:aprende_mas/views/views.dart';
 import 'package:aprende_mas/providers/providers.dart';
@@ -52,7 +53,7 @@ class _ActivitySectionSubmissionState
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 ListTile(
-                  leading: const Icon(Icons.edit_note),
+                  leading: SvgPicture.asset('assets/icons/activities20.svg', width: 24, height: 24),
                   title: const Text('Agregar Respuesta'),
                   onTap: () {
                     Navigator.pop(context);
@@ -135,7 +136,7 @@ class _ActivitySectionSubmissionState
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 ListTile(
-                  leading: const Icon(Icons.delete),
+                  leading: SvgPicture.asset('assets/icons/eliminar1.svg', width: 24, height: 24),
                   title: const Text('Eliminar respuesta'),
                   onTap: () {
                     ref.read(activityFormProvider.notifier).dropAnswer();
@@ -160,7 +161,7 @@ class _ActivitySectionSubmissionState
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 ListTile(
-                  leading: const Icon(Icons.delete),
+                  leading: SvgPicture.asset('assets/icons/eliminar1.svg', width: 24, height: 24),
                   title: const Text('Cancelar Entregable'),
                   onTap: () {
                     if (authConectionType == AuthConnectionType.online) {
@@ -201,16 +202,18 @@ class _ActivitySectionSubmissionState
                             Icons.send,
                             color: Colors.grey.withOpacity(0.8),
                           )
-                        : Icon(
-                            Icons.add,
-                            color: Colors.grey.withOpacity(0.8),
+                        : SvgPicture.asset(
+                            'assets/icons/agregar.svg',
+                            color: Colors.black,
+                            width: 40,
+                            height: 40,
                           ))
                 : const SizedBox(),
         appBar: AppBar(
           backgroundColor: Colors.white,
           elevation: 0,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
+            icon: SvgPicture.asset('assets/icons/retroceder.svg', width: 35, height: 35, color: Colors.black),
             onPressed: () {
               Navigator.pop(context);
             },
@@ -295,15 +298,15 @@ class _ActivitySectionSubmissionState
 
                                     return GestureDetector(
                                       onLongPress: () {
-                                        if (submission.status) {
+                                        if (submission.status!) {
                                           showModalBottomCancelSubmit(
-                                              submission.studentActivityId);
+                                              submission.submissionActivityStudentId);
                                         }
                                       },
                                       child: ElementTile(
-                                          icon: Icons.edit_note,
-                                          iconSize: 28,
+                                          iconWidget: SvgPicture.asset('assets/icons/activities20.svg', width: 28, height: 28),
                                           iconColor: Colors.white,
+                                          iconSize: 28,
                                           title: "Respuesta",
                                           subtitle: "",
                                           onTapFunction: () {
@@ -332,7 +335,7 @@ class _ActivitySectionSubmissionState
                                               ),
                                             );
                                           },
-                                          trailingString: submission.status
+                                          trailingString: submission.status!
                                               ? (submission.grade == null
                                                   ? "Enviado"
                                                   : "${submission.grade} /${widget.activity.puntaje}")
@@ -361,7 +364,7 @@ class _ActivitySectionSubmissionState
                                 showModalBottomDropAnswer(context);
                               },
                               child: ElementTile(
-                                icon: Icons.edit_note,
+                                iconWidget: SvgPicture.asset('assets/icons/activities20.svg', width: 28, height: 28),
                                 iconSize: 28,
                                 iconColor: Colors.white,
                                 title: 'Respuesta',
@@ -383,3 +386,4 @@ class _ActivitySectionSubmissionState
         ));
   }
 }
+

@@ -25,14 +25,25 @@ class SubjectsStateNotifier extends StateNotifier<SubjectsState> {
   Future<void> getSubjects() async {
     try {
       final subjects = await subjectsRepository.getSubjectsWithoutGroup();
-      debugPrint("SubjectsStateNotifier: $subjects");
+      debugPrint("SubjectsStateNotifier: ${subjects.map((s) => {'id': s.materiaId, 'desc': s.descripcion, 'code': s.codigoAcceso}).toList()}");
       if (mounted) {
         setSubjects(subjects);
+        await subjectsOffline.saveSubjectsWithoutGroup(subjects);
       }
     } catch (e, stacktrace) {
-      debugPrint("Error en getSubjects: $e");
+      debugPrint("Error en getSubjects online: $e");
       debugPrint("Stacktrace: $stacktrace");
-      throw Exception(e);
+      // Fallback a offline
+      try {
+        final subjectsOfflineList = await subjectsOffline.getSujectsWithoutGroup();
+        debugPrint("Cargando desde offline: ${subjectsOfflineList.map((s) => {'id': s.materiaId, 'desc': s.descripcion, 'code': s.codigoAcceso}).toList()}");
+        if (mounted) {
+          setSubjects(subjectsOfflineList);
+        }
+      } catch (e2) {
+        debugPrint("Error en offline: $e2");
+        // No hacer nada
+      }
     }
   }
 
@@ -52,10 +63,14 @@ class SubjectsStateNotifier extends StateNotifier<SubjectsState> {
   Future<void> createSubjectWithGroups(String subjectName, String description,
       Color colorCode, List<int> groupsId) async {
     try {
+      debugPrint("📝 Llamando createSubjectWithGroups: $subjectName, grupos: $groupsId");
       final subject = await subjectsRepository.createSubjectWithGroup(
           subjectName, description, colorCode, groupsId);
+      debugPrint("📝 Materia creada, actualizando groups");
       _setSubjectWithGroups(subject);
+      debugPrint("📝 Groups actualizados con nueva materia");
     } catch (e) {
+      debugPrint("❌ Error en createSubjectWithGroups: $e");
       throw Exception(e);
     }
   }
@@ -71,6 +86,7 @@ class SubjectsStateNotifier extends StateNotifier<SubjectsState> {
       final subjects = await subjectsRepository.createSubjectWithoutGroup(
           subjectName, description, colorCode);
       _setSubjectsWithoutGroups(subjects);
+      await subjectsOffline.saveSubjectsWithoutGroup(subjects);
     } catch (e) {
       throw Exception(e);
     }
@@ -82,6 +98,17 @@ class SubjectsStateNotifier extends StateNotifier<SubjectsState> {
 
   void addSubjectToState(Subject subject) async {
     final subjectId = subject.materiaId;
+
+    // Verificar si la materia ya existe en el estado
+    final existingSubjectIndex = state.lsSubjects.indexWhere((s) => s.materiaId == subjectId);
+
+    if (existingSubjectIndex != -1) {
+      // La materia ya existe, no la agregamos de nuevo
+      debugPrint("⚠️ Materia ID $subjectId ya existe en el estado, omitiendo duplicado");
+      return;
+    }
+
+    // La materia no existe, la agregamos
     state = state.copyWith(lsSubjects: [subject, ...state.lsSubjects]);
 
     List<Subject> lsSubject = [subject];
@@ -95,6 +122,58 @@ class SubjectsStateNotifier extends StateNotifier<SubjectsState> {
       List<Submission> lsSubmissions = await getSubmissionsCallback(activityId!);
       await activityOffline.saveSubmissions(lsSubmissions, activityId);
     }
+  }
+
+  Future<bool> deleteSubject(int subjectId) async {
+    try {
+      debugPrint("🗑️ Iniciando eliminación de materia ID: $subjectId");
+      bool success = await subjectsRepository.deleteSubject(subjectId);
+      if (success) {
+        debugPrint("✅ Materia eliminada del backend, actualizando state");
+        _deleteSubjectFromState(subjectId);
+        debugPrint("✅ Materia removida del state local");
+        return true;
+      } else {
+        debugPrint("❌ El backend reportó fallo en eliminación de materia");
+        return false;
+      }
+    } catch (e) {
+      debugPrint("❌ Error inesperado al eliminar materia: $e");
+      return false;
+    }
+  }
+
+  Future<bool> updateSubject(int subjectId, String name, String description) async {
+    try {
+      debugPrint("🖊️ Iniciando actualización de materia ID: $subjectId");
+      final updatedSubject = await subjectsRepository.updateSubject(subjectId, name, description);
+      if (updatedSubject != null) {
+        _updateSubjectInState(updatedSubject);
+        debugPrint("✅ Materia actualizada en state local");
+        return true;
+      } else {
+        debugPrint("❌ El backend no retornó la materia actualizada");
+        return false;
+      }
+    } catch (e) {
+      debugPrint("❌ Error inesperado al actualizar materia: $e");
+      return false;
+    }
+  }
+
+  void _updateSubjectInState(Subject updatedSubject) {
+    List<Subject> lsSubjects = List.from(state.lsSubjects);
+    final index = lsSubjects.indexWhere((s) => s.materiaId == updatedSubject.materiaId);
+    if (index != -1) {
+      lsSubjects[index] = updatedSubject;
+      state = state.copyWith(lsSubjects: lsSubjects);
+    }
+  }
+
+  void _deleteSubjectFromState(int subjectId) {
+    List<Subject> lsSubjects = List.from(state.lsSubjects);
+    lsSubjects.removeWhere((subject) => subject.materiaId == subjectId);
+    state = state.copyWith(lsSubjects: lsSubjects);
   }
 
   void clearSubjectsState() {

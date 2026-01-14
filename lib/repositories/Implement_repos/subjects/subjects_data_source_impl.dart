@@ -17,18 +17,54 @@ class SubjectsDataSourceImpl implements SubjectsDataSource {
 
       if (role == cn.getRoleTeacherName) {
         const uri = "/Materias/ObtenerMateriasDocente";
-        final res = await dio.get(uri, queryParameters: {'docenteId': id});
-        resList = List<Map<String, dynamic>>.from(res.data);
-        debugPrint("SubjectsDataSourceImpl: ${res.data}");
+        debugPrint("🔍 [LOGIN] Solicitando materias del docente: $uri?docenteId=$id");
+        final res = await dio.get(
+          uri,
+          queryParameters: {'docenteId': id},
+          options: Options(validateStatus: (status) => true),
+        );
+        debugPrint("📥 [LOGIN] Respuesta docente - Status: ${res.statusCode}");
+        if (res.statusCode == 200) {
+          resList = List<Map<String, dynamic>>.from(res.data);
+        } else if (res.statusCode == 400) {
+          debugPrint("⚠️ [LOGIN] Status 400 para docente - Data: ${res.data}");
+          resList = [];
+        } else {
+          debugPrint("🚨 [LOGIN] Status inesperado ${res.statusCode} para docente");
+          resList = [];
+        }
       } else if (role == cn.getRoleStudentName) {
         const uri = "/Materias/ObtenerMateriasAlumno";
-        final res = await dio.get(uri, queryParameters: {'alumnoId': id});
-        resList = List<Map<String, dynamic>>.from(res.data);
+        debugPrint("🔍 [LOGIN] Solicitando materias del alumno: $uri?alumnoId=$id");
+        final res = await dio.get(
+          uri,
+          queryParameters: {'alumnoId': id},
+          options: Options(validateStatus: (status) => true),
+        );
+        debugPrint("📥 [LOGIN] Respuesta alumno - Status: ${res.statusCode}");
+        if (res.statusCode == 200) {
+          resList = List<Map<String, dynamic>>.from(res.data);
+        } else if (res.statusCode == 400) {
+          debugPrint("⚠️ [LOGIN] Status 400 para alumno - Data: ${res.data}");
+          resList = [];
+        } else {
+          debugPrint("🚨 [LOGIN] Status inesperado ${res.statusCode} para alumno");
+          resList = [];
+        }
       }
-      
+
       final lsSubjects = Subject.subjectsJsonToEntityList(resList);
+      debugPrint("✅ [LOGIN] Materias parseadas exitosamente: ${lsSubjects.length} materias");
       return lsSubjects;
+    } on DioException catch (e) {
+      debugPrint("🚨 [LOGIN] DioException en getSubjectsWithoutGroup: ${e.message}");
+      debugPrint("🚨 [LOGIN] Status Code: ${e.response?.statusCode}");
+      debugPrint("🚨 [LOGIN] Response Data: ${e.response?.data}");
+      debugPrint("🚨 [LOGIN] Request: ${e.requestOptions.method} ${e.requestOptions.path}");
+      // Re-throw DioException para que sea capturado por catchError en auth_state_notifier
+      rethrow;
     } catch (e) {
+      debugPrint("🚨 [LOGIN] Error inesperado en getSubjectsWithoutGroup: $e");
       throw Exception(e);
     }
   }
@@ -39,6 +75,7 @@ class SubjectsDataSourceImpl implements SubjectsDataSource {
     try {
       const uri = "/Materias/CrearMateriaGrupos";
       final id = await storageService.getId();
+      debugPrint("📝 Creando materia '$subjectName' para grupos: $groupsId");
       final res = await dio.post(uri, data: {
         "NombreMateria": subjectName,
         "Descripcion": description,
@@ -46,11 +83,20 @@ class SubjectsDataSourceImpl implements SubjectsDataSource {
         "DocenteId": id,
         "Grupos": groupsId
       });
+      debugPrint("📥 Status Code: ${res.statusCode}");
+      debugPrint("📥 Response Data: ${res.data}");
 
-      final resList = List<Map<String, dynamic>>.from(res.data);
-      final groups = Group.groupsJsonToEntityList(resList);
-      return groups;
+      if (res.statusCode == 200) {
+        debugPrint("✅ Materia creada exitosamente en backend");
+        // El backend ahora retorna un mensaje, no la lista de grupos
+        // La actualización se hace con getGroupsSubjects después
+        return [];
+      } else {
+        debugPrint("❌ Status code ${res.statusCode}: ${res.data}");
+        return [];
+      }
     } catch (e) {
+      debugPrint("❌ Error creando materia con grupos: $e");
       throw Exception(e);
     }
   }
@@ -77,15 +123,56 @@ class SubjectsDataSourceImpl implements SubjectsDataSource {
   }
 
   @override
-  Future<void> deleteSubject() {
-    // TODO: implement deleteSubject
-    throw UnimplementedError();
+  Future<bool> deleteSubject(int subjectId) async {
+    try {
+      const uri = "/Materias/DeleteSubject";
+      final fullUri = "$uri/$subjectId";
+      debugPrint("🔍 Intentando eliminar materia con ID: $subjectId");
+      debugPrint("🔍 URL: $fullUri");
+      final response = await dio.delete(fullUri);
+      debugPrint("🔍 Status Code: ${response.statusCode}");
+      debugPrint("🔍 Response Data: ${response.data}");
+
+      if (response.statusCode == 200) {
+        debugPrint("✅ Materia eliminada exitosamente");
+        return true;
+      } else {
+        debugPrint("❌ Error del servidor: ${response.statusCode} - ${response.data}");
+        return false;
+      }
+    } catch (e) {
+      debugPrint("❌ Error de conexión al eliminar materia: $e");
+      return false;
+    }
   }
 
   @override
-  Future<void> updateSubject() {
-    // TODO: implement updateSubject
-    throw UnimplementedError();
+  Future<Subject> updateSubject(int subjectId, String name, String description) async {
+    try {
+      const uri = "/Materias/UpdateSubject";
+      final res = await dio.put(uri, data: {
+        "MateriaId": subjectId,
+        "NombreMateria": name,
+        "Descripcion": description,
+      });
+
+      if (res.statusCode == 200) {
+        // Assuming the response contains the updated subject
+        final subjectMap = res.data as Map<String, dynamic>;
+        final updatedSubject = Subject(
+          materiaId: subjectMap['MateriaId'],
+          nombreMateria: subjectMap['NombreMateria'],
+          descripcion: subjectMap['Descripcion'] ?? "",
+          codigoAcceso: subjectMap['CodigoAcceso'] ?? "",
+          codigoColor: subjectMap['CodigoColor'] ?? "",
+        );
+        return updatedSubject;
+      } else {
+        throw Exception("Error updating subject: ${res.statusCode}");
+      }
+    } catch (e) {
+      throw Exception(e);
+    }
   }
 
 
@@ -137,6 +224,8 @@ try {
     throw Exception(e); 
   }
 }
+
+
 
   @override
   Future<List<StudentGroupSubject>> getStudentsSubject(int? groupId,int subjectId) async {

@@ -99,7 +99,7 @@ class _GroupTeacherOptionsState extends ConsumerState<GroupTeacherOptions> {
             ContainerNameGroupSubjects(
               name: widget.groupName,
               accessCode: widget.accessCode,
-              color: const Color(0xFF31D492),
+              color: AppTheme.mainColor,
             ),
             TeacherGroupOptions(
                 lsGroupOptions: lsGroupOptions,

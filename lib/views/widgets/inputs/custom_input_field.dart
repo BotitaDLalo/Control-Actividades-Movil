@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 class CustomInputField extends StatelessWidget {
+  final Widget? icon;
   final String? label;
   final String? hint;
   final String? errorMessage;
@@ -17,6 +18,7 @@ class CustomInputField extends StatelessWidget {
 
   const CustomInputField({
     super.key,
+    this.icon,
     this.label,
     this.hint,
     this.errorMessage,
@@ -37,8 +39,9 @@ class CustomInputField extends StatelessWidget {
     final colors = Theme.of(context);
 
     return TextFormField(
-      controller: textEditingController ?? TextEditingController(text: initialValue),
-      onChanged: onChanged,
+      controller: textEditingController,
+      initialValue: textEditingController == null ? initialValue : null,
+      onChanged: onChanged != null ? (value) => onChanged!(value) : null,
       validator: validator,
       obscureText: obscureText,
       keyboardType: isNumericKeyboard ? TextInputType.number : keyboardType,
@@ -47,33 +50,18 @@ class CustomInputField extends StatelessWidget {
           ? TextCapitalization.sentences
           : TextCapitalization.none,
       style: const TextStyle(fontSize: 20, color: Colors.black),
-      decoration: InputDecoration(
+        decoration: InputDecoration(
+        prefixIcon: icon,
         floatingLabelStyle: const TextStyle(
-            color: Colors.black, fontWeight: FontWeight.bold, fontSize: 18),
-        enabledBorder: OutlineInputBorder(
-          borderSide: const BorderSide(color: Color.fromARGB(100, 0, 0, 0)),
-          borderRadius: BorderRadius.circular(15),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderSide: const BorderSide(color: Color.fromARGB(255, 0, 0, 0)),
-          borderRadius: BorderRadius.circular(15),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.red.shade800),
-          borderRadius: BorderRadius.circular(15),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.red.shade800),
-          borderRadius: BorderRadius.circular(15),
-        ),
+          color: Colors.black, fontWeight: FontWeight.bold, fontSize: 18),
         isDense: true,
         label: label != null ? Text(label!) : null,
         hintText: hint,
         errorText: errorMessage,
         focusColor: colors.primaryColor,
         contentPadding: EdgeInsets.symmetric(
-            horizontal: 8, vertical: customHeight ?? 15),
-      ),
+          horizontal: 8, vertical: customHeight ?? 15),
+        ),
     );
   }
 }

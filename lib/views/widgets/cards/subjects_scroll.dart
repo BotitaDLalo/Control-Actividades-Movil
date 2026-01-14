@@ -19,9 +19,11 @@ class SubjectScroll extends ConsumerWidget {
               groupId: groupId,
               subjectId: materia.materiaId,
               nombreMateria: materia.nombreMateria,
-              accessCode: materia.codigoAcceso,
+              accessCode: materia.codigoAcceso ?? "",
               description: materia.descripcion ?? "",
               actividades: materia.actividades,
+              widthFactor: 0.60,
+              heightFactor: 0.18,
             )
         ],
       ),

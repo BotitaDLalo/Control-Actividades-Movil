@@ -85,18 +85,20 @@ Future<bool> addStudentsSubject(int subjectId) async {
 
 
  Future<bool> removeStudentFromSubject({
-  required int alumnoMateriaId,
+  // required int alumnoMateriaId,
+  required int studentId,
+  required int subjectId
 }) async {
   try {
     final success = await subjectsRepository.removeStudentFromSubject(
-      alumnoMateriaId: alumnoMateriaId,
+      alumnoMateriaId: studentId,
     );
 
     if (success) {
       final updatedList = state.lsStudentsSubject
           .where(
             (student) =>
-                student.alumnoMateriaId != alumnoMateriaId,
+                student.alumnoMateriaId != studentId,
           )
           .toList();
 

@@ -18,7 +18,7 @@ class ButtonCreateActivitiesBetter extends StatelessWidget {
         child: FilledButton(
           onPressed: onPressed,
           style: ButtonStyle(
-            backgroundColor: const WidgetStatePropertyAll(Colors.grey),
+            backgroundColor: const WidgetStatePropertyAll(Color(0xFF00569E)),
             shape: WidgetStatePropertyAll(
               RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(6), // esquinas menos redondeadas
@@ -31,7 +31,7 @@ class ButtonCreateActivitiesBetter extends StatelessWidget {
           child: const Text(
             'Crear',
             style: TextStyle(
-              color: Colors.black, // texto negro
+              color: Colors.white, // texto blanco
               fontSize: 16,
               fontWeight: FontWeight.w600,
             ),

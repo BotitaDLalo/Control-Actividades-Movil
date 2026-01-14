@@ -1,6 +1,9 @@
 import 'package:aprende_mas/views/teacher/agenda/form_events.dart';
 import 'package:aprende_mas/views/views.dart';
+import 'package:aprende_mas/views/widgets/structure/app_bar_home.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:go_router/go_router.dart';
 
 class CreateEventScreen extends StatelessWidget {
   const CreateEventScreen({super.key,});
@@ -11,26 +14,19 @@ class CreateEventScreen extends StatelessWidget {
     return GestureDetector(
       onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
       child: Scaffold(
+        appBar: AppBarHome(
+          title: 'Crear evento',
+          showSettings: false,
+          leading: IconButton(
+            onPressed: () => context.pop(),
+            icon: SvgPicture.asset('assets/icons/retroceder.svg', width: 35, height: 35, color: Colors.white),
+          ),
+        ),
         body: SingleChildScrollView(
           child: Column(
             children: [
-              const Stack(
-                children: [
-                  HeaderTile(
-                    svg: 'assets/icons/agregar-tarea.svg', 
-                    titulo: 'Crear Evento',
-                    // colorUno: Color(0xff536cf6),
-                    // colorDos: Color(0xff66A9F2),
-                  ),
-                  Positioned(
-                    left: 10,
-                    top: 40,
-                    child: ButtonClose(),
-                  ),
-                ],
-              ),
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: 20.0),
+                padding: const EdgeInsets.symmetric(vertical: 0.0),
                 child: FormEvents()
               ),
             ],
@@ -40,4 +36,5 @@ class CreateEventScreen extends StatelessWidget {
     );
   }
 }
+
 

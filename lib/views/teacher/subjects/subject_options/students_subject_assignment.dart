@@ -1,10 +1,13 @@
 import 'package:aprende_mas/config/utils/packages.dart';
 import 'package:aprende_mas/config/utils/app_theme.dart';
+import 'package:aprende_mas/config/utils/responsive_utils.dart';
 import 'package:aprende_mas/providers/subjects/students_subject_provider.dart';
 import 'package:aprende_mas/views/views.dart';
 import 'package:aprende_mas/providers/providers.dart';
 import 'package:aprende_mas/views/widgets/buttons/button_form.dart';
 import 'package:aprende_mas/views/widgets/buttons/custom_rounded_button.dart';
+import 'package:aprende_mas/views/widgets/alerts/success_dialog.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 final contentProvider = StateProvider<String>((ref) => '');
 final addStudentMessageProvider = StateProvider<bool>((ref) => false);
@@ -37,12 +40,13 @@ class _StudentsSubjectAssignmentState
   }
 
   @override
-Widget build(BuildContext context) {
-  final isNotEmpty = ref.watch(addStudentMessageProvider);
-  final content = ref.watch(contentProvider);
-  final formSubjects = ref.watch(formSubjectsProvider);
-  final lsEmails = ref.watch(studentsSubjectProvider).lsEmails;
-  final canSubmit = lsEmails.isNotEmpty && !formSubjects.isPosting;
+ Widget build(BuildContext context) {
+   final isNotEmpty = ref.watch(addStudentMessageProvider);
+   final content = ref.watch(contentProvider);
+   final formSubjects = ref.watch(formSubjectsProvider);
+   final lsEmails = ref.watch(studentsSubjectProvider).lsEmails;
+   final canSubmit = lsEmails.isNotEmpty && !formSubjects.isPosting;
+   final subjectColor = getSubjectColor(widget.subjectId);
 
   void clear() {
     controller.clear();
@@ -65,30 +69,47 @@ Widget build(BuildContext context) {
     final isFormPosted = next.isFormPosted;
     if (isFormPosted) {
       ref.read(studentsSubjectProvider.notifier).clearLsEmails();
+      // Mostrar diálogo de éxito
+      SuccessDialog.show(
+        context,
+        message: 'Alumno agregado correctamente',
+      );
     }
   });
 
-  return Column( // El widget principal es ahora un Column
-    children: [
-      Expanded( // Esta sección crecerá y es la única que podrá desplazarse
-        child: SingleChildScrollView(
+  return Scaffold(
+    resizeToAvoidBottomInset: false, // Evita que el contenido suba con el teclado
+    body: Stack(
+      children: [
+        // Contenido scrollable
+        SingleChildScrollView(
+          padding: const EdgeInsets.only(bottom: 100, left: 20, right: 20), // Espacio para el botón fijo y márgenes laterales
           child: Column(
             children: [
               const SizedBox(height: 10),
               // --- SECCIÓN 1: INPUT Y SUGERENCIA (Altura dinámica) ---
               SizedBox(
-                width: 350,
-                // height: 150 fue eliminado en el paso anterior
+                width: 320,
                 child: Column(
                   children: [
-                    CustomTextFormField(
-                      textEditingController: controller,
-                      label: 'Agregar alumno',
-                      icon: const Icon(Icons.search, color: Colors.grey),
+                    TextField(
+                      controller: controller,
+                      decoration: InputDecoration(
+                        labelText: '  Agregar alumno',
+                        prefixIconConstraints: BoxConstraints(maxWidth: 40, maxHeight: 40),
+                        prefixIcon: Padding(padding: EdgeInsets.only(left: 8, right: 8), child: SvgPicture.asset('assets/icons/buscar.svg', width: 24, height: 24, colorFilter: ColorFilter.mode(subjectColor, BlendMode.srcIn))),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(25.0)),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: subjectColor, width: 2.0),
+                          borderRadius: BorderRadius.all(Radius.circular(25.0)),
+                        ),
+                      ),
                     ),
                     isNotEmpty
                         ? SizedBox(
-                            width: 330,
+                            width: 300,
                             child: Container(
                               color: Colors.grey.shade200,
                               child: ListTile(
@@ -118,11 +139,10 @@ Widget build(BuildContext context) {
                   ],
                 ),
               ),
-              
+
               // --- SECCIÓN 2: LISTADO DE ALUMNOS (Contenido scrollable) ---
-              // Nota: Mantuve el height: 350. Si quieres que la lista crezca infinitamente, puedes quitarlo.
               SizedBox(
-                height: 350, 
+                height: 350,
                 child: Column(
                   children: [
                     Padding(
@@ -132,39 +152,46 @@ Widget build(BuildContext context) {
                         style: Theme.of(context).textTheme.titleLarge,
                       ),
                     ),
-                    Expanded( // Aseguramos que el ListView ocupe el espacio restante
+                    Expanded(
                       child: SizedBox(
-                        width: 360,
+                        width: 320,
                         child: ListView.builder(
                           itemCount: lsEmails.length,
                           itemBuilder: (context, index) {
                             final email = lsEmails[index];
                             if (email.isEmailValid) {
-                              return Container(
-                                margin: const EdgeInsets.only(bottom: 10),
-                                // ... contenido de ListTile ...
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(10),
-                                  color: Colors.grey.shade200,
+                              return ElementTile(
+                                iconWidget: SvgPicture.asset(
+                                  'assets/icons/user2.svg',
+                                  width: 32,
+                                  height: 32,
+                                  colorFilter: const ColorFilter.mode(Colors.black, BlendMode.srcIn),
                                 ),
-                                child: ListTile(
-                                  leading: IconButton(
-                                    icon: const Icon(Icons.person),
-                                    iconSize: 30,
-                                    onPressed: () {},
-                                  ),
-                                  title: Text(
-                                    email.email,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(fontSize: 16.5),
-                                  ),
-                                  trailing: IconButton(
-                                    icon: const Icon(Icons.delete),
-                                    onPressed: () {
-                                      ref
-                                          .read(studentsSubjectProvider.notifier)
-                                          .onDeleteVeryfyEmail(index);
-                                    },
+                                iconColor: Colors.white,
+                                iconSize: 32,
+                                title: email.email,
+                                subtitle: '',
+                                trailingWidget: IconButton(
+                                  onPressed: () {
+                                    ref
+                                        .read(studentsSubjectProvider.notifier)
+                                        .onDeleteVeryfyEmail(index);
+                                  },
+                                  icon: Container(
+                                    width: 40,
+                                    height: 40,
+                                    decoration: BoxDecoration(
+                                      color: Colors.red,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Center(
+                                      child: SvgPicture.asset(
+                                        'assets/icons/eliminar4.svg',
+                                        width: 20,
+                                        height: 20,
+                                        colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+                                      ),
+                                    ),
                                   ),
                                 ),
                               );
@@ -180,30 +207,32 @@ Widget build(BuildContext context) {
             ],
           ),
         ),
-      ),
-      
-      // --- SECCIÓN 3: BOTÓN FIJO (Fuera del scroll) ---
-      Padding(
-  padding: const EdgeInsets.only(right: 20, bottom: 20, top: 10),
-  child: Align(
-    alignment: Alignment.centerRight,
-    child: CustomRoundedButton(
-      text: "Agregar",
-      // Asignamos la función SÓLO si 'canSubmit' es verdadero.
-      // Si es falso, el botón será 'null' (deshabilitado).
-      onPressed: canSubmit 
-          ? () async {
-              // DEBUG: Agrega un print para confirmar que la función se ejecuta
-              print('--- INICIANDO ENVÍO DE ${lsEmails.length} ALUMNOS ---');
-              ref
-                  .read(formSubjectsProvider.notifier)
-                  .onAddStudentsSubjectWithoutGroup(widget.subjectId);
-            }
-          : null, // Deshabilita el botón si la lista está vacía o está enviando
+
+        // Botón fijo en la parte inferior
+        Positioned(
+          bottom: 20,
+          left: 0,
+          right: 0,
+          child: Center(
+            child: SizedBox(
+              width: 150,
+              child: CustomRoundedButton(
+                text: "Agregar",
+                backgroundColor: subjectColor,
+                onPressed: canSubmit
+                    ? () async {
+                        print('--- INICIANDO ENVÍO DE ${lsEmails.length} ALUMNOS ---');
+                        ref
+                            .read(formSubjectsProvider.notifier)
+                            .onAddStudentsSubjectWithoutGroup(widget.subjectId);
+                      }
+                    : null,
+              ),
+            ),
+          ),
+        ),
+      ],
     ),
-  ),
-),
-    ],
   );
 }
 }

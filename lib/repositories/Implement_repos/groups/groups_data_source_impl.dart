@@ -18,16 +18,53 @@ class GroupsDataSourceImpl implements GroupsDataSource {
 
       if (role == cn.getRoleTeacherName) {
         const uri = "/Grupos/ObtenerGruposMateriasDocente";
-        final res = await dio.get(uri, queryParameters: {'docenteId': id});
-        resList = List<Map<String, dynamic>>.from(res.data);
+        debugPrint("🔍 [LOGIN] Solicitando grupos del docente: $uri?docenteId=$id");
+        final res = await dio.get(
+          uri,
+          queryParameters: {'docenteId': id},
+          options: Options(validateStatus: (status) => true),
+        );
+        debugPrint("📥 [LOGIN] Respuesta docente - Status: ${res.statusCode}");
+        if (res.statusCode == 200) {
+          resList = List<Map<String, dynamic>>.from(res.data);
+        } else if (res.statusCode == 400) {
+          debugPrint("⚠️ [LOGIN] Status 400 para docente - Data: ${res.data}");
+          resList = [];
+        } else {
+          debugPrint("🚨 [LOGIN] Status inesperado ${res.statusCode} para docente");
+          resList = [];
+        }
       } else if (role == cn.getRoleStudentName) {
         const uri = "/Grupos/ObtenerGruposMateriasAlumno";
-        final res = await dio.get(uri, queryParameters: {'alumnoId': id});
-        resList = List<Map<String, dynamic>>.from(res.data);
+        debugPrint("🔍 [LOGIN] Solicitando grupos del alumno: $uri?alumnoId=$id");
+        final res = await dio.get(
+          uri,
+          queryParameters: {'alumnoId': id},
+          options: Options(validateStatus: (status) => true),
+        );
+        debugPrint("📥 [LOGIN] Respuesta alumno - Status: ${res.statusCode}");
+        if (res.statusCode == 200) {
+          resList = List<Map<String, dynamic>>.from(res.data);
+        } else if (res.statusCode == 400) {
+          debugPrint("⚠️ [LOGIN] Status 400 para alumno - Data: ${res.data}");
+          resList = [];
+        } else {
+          debugPrint("🚨 [LOGIN] Status inesperado ${res.statusCode} para alumno");
+          resList = [];
+        }
       }
       final groups = Group.groupsJsonToEntityList(resList);
+      debugPrint("✅ [LOGIN] Grupos parseados exitosamente: ${groups.length} grupos");
       return groups;
+    } on DioException catch (e) {
+      debugPrint("🚨 [LOGIN] DioException en getGroupsSubjects: ${e.message}");
+      debugPrint("🚨 [LOGIN] Status Code: ${e.response?.statusCode}");
+      debugPrint("🚨 [LOGIN] Response Data: ${e.response?.data}");
+      debugPrint("🚨 [LOGIN] Request: ${e.requestOptions.method} ${e.requestOptions.path}");
+      // Re-throw DioException para que sea capturado por catchError en auth_state_notifier
+      rethrow;
     } catch (e) {
+      debugPrint("🚨 [LOGIN] Error inesperado en getGroupsSubjects: $e");
       throw Exception(e);
     }
   }
@@ -48,7 +85,7 @@ class GroupsDataSourceImpl implements GroupsDataSource {
 
   @override
   Future<List<Group>> createGroupSubjects(String groupName, String description,
-       List<SubjectsRow> subjectsList) async {
+        List<SubjectsRow> subjectsList) async {
     try {
       const uri = "/Grupos/CrearGrupoMaterias";
       final id = await storageService.getId();
@@ -56,21 +93,56 @@ class GroupsDataSourceImpl implements GroupsDataSource {
           .map((subject) => subject.toJsonGroupsSubjects())
           .toList();
 
+      debugPrint("📤 Enviando POST a: $uri");
+      debugPrint("📤 Datos: DocenteId=$id, NombreGrupo=$groupName");
       final res = await dio.post(uri, data: {
         "DocenteId": id,
         "NombreGrupo": groupName,
         "Descripcion": description,
         "Materias": subList
       });
+      debugPrint("📥 Status Code: ${res.statusCode}");
+      debugPrint("📥 Response Data: ${res.data}");
 
       if (res.statusCode == 200) {
-        final resLista = List<Map<String, dynamic>>.from(res.data);
-        final groups = Group.groupsJsonToEntityList(resLista);
-        return groups;
+        if (res.data != null && res.data is List) {
+          try {
+            // Conversión más segura que maneja nulls en campos internos
+            final cleanData = res.data.where((item) => item != null).map((item) {
+              if (item is Map<String, dynamic>) {
+                // Asegurar que campos de lista no sean null
+                return item.map((key, value) {
+                  if (value == null && (key == 'Materias' || key == 'materias')) {
+                    return MapEntry(key, <dynamic>[]);
+                  }
+                  return MapEntry(key, value);
+                });
+              }
+              return item;
+            }).toList();
+
+            final resLista = List<Map<String, dynamic>>.from(cleanData);
+            final groups = Group.groupsJsonToEntityList(resLista);
+            debugPrint("✅ Grupos creados: ${groups.length}");
+            return groups;
+          } catch (e) {
+            debugPrint("❌ Error convirtiendo response data: $e");
+            debugPrint("❌ Response data type: ${res.data.runtimeType}");
+            // Mostrar más detalles del error
+            for (var i = 0; i < res.data.length; i++) {
+              debugPrint("❌ Item $i: ${res.data[i]} (type: ${res.data[i]?.runtimeType})");
+            }
+            return [];
+          }
+        } else {
+          debugPrint("❌ Response data es null o no es List: ${res.data?.runtimeType}");
+          return [];
+        }
       }
+      debugPrint("❌ Status code no es 200: ${res.statusCode}");
       return [];
     } catch (e) {
-      print(e);
+      debugPrint("❌ Error en createGroupSubjects: $e");
       return [];
     }
   }
@@ -100,9 +172,19 @@ class GroupsDataSourceImpl implements GroupsDataSource {
   }
 
   @override
-  Future<void> deleteGroup(int teacherId, int groupId) {
-    // TODO: implement updateGroup
-    throw UnimplementedError();
+  Future<bool> deleteGroup(int groupId) async {
+    try {
+      const uri = "/Grupos/DeleteGroup";
+      final fullUri = "$uri/$groupId";
+      debugPrint("🔍 DELETE URL: $fullUri (groupId: $groupId)");
+      final response = await dio.delete(fullUri);
+      debugPrint("🔍 Response status: ${response.statusCode}");
+      debugPrint("🔍 Response data: ${response.data}");
+      return response.statusCode == 200;
+    } catch (e) {
+      debugPrint("❌ Error en deleteGroup: $e");
+      return false;
+    }
   }
 
   @override
@@ -186,15 +268,15 @@ class GroupsDataSourceImpl implements GroupsDataSource {
 
   @override
   Future<bool> removeStudentFromGroup({
-    required int groupId, 
+    required int groupId,
     required int studentId
   }) async {
     try {
-      // Esta es la ruta que acabamos de crear en C#
-      const uri = "/api/Alumnos/EliminarAlumnoGrupo"; 
+      // Ruta corregida para ser consistente con otros endpoints
+      const uri = "/Alumnos/EliminarAlumnoGrupo";
 
       final res = await dio.post(
-        uri, 
+        uri,
         data: {
           "GrupoId": groupId,
           "AlumnoId": studentId,

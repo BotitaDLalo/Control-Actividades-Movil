@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:aprende_mas/config/utils/packages.dart';
 
 class CustomDropdown extends StatelessWidget {
   final List<String> items;
-  final Icon? icon;
+  final Widget? icon;
   final String? label;
   final String? hint;
   final String? errorMessage;
+  final String? value;
   final Function(dynamic)? onChanged;
   final FormFieldValidator? validator;
   final bool capitalizeFirstLetter;
@@ -17,6 +19,7 @@ class CustomDropdown extends StatelessWidget {
     this.label,
     this.hint,
     this.errorMessage,
+    this.value,
     this.onChanged,
     this.validator,
     this.capitalizeFirstLetter = false,
@@ -28,43 +31,39 @@ class CustomDropdown extends StatelessWidget {
     final colors = Theme.of(context);
 
     return DropdownButtonFormField(
+      value: value,
       validator: validator,
-      style: const TextStyle(fontSize: 20, color: Colors.black),
+      style: TextStyle(
+        fontSize: context.fontSize(20), // Tamaño base 20, escalado responsive
+        color: Colors.black,
+      ),
       items: items.map((user) {
         return DropdownMenuItem<String>(
           value: user,
           child: Text(
             user,
-            style: const TextStyle(fontSize: 20),
+            style: TextStyle(fontSize: context.fontSize(20)), // Tamaño base 20, escalado responsive
           ),
         );
       }).toList(),
       onChanged: onChanged,
       decoration: InputDecoration(
         prefixIcon: icon,
-        floatingLabelStyle: const TextStyle(
-            color: Colors.black, fontWeight: FontWeight.bold, fontSize: 18),
-        enabledBorder: const OutlineInputBorder(
-          borderSide: BorderSide(color: Color.fromARGB(100, 0, 0, 0)),
-        ),
-        focusedBorder: const OutlineInputBorder(
-          borderSide: BorderSide(color: Color.fromARGB(255, 0, 0, 0)),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.red.shade800),
-          // borderRadius: BorderRadius.circular(15),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.red.shade800),
-          // borderRadius: BorderRadius.circular(15),
-        ),
+        prefixIconConstraints: const BoxConstraints(maxWidth: 48, maxHeight: 48),
+        floatingLabelStyle: TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+            fontSize: context.fontSize(18)), // Tamaño base 18, escalado responsive
+        // No forzar bordes: respetar el InputDecorationTheme global
         isDense: true,
         label: label != null ? Text(label!) : null,
         hintText: hint,
         errorText: errorMessage,
         focusColor: colors.primaryColor,
-        contentPadding:
-            EdgeInsets.symmetric(horizontal: 8, vertical: customHeight ?? 15),
+        contentPadding: EdgeInsets.symmetric(
+          horizontal: context.width(0.02), // 2% del ancho
+          vertical: customHeight ?? context.height(0.02), // 2% de la altura por defecto
+        ),
       ),
     );
   }

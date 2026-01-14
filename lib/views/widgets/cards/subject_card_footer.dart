@@ -4,6 +4,7 @@ import 'package:aprende_mas/config/utils/catalog_names.dart';
 import 'package:aprende_mas/config/data/data.dart';
 import 'package:aprende_mas/providers/data/key_value_storage_service_providers.dart';
 import 'package:aprende_mas/config/utils/app_theme.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class CustomFooterContainer extends ConsumerWidget {
   final int? groupId;

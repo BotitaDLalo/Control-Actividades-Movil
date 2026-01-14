@@ -1,8 +1,13 @@
 import 'package:aprende_mas/config/utils/packages.dart';
+import 'package:aprende_mas/config/utils/responsive_utils.dart';
 import 'package:aprende_mas/providers/providers.dart';
 import 'package:aprende_mas/providers/subjects/students_subject_provider.dart';
 import 'package:aprende_mas/views/teacher/groups_subjects/students_groups_subjects.dart';
+import 'package:aprende_mas/views/widgets/alerts/success_dialog.dart';
+import 'package:aprende_mas/views/widgets/alerts/error_dialog.dart';
+import 'package:aprende_mas/views/widgets/alerts/warning_confirmation_dialog.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class StudentsSubject extends ConsumerStatefulWidget {
   final int id;
@@ -36,6 +41,7 @@ class _StudentsSubjectState extends ConsumerState<StudentsSubject> {
   @override
   Widget build(BuildContext context) {
     final lsStudents = ref.watch(studentsSubjectProvider).lsStudentsSubject;
+    final subjectColor = getSubjectColor(widget.id);
 
     final filteredStudents = lsStudents.where((student) {
       final searchLower = _searchTerm.toLowerCase();
@@ -46,45 +52,59 @@ class _StudentsSubjectState extends ConsumerState<StudentsSubject> {
     }).toList();
 
     void showStudentOptions({
-      required int alumnoMateriaId,
+      required int studentId,
       //required int studentId,
       required String username,
       required String name,
       required String lastName,
       required String lastName2,
     }) {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Eliminar estudiante'),
-          content: Text('¿Estás seguro de que deseas eliminar a $name $lastName $lastName2 de esta materia?'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text('Cancelar'),
-            ),
-            TextButton(
-              onPressed: () async {
-                if (!context.mounted) return;
+      // Leer el notifier ANTES de la operación async para evitar el error de ref disposed
+      final subjectNotifier = ref.read(studentsSubjectProvider.notifier);
 
-                final subjectNotifier =
-                    ref.read(studentsSubjectProvider.notifier);
+      // Mostrar diálogo de confirmación antes de eliminar
+      WarningConfirmationDialog.show(
+        context,
+        message: '¿Está seguro de que desea eliminar a este alumno de la materia?',
+        onConfirmPressed: () async {
+          try {
+            if (!context.mounted) return;
 
-                  await subjectNotifier.removeStudentFromSubject(
-                    alumnoMateriaId: alumnoMateriaId,
-                  );
+            // Usar el notifier ya leído
+            final success = await subjectNotifier.removeStudentFromSubject(
+              subjectId: widget.id,
+              studentId: studentId,
+            );
 
-
-                if (context.mounted) {
-                  Navigator.pop(context);
-                }
-              },
-              child: const Text('Eliminar'),
-            ),
-          ],
-        ),
+            if (success) {
+              // Mostrar mensaje de éxito
+              SuccessDialog.show(
+                context,
+                message: 'Alumno eliminado de la materia exitosamente',
+                onOkPressed: () {
+                  // No es necesario hacer nada, el diálogo se cierra automáticamente
+                },
+              );
+            } else {
+              // Mostrar mensaje de error
+              ErrorDialog.show(
+                context,
+                message: 'No se pudo eliminar al alumno de la materia. Por favor, intente de nuevo.',
+              );
+            }
+          } catch (e) {
+            // Captura cualquier error en la eliminación del alumno
+            print("Error al eliminar al alumno de la materia: $e");
+            // Mostrar mensaje de error
+            ErrorDialog.show(
+              context,
+              message: 'Error al eliminar al alumno de la materia: $e',
+            );
+          }
+        },
+        onCancelPressed: () {
+          // No hacer nada, solo cerrar el diálogo
+        },
       );
     }
 
@@ -92,14 +112,15 @@ class _StudentsSubjectState extends ConsumerState<StudentsSubject> {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: const [
-            Icon(
-              Icons.school_outlined,
-              size: 200,
-              color: Colors.grey,
+          children: [
+            SvgPicture.asset(
+              'assets/icons/studentcap1.svg',
+              height: 200,
+              width: 200,
+              colorFilter: ColorFilter.mode(subjectColor, BlendMode.srcIn),
             ),
-            SizedBox(height: 16),
-            Padding(
+            const SizedBox(height: 16),
+            const Padding(
               padding: EdgeInsets.symmetric(horizontal: 40),
               child: Text(
                 "Aquí se mostrarán los estudiantes que agregues a la materia.",
@@ -129,10 +150,15 @@ class _StudentsSubjectState extends ConsumerState<StudentsSubject> {
           padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 8.0),
           child: TextField(
             controller: _searchController,
-            decoration: const InputDecoration(
-              labelText: 'Buscar estudiantes por nombre o usuario',
-              prefixIcon: Icon(Icons.search),
+            decoration: InputDecoration(
+              labelText: '  Buscar estudiantes por nombre o usuario',
+              prefixIconConstraints: BoxConstraints(maxWidth: 40, maxHeight: 40),
+              prefixIcon: Padding(padding: EdgeInsets.only(left: 8, right: 8), child: SvgPicture.asset('assets/icons/buscar.svg', width: 24, height: 24, colorFilter: ColorFilter.mode(subjectColor, BlendMode.srcIn))),
               border: OutlineInputBorder(
+                borderRadius: BorderRadius.all(Radius.circular(25.0)),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: subjectColor, width: 2.0),
                 borderRadius: BorderRadius.all(Radius.circular(25.0)),
               ),
             ),

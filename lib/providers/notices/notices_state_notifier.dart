@@ -20,7 +20,7 @@ class NoticesStateNotifier extends StateNotifier<NoticesState> {
       }
       return false;
     } catch (e) {
-      debugPrint(e.toString());
+      debugPrint('Error creating notice: ${e.toString()}');
       return false;
     }
   }

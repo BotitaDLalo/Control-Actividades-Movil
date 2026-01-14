@@ -1,71 +1,93 @@
 import 'package:aprende_mas/config/utils/packages.dart';
-import 'package:aprende_mas/providers/authentication/auth_provider.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+// auth provider removed from this widget to keep AppBarHome generic
+import 'header_background.dart';
 
 class AppBarHome extends ConsumerWidget implements PreferredSizeWidget {
   final String title;
-  const AppBarHome({super.key, required this.title});
+  final bool showSettings;
+  final Widget? leading;
+  final double titleFontSize;
+
+  const AppBarHome({
+    super.key,
+    required this.title,
+    this.showSettings = true,
+    this.leading,
+    this.titleFontSize = 27,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final auth = ref.read(authProvider);
-    String userName() {
-      String userName = auth.authUser!.userName;
-      return userName;
-    }
+    // no read de auth aquí para evitar mostrar datos en pantallas públicas
+
+    // altura deseada para el encabezado grande
+    const double headerHeight = 150;
 
     return AppBar(
-        forceMaterialTransparency: true,
-        backgroundColor: const Color.fromARGB(255, 255, 255, 255),
-        elevation: 0,
-        title: Column(
+      forceMaterialTransparency: true,
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      toolbarHeight: headerHeight,
+      flexibleSpace: const HeaderBackground(
+        colorUno: Color.fromARGB(255, 8, 110, 154),
+        colorDos: Color.fromARGB(255, 29, 183, 247),
+      ),
+      leading: leading,
+      title: Padding(
+        padding: const EdgeInsets.only(top: 20),
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
+            /*
+            // Estilo de texto para el correo electrónico
             Text(
-              userName(),
+              displayEmail(),
               style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w400,
-                // color: Colors.grey[400],
+                fontSize: 18,
+                fontWeight: FontWeight.w500,
+                color: Color.fromARGB(255, 255, 255, 255),
               ),
             ),
+            */
+            const SizedBox(height: 6),
+            // Estilo de texto para el título principal
             Text(
               title,
-              style: const TextStyle(
-                fontSize: 24,
+              style: TextStyle(
+                fontSize: titleFontSize,
                 fontWeight: FontWeight.bold,
-                // color: Colors.white,
+                color: const Color.fromARGB(255, 255, 255, 255),
               ),
             ),
           ],
         ),
-        flexibleSpace: Container(
-            // decoration: const BoxDecoration(gradient: AppTheme.degradedBlue),
-            ),
-        // backgroundColor: Colors.blue,
-        // toolbarHeight: 60,
-        actions: [
-          Container(
-            padding: const EdgeInsets.only(right: 10),
-            child: IconButton(
-                color: Colors.white,
-                onPressed: () {
-                  Scaffold.of(context).openEndDrawer();
-                  // if (auth.authGoogleStatus == AuthGoogleStatus.authenticated) {
-                  //   ref.watch(authProvider.notifier).logoutGoogle();
-                  // } else if (auth.authStatus == AuthStatus.authenticated) {
-                  //   ref.watch(authProvider.notifier).logout();
-                  // }
-                  // ref.read(noticesProvider.notifier).clearNotifications();
-                },
-                icon: const Icon(
-                  Icons.settings,
-                  color: Colors.black,
-                  size: 35,
-                )),
-          )
-        ]);
+      ),
+      actions: showSettings
+          ? [
+              Padding(
+                padding: const EdgeInsets.only(top: 32, right: 12),
+                child: GestureDetector(
+                  onTap: () => Scaffold.of(context).openEndDrawer(),
+                  child: Container(
+                    width: 45,
+                    height: 45,
+                    // Estilo del icono de configuración
+                     child: SvgPicture.asset(
+                       'assets/icons/user1.svg',
+                       color: const Color.fromARGB(255, 255, 255, 255),
+                       width: 20,
+                       height: 20,
+                     ),
+                  ),
+                ),
+              ),
+            ]
+          : null,
+    );
   }
 
   @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+  Size get preferredSize => const Size.fromHeight(152);
 }

@@ -4,6 +4,7 @@ import 'package:aprende_mas/providers/groups/groups_state.dart';
 import 'package:aprende_mas/repositories/Implement_repos/activity/activity_offline_repository_impl.dart';
 import 'package:aprende_mas/repositories/Interface_repos/groups/groups_repository.dart';
 import 'package:aprende_mas/repositories/Interface_repos/groups/groups_offline_repository.dart';
+import 'package:aprende_mas/config/data/key_value_storage_service_impl.dart';
 
 class GroupsNotifier extends StateNotifier<GroupsState> {
   final Function(int) getAllActivitiesCallback;
@@ -11,6 +12,7 @@ class GroupsNotifier extends StateNotifier<GroupsState> {
   final GroupsRepository groupsRepository;
   final ActivityOfflineRepositoryImpl activityOffline;
   final GroupsOfflineRepository groupsOfflineRepository;
+  final storageService = KeyValueStorageServiceImpl();
 
   GroupsNotifier(
       {required this.getAllActivitiesCallback,
@@ -22,10 +24,14 @@ class GroupsNotifier extends StateNotifier<GroupsState> {
 
   Future<void> getGroupsSubjects() async {
     try {
+      debugPrint("📡 Llamando getGroupsSubjects desde backend");
       final groups = await groupsRepository.getGroupsSubjects();
+      debugPrint("📡 Recibidos ${groups.length} grupos del backend");
       setGroupsSubjects(groups);
+      debugPrint("📡 State de grupos actualizado con ${state.lsGroups.length} grupos");
     } catch (e) {
-      debugPrint(e.toString());
+      debugPrint("❌ Error en getGroupsSubjects: $e");
+      debugPrint("❌ Stack trace: ${StackTrace.current}");
     }
   }
 
@@ -61,15 +67,23 @@ class GroupsNotifier extends StateNotifier<GroupsState> {
       // Color colorCode,
       List<SubjectsRow> subjectsList) async {
     try {
+      debugPrint("🆕 Creando grupo: $groupName");
       final group = await groupsRepository.createGroupSubjects(
           groupName, description, subjectsList);
 
       if (group.isNotEmpty) {
+        debugPrint("✅ Grupo creado en backend, actualizando state");
         _setCreateGroupSubjects(group);
+        // Refrescar la lista completa para asegurar consistencia
+        debugPrint("🔄 Refrescando lista de grupos...");
+        await getGroupsSubjects();
+        debugPrint("✅ Lista de grupos refrescada");
         return true;
       }
+      debugPrint("❌ No se creó el grupo");
       return false;
     } catch (e) {
+      debugPrint("❌ Error creando grupo: $e");
       throw Exception(e);
     }
   }
@@ -78,7 +92,19 @@ class GroupsNotifier extends StateNotifier<GroupsState> {
     state = state.copyWith(lsGroups: groups);
   }
 
-  Future<void> deleteGroup() async {}
+  Future<bool> deleteGroup(int groupId) async {
+    try {
+      bool success = await groupsRepository.deleteGroup(groupId);
+      if (success) {
+        _deleteGroupFromState(groupId);
+        return true;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      return false;
+    }
+  }
 
   Future<bool> updateGroup(
       int groupId, String groupName, String descriptionGroup) async {
@@ -111,11 +137,29 @@ class GroupsNotifier extends StateNotifier<GroupsState> {
     }
   }
 
+  _deleteGroupFromState(int groupId) {
+    List<Group> lsGroups = List.from(state.lsGroups);
+    lsGroups.removeWhere((group) => group.grupoId == groupId);
+    state = state.copyWith(lsGroups: lsGroups);
+  }
+
   onNewSubject(List<Group> groups) {
     state = state.copyWith(lsGroups: groups);
   }
 
   void addGroupToState(Group group) async {
+    final groupId = group.grupoId;
+
+    // Verificar si el grupo ya existe en el estado
+    final existingGroupIndex = state.lsGroups.indexWhere((g) => g.grupoId == groupId);
+
+    if (existingGroupIndex != -1) {
+      // El grupo ya existe, no lo agregamos de nuevo
+      debugPrint("⚠️ Grupo ID $groupId ya existe en el estado, omitiendo duplicado");
+      return;
+    }
+
+    // El grupo no existe, lo agregamos
     state = state.copyWith(lsGroups: [group, ...state.lsGroups]);
 
     List<Group> lsGroup = [group];

@@ -7,6 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:aprende_mas/views/teacher/notices/teacher_create_notice.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:aprende_mas/views/widgets/alerts/success_dialog.dart';
+import 'package:aprende_mas/views/widgets/alerts/error_dialog.dart';
+import 'package:aprende_mas/views/widgets/alerts/warning_confirmation_dialog.dart';
 
 class DataBody extends ConsumerWidget {
   final bool optionsIsVisible;
@@ -101,41 +104,42 @@ class DataBody extends ConsumerWidget {
               // Opción Eliminar
               PopupMenuItem(
                 onTap: () {
-                  showDialog(
-                    barrierDismissible: false,
-                    context: context,
-                    builder: (context) {
-                      return AlertDialog(
-                        title: const Text(
-                          '¿Desea eliminar el aviso?',
-                          style: TextStyle(fontSize: 22),
-                        ),
-                        actions: [
-                          ElevatedButton(
-                            onPressed: () {
-                              context.pop();
+                  // Mostrar diálogo de confirmación antes de eliminar
+                  WarningConfirmationDialog.show(
+                    context,
+                    message: '¿Está seguro de que desea eliminar este aviso?',
+                    onConfirmPressed: () async {
+                      try {
+                        // Usamos el ID del modelo
+                        final success = await formNotices.onDeleteSubmit(noticeId);
+                        if (success) {
+                          // Mostrar mensaje de éxito
+                          SuccessDialog.show(
+                            context,
+                            message: 'Aviso eliminado exitosamente',
+                            onOkPressed: () {
+                              // No es necesario hacer nada, el diálogo se cierra automáticamente
                             },
-                            style: AppTheme.buttonPrimary,
-                            child: const Text(
-                              'Cancelar',
-                              style: TextStyle(
-                                  color: Colors.white, fontSize: 16),
-                            ),
-                          ),
-                          ElevatedButton(
-                              style: AppTheme.buttonPrimary,
-                              onPressed: () {
-                                // Usamos el ID del modelo
-                                formNotices.onDeleteSubmit(noticeId);
-                                context.pop();
-                              },
-                              child: const Text(
-                                'Eliminar',
-                                style: TextStyle(
-                                    color: Colors.white, fontSize: 16),
-                              ))
-                        ],
-                      );
+                          );
+                        } else {
+                          // Mostrar mensaje de error
+                          ErrorDialog.show(
+                            context,
+                            message: 'No se pudo eliminar el aviso. Por favor, intente de nuevo.',
+                          );
+                        }
+                      } catch (e) {
+                        // Captura cualquier error en la eliminación del aviso
+                        print("Error al eliminar el aviso: $e");
+                        // Mostrar mensaje de error
+                        ErrorDialog.show(
+                          context,
+                          message: 'Error al eliminar el aviso: $e',
+                        );
+                      }
+                    },
+                    onCancelPressed: () {
+                      // No hacer nada, solo cerrar el diálogo
                     },
                   );
                 },

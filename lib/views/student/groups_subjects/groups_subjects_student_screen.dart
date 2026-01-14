@@ -3,6 +3,7 @@ import 'package:aprende_mas/views/student/student.dart';
 import 'package:aprende_mas/views/users/groups_subjects/groups_subjects_screen.dart';
 import 'package:aprende_mas/views/widgets/buttons/floating_action_button_custom.dart';
 import 'package:aprende_mas/views/widgets/structure/modal_bottom_sheet_custom.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class GroupsSubjectsStudentScreen extends ConsumerStatefulWidget {
   const GroupsSubjectsStudentScreen({super.key});
@@ -33,7 +34,7 @@ class _GroupsSubjectsTeacherScreenState
   Widget build(BuildContext context) {
     List<Widget> lsOptions = [
       ListTile(
-        leading: const Icon(Icons.group_add),
+        leading: SvgPicture.asset('assets/icons/unirseClase.svg', width: 24, height: 24),
         title: const Text('Unirse a una clase'),
         onTap: () {
           Navigator.pop(context);

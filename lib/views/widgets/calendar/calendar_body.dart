@@ -50,7 +50,9 @@ Future<void> getRole() async {
       final teacherEvents = ref.read(eventProvider).events; // 🔹 Obtener eventos actualizados
       calendarDataSource.updateEvents(teacherEvents); // 🔹 Actualizar UI solo para docentes
     } else if (role == cn.getRoleStudentName) {
-      await ref.read(eventProvider.notifier).getEventsStudent(); // 🔹 Cargar eventos de alumnos (pero sin actualizar la UI)
+      await ref.read(eventProvider.notifier).getEventsStudent(); // 🔹 Cargar eventos de alumnos
+      final studentEvents = ref.read(eventProvider).events; // 🔹 Obtener eventos actualizados
+      calendarDataSource.updateEvents(studentEvents); // 🔹 Actualizar UI para alumnos
     }
   });
 }
@@ -76,9 +78,26 @@ Future<void> getRole() async {
             cellBorderColor: Colors.transparent,
             dataSource: calendarDataSource,
             controller: calendarController,
+            backgroundColor: const Color.fromARGB(255, 255, 255, 255),
             monthViewSettings: const MonthViewSettings(
               appointmentDisplayMode: MonthAppointmentDisplayMode.indicator,
               showAgenda: true,
+              dayFormat: 'EEE',
+              numberOfWeeksInView: 6,
+            ),
+            headerStyle: const CalendarHeaderStyle(
+              backgroundColor: Color.fromARGB(255, 199, 240, 249),
+              textStyle: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Color.fromARGB(255, 0, 0, 0),
+              ),
+            ),
+            todayHighlightColor: const Color(0xFF0FA4E0),
+            selectionDecoration: BoxDecoration(
+              color: const Color.fromARGB(30, 15, 164, 224),
+              border: Border.all(color: const Color(0xFF0FA4E0), width: 2),
+              borderRadius: BorderRadius.circular(8),
             ),
             view: calendarView,
             showDatePickerButton: true,

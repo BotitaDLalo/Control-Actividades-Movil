@@ -5,6 +5,7 @@ import 'package:aprende_mas/providers/authentication/form_confirmation_code_prov
 import 'package:aprende_mas/views/views.dart';
 import 'package:aprende_mas/views/widgets/buttons/button_login.dart';
 import 'package:aprende_mas/views/widgets/inputs/textfield_number.dart';
+import 'package:aprende_mas/views/widgets/alerts/error_dialog.dart';
 
 class FormConfirmationCode extends ConsumerWidget {
   const FormConfirmationCode({super.key});
@@ -22,7 +23,10 @@ class FormConfirmationCode extends ConsumerWidget {
           if (next.errorHandlingStyle == ErrorHandlingStyle.snackBar) {
             Navigator.of(context).pop();
             ScaffoldMessenger.of(context).clearSnackBars();
-            errorMessage(context, next.errorMessage);
+            ErrorDialog.show(context, message: next.errorMessage);
+          } else if (next.errorHandlingStyle == ErrorHandlingStyle.dialog) {
+            Navigator.of(context).pop();
+            ErrorDialog.show(context, message: next.errorMessage);
           }
         }
       },

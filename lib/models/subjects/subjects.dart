@@ -60,6 +60,6 @@ class Subject {
               fechaCreacion: formatDate(e['FechaCreacion']),
               fechaLimite: formatDate(e['FechaLimite']),
               puntaje: e['Puntaje'],
-              materiaId: e['MateriaId']))
+              materiaId: map['MateriaId'])) // Usar el materiaId del Subject padre
           .toList());
 }

@@ -1,10 +1,15 @@
-import 'package:aprende_mas/views/widgets/cards/subject_card_activities.dart';
-import 'package:aprende_mas/views/widgets/cards/subject_card_header.dart';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import '../../../models/models.dart';
-import 'subject_card_footer.dart';
+import 'package:aprende_mas/config/utils/catalog_names.dart';
+import 'package:aprende_mas/providers/data/key_value_storage_service_providers.dart';
+import 'package:aprende_mas/models/models.dart';
+import 'package:aprende_mas/config/utils/packages.dart';
+import 'package:aprende_mas/providers/subjects/subjects_provider.dart';
+import 'package:aprende_mas/providers/groups/groups_provider.dart';
+import 'package:aprende_mas/views/widgets/alerts/error_dialog.dart';
+import 'package:aprende_mas/views/widgets/alerts/success_dialog.dart';
+import 'package:aprende_mas/views/widgets/alerts/warning_confirmation_dialog.dart';
 
 class SubjectCard extends ConsumerWidget {
   final int? groupId;
@@ -12,8 +17,9 @@ class SubjectCard extends ConsumerWidget {
   final String nombreMateria;
   final String description;
   final String accessCode;
-  // final List<Activities>? actividades;
   final List<Activity>? actividades;
+  final double widthFactor;
+  final double heightFactor;
 
   const SubjectCard({
     super.key,
@@ -23,57 +29,273 @@ class SubjectCard extends ConsumerWidget {
     required this.description,
     required this.accessCode,
     required this.actividades,
+    this.widthFactor = 0.5,
+    this.heightFactor = 0.15,
   });
+
+  // Genera un degradado agradable determinístico a partir del subjectId
+  LinearGradient _makeGradient(int id) {
+    final hue = (id * 47) % 360;
+    final c1 = HSLColor.fromAHSL(1, hue.toDouble(), 0.62, 0.48).toColor();
+    final c2 = HSLColor.fromAHSL(1, (hue + 25) % 360, 0.70, 0.40).toColor();
+    return LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [c1, c2]);
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Card(
-      color: const Color.fromARGB(255, 255, 255, 255),
-      elevation: 4,
-      margin: const EdgeInsets.all(8.8),
-      child: SizedBox(
-        width: MediaQuery.of(context).size.width * 0.9,
-        height: MediaQuery.of(context).size.height * 0.35,
-        child: Column(
-          children: [
-            CustomHeaderContainer(nombreMateria: nombreMateria),
-            Expanded(
-              child: ClipRRect(
-                borderRadius:
-                    const BorderRadius.vertical(top: Radius.circular(8)),
-                child: SizedBox(
-                  height:
-                      160, // Limita la altura del contenedor para las actividades
-                  child: ListView.builder(
-                    itemCount: actividades?.take(3).length ?? 0,
-                    itemBuilder: (context, index) {
-                      final actividad = actividades![index];
-                      return Column(
-                        children: [
-                          CustomActivitiesContainer(
-                            actividades: actividad,
-                          ),
-                        ],
-                      );
-                    },
-                  ),
-                ),
+    final gradient = _makeGradient(subjectId);
+
+    // Ahora calculamos dimensiones en función del espacio disponible usando LayoutBuilder.
+    // Si el padre no proporciona un ancho finito (por ejemplo, en una lista horizontal),
+    // se usa MediaQuery como fallback.
+
+    final cn = ref.watch(catalogNamesProvider);
+    final role = ref.watch(roleFutureProvider).maybeWhen(
+          data: (data) => data,
+          orElse: () => "",
+        );
+
+    void teacherSubjectOptions(Subject data) {
+      context.push('/teacher-subject-options', extra: data);
+    }
+
+    void studentSubjectOptions(Subject data) {
+      context.push('/student-subject-options', extra: data);
+    }
+
+    void _showDeleteConfirmation(BuildContext context, Subject subjectData) {
+    WarningConfirmationDialog.show(
+      context,
+      message: '¿Estás seguro de que deseas eliminar esta materia? Esta acción no se puede deshacer.',
+      onConfirmPressed: () async {
+        bool success = await ref.read(subjectsProvider.notifier).deleteSubject(subjectData.materiaId!);
+        if (success) {
+          SuccessDialog.show(context, message: "Materia eliminada exitosamente");
+          await ref.read(groupsProvider.notifier).getGroupsSubjects();
+        } else {
+          ErrorDialog.show(context, message: "Error al eliminar la materia");
+        }
+      },
+    );
+  }
+
+
+    void _showEditDialog(BuildContext context, Subject subjectData) {
+      final nameController = TextEditingController(text: subjectData.nombreMateria);
+      final descriptionController = TextEditingController(text: subjectData.descripcion);
+
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text('Editar materia', style: TextStyle(color: Colors.black, fontWeight: FontWeight.w500)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: nameController,
+                decoration: const InputDecoration(labelText: 'Nombre de la materia'),
               ),
+              TextField(
+                controller: descriptionController,
+                decoration: const InputDecoration(labelText: 'Descripción'),
+                maxLines: 3,
+              ),
+            ],
+          ),
+          actions: [
+            SizedBox(height: 20),
+            TextButton(
+              style: TextButton.styleFrom(
+                backgroundColor: Colors.green,
+                minimumSize: Size(100, 50),
+              ),
+              onPressed: () async {
+                final newName = nameController.text.trim();
+                final newDescription = descriptionController.text.trim();
+                if (newName.isEmpty) {
+                  ErrorDialog.show(context, message: "El nombre no puede estar vacío");
+                  return;
+                }
+                Navigator.of(context).pop();
+                bool success = await ref.read(subjectsProvider.notifier).updateSubject(subjectData.materiaId!, newName, newDescription);
+                if (success) {
+                  SuccessDialog.show(context, message: "Materia actualizada exitosamente");
+                  // Refrescar la lista de grupos
+                  await ref.read(groupsProvider.notifier).getGroupsSubjects();
+                } else {
+                  ErrorDialog.show(context, message: "Error al actualizar la materia");
+                }
+              },
+              child: Text('Actualizar', style: TextStyle(color: Colors.white)),
             ),
-            const Divider(
-              color: Colors.black,
-              height: 0.5,
-            ),
-            CustomFooterContainer(
-              groupId: groupId,
-              subjectId: subjectId,
-              subjectName: nombreMateria,
-              description: description,
-              accessCode: accessCode,
+            SizedBox(height: 20),
+            TextButton(
+              style: TextButton.styleFrom(
+                backgroundColor: Colors.red,
+                minimumSize: Size(100, 45),
+              ),
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text('Cancelar', style: TextStyle(color: Colors.white)),
             ),
           ],
         ),
+      );
+    }
+
+
+    // Selección determinística de watermark (usa recursos existentes en assets/icons)
+    const watermarkIcons = [
+      //'assets/icons/grupo.svg',
+      'assets/icons/book1.svg',
+      //'assets/icons/school.svg',
+    ];
+    final watermark = watermarkIcons[subjectId % watermarkIcons.length];
+
+    return LayoutBuilder(builder: (context, constraints) {
+      final availableWidth = constraints.maxWidth.isFinite
+          ? constraints.maxWidth
+          : MediaQuery.of(context).size.width;
+      final width = availableWidth * widthFactor;
+      final height = MediaQuery.of(context).size.height * heightFactor;
+
+      return GestureDetector(
+      onTap: () {
+        final data = Subject(
+            groupId: groupId,
+            materiaId: subjectId,
+            nombreMateria: nombreMateria,
+            codigoAcceso: accessCode,
+            descripcion: description);
+        if (role == cn.getRoleTeacherName) {
+          teacherSubjectOptions(data);
+        } else if (role == cn.getRoleStudentName) {
+          studentSubjectOptions(data);
+        }
+      },
+      child: Container(
+        margin: ResponsiveUtils.margin(context, horizontal: 0.02, vertical: 0.01), // 2% horizontal, 1% vertical
+        width: width,
+        height: height,
+        decoration: BoxDecoration(
+          gradient: gradient,
+          borderRadius: BorderRadius.circular(context.radius(0.055)), // 5.5% del ancho
+          boxShadow: [
+            BoxShadow(
+                color: Colors.black.withOpacity(0.12),
+                blurRadius: context.width(0.03), // 3% del ancho
+                offset: Offset(0, context.height(0.008))) // 0.8% de la altura
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(context.radius(0.055)),
+          child: Material(
+            color: Colors.transparent,
+            child: Stack(
+              children: [
+                // Watermark grande en la esquina inferior derecha (no haga overflow)
+                Positioned(
+                  right: -00,
+                  bottom: -00,
+                  child: Opacity(
+                    opacity: 0.12,
+                    child: SvgPicture.asset(
+                      watermark,
+                      // Limitamos el tamaño para evitar overflow en tarjetas bajas
+                      width: min(width * 0.8, height * 1.0),
+                      height: min(width * 0.5, height * 1.0),
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+
+                if (role == cn.getRoleTeacherName)
+                  // Menú de opciones en la esquina superior derecha
+                  Positioned(
+                    top: context.height(0.01), // 1% de la altura
+                    right: context.width(0.02), // 2% del ancho
+                    child: PopupMenuButton<String>(
+                      icon: Icon(
+                        Icons.more_vert,
+                        size: context.width(0.055), // 5.5% del ancho
+                        color: Colors.white,
+                      ),
+                      onSelected: (value) {
+                        final data = Subject(
+                            groupId: groupId,
+                            materiaId: subjectId,
+                            nombreMateria: nombreMateria,
+                            codigoAcceso: accessCode,
+                            descripcion: description);
+                        if (value == 'edit') {
+                          _showEditDialog(context, data);
+                        } else if (value == 'delete') {
+                          _showDeleteConfirmation(context, data);
+                        }
+                      },
+                      itemBuilder: (context) => [
+                        const PopupMenuItem(
+                          value: 'edit',
+                          child: Text('Editar'),
+                        ),
+                        const PopupMenuItem(
+                          value: 'delete',
+                          child: Text('Eliminar'),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                // Contenido principal
+                Padding(
+                  padding: ResponsiveUtils.padding(context, horizontal: 0.04, vertical: 0.015), // 4% horizontal, 1.5% vertical
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                     // Título grande a la izquierda
+                     Text(
+                       nombreMateria,
+                       maxLines: 2,
+                       overflow: TextOverflow.ellipsis,
+                       style: TextStyle(
+                           color: Colors.white,
+                           fontSize: context.fontSize(16), // Tamaño base 16, escalado responsive
+                           fontWeight: FontWeight.bold),
+                     ),
+                      SizedBox(height: context.height(0.008)), // 0.8% de la altura
+                      // Descripción pequeña
+                      Text(
+                        description.trim().isNotEmpty ? description.trim() : "Sin descripción",
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.9),
+                          fontSize: context.fontSize(13), // Tamaño base 13, escalado responsive
+                        ),
+                      ),
+                      const Spacer(),
+                      // Row inferior: número de actividades
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          if (actividades != null && actividades!.isNotEmpty)
+                            Text(
+                              '${actividades!.length} actividades',
+                              style: TextStyle(
+                                color: Colors.white.withOpacity(0.85),
+                                fontSize: context.fontSize(15), // Tamaño base 15, escalado responsive
+                              ),
+                            ),
+                        ],
+                      )
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
+    });
   }
 }

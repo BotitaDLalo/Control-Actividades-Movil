@@ -10,9 +10,9 @@ abstract class SubjectsRepository {
   Future<List<Subject>> createSubjectWithoutGroup(
       String subjectName, String description, Color colorCode);
 
-  Future<void> deleteSubject();
+  Future<bool> deleteSubject(int subjectId);
 
-  Future<void> updateSubject();
+  Future<Subject> updateSubject(int subjectId, String name, String description);
 
   Future<VerifyEmail> verifyEmail(String email);
 

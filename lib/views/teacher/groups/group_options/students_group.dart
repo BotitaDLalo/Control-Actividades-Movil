@@ -2,7 +2,11 @@ import 'package:aprende_mas/config/utils/packages.dart';
 import 'package:aprende_mas/providers/groups/groups_provider.dart';
 import 'package:aprende_mas/providers/groups/students_group_provider.dart';
 import 'package:aprende_mas/views/teacher/groups_subjects/students_groups_subjects.dart';
+import 'package:aprende_mas/views/widgets/alerts/success_dialog.dart';
+import 'package:aprende_mas/views/widgets/alerts/error_dialog.dart';
+import 'package:aprende_mas/views/widgets/alerts/warning_confirmation_dialog.dart';
 import 'package:flutter/material.dart'; // Importante para TextField
+import 'package:flutter_svg/flutter_svg.dart';
 
 class StudentsGroup extends ConsumerStatefulWidget {
   final int id; // Este es el GroupId
@@ -56,67 +60,59 @@ class _StudentsGroupState extends ConsumerState<StudentsGroup> {
 
     void showStudentOptions({
       // 2. AÑADIDO: Recibir el ID del alumno
-      required int alumnoMateriaId,
-      //required int studentId,
+      required int studentId,
       required String username,
       required String name,
       required String lastName,
       required String lastName2,
     }) {
-      
-      // Cerrar el ModalBottomSheet antes de mostrar el diálogo
-      Navigator.pop(context);
 
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text(
-            '¿Deseas eliminar el alumno?',
-            style: TextStyle(fontWeight: FontWeight.w500, fontSize: 20),
-          ),
-          content: ListTile(
-            leading: IconButton(
-              onPressed: () {},
-              icon: const Icon(Icons.person),
-              iconSize: 30,
-            ),
-            title: Text(username),
-            subtitle: Text("$name $lastName $lastName2"),
-          ),
-          contentPadding: const EdgeInsets.all(10),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text('Cancelar'),
-            ),
-            TextButton(
-              onPressed: () async {
-                // 3. IMPLEMENTACIÓN DE LA LÓGICA
-                
-                // Acceder al Notifier de Grupos
-                final groupNotifier = ref.read(studentsGroupProvider.notifier);
+      // Leer el notifier ANTES de la operación async para evitar el error de ref disposed
+      final groupNotifier = ref.read(studentsGroupProvider.notifier);
 
-                // Llamar a la función de eliminación
-                /*final success = await groupNotifier.removeStudentFromGroup(
-                  groupId: widget.id,
-                  studentId: studentId,
-                );
+      // Mostrar diálogo de confirmación antes de eliminar
+      WarningConfirmationDialog.show(
+        context,
+        message: '¿Está seguro de que desea eliminar a este alumno del grupo?',
+        onConfirmPressed: () async {
+          try {
+            // 3. IMPLEMENTACIÓN DE LA LÓGICA
 
-                if (context.mounted) {
-                  Navigator.pop(context); // Cerrar el diálogo
-                }
+            // Usar el notifier ya leído
+            final success = await groupNotifier.removeStudentFromGroup(
+              groupId: widget.id,
+              studentId: studentId,
+            );
 
-                if (success) {
-                  // Opcional: Feedback visual
-                  // print("Alumno eliminado del grupo correctamente");
-                }*/
-              },
-              child: const Text('Eliminar'),
-            )
-          ],
-        ),
+            if (success) {
+              // Mostrar mensaje de éxito
+              SuccessDialog.show(
+                context,
+                message: 'Alumno eliminado del grupo exitosamente',
+                onOkPressed: () {
+                  // No es necesario hacer nada, el diálogo se cierra automáticamente
+                },
+              );
+            } else {
+              // Mostrar mensaje de error
+              ErrorDialog.show(
+                context,
+                message: 'No se pudo eliminar al alumno del grupo. Por favor, intente de nuevo.',
+              );
+            }
+          } catch (e) {
+            // Captura cualquier error en la eliminación del alumno
+            print("Error al eliminar al alumno del grupo: $e");
+            // Mostrar mensaje de error
+            ErrorDialog.show(
+              context,
+              message: 'Error al eliminar al alumno del grupo: $e',
+            );
+          }
+        },
+        onCancelPressed: () {
+          // No hacer nada, solo cerrar el diálogo
+        },
       );
     }
 
@@ -125,14 +121,15 @@ class _StudentsGroupState extends ConsumerState<StudentsGroup> {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: const [
-            Icon(
-              Icons.group_outlined, // Icono adaptado para grupos
-              size: 200,
-              color: Colors.grey,
+          children: [
+            SvgPicture.asset(
+              'assets/icons/studentcap1.svg',
+              height: 200,
+              width: 200,
+              color: Colors.black,
             ),
-            SizedBox(height: 16),
-            Padding(
+            const SizedBox(height: 16),
+            const Padding(
               padding: EdgeInsets.symmetric(horizontal: 40),
               child: Text(
                 "Aquí se mostrarán los estudiantes que agregues al grupo.",
@@ -165,9 +162,10 @@ class _StudentsGroupState extends ConsumerState<StudentsGroup> {
           padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 8.0),
           child: TextField(
             controller: _searchController,
-            decoration: const InputDecoration(
-              labelText: 'Buscar estudiantes por nombre o usuario',
-              prefixIcon: Icon(Icons.search),
+            decoration: InputDecoration(
+              labelText: '  Buscar estudiantes por nombre o usuario',
+              prefixIconConstraints: BoxConstraints(maxWidth: 24, maxHeight: 24),
+              prefixIcon: SizedBox(width: 20, height: 20, child: SvgPicture.asset('assets/icons/buscar.svg', colorFilter: ColorFilter.mode(Colors.blue, BlendMode.srcIn))),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.all(Radius.circular(25.0)),
               ),

@@ -1,5 +1,6 @@
 import 'package:aprende_mas/config/utils/app_theme.dart';
 import 'package:aprende_mas/config/utils/packages.dart';
+import 'package:aprende_mas/config/utils/responsive_utils.dart';
 import 'package:aprende_mas/models/models.dart';
 import 'package:aprende_mas/views/student/notices/student_notice_options_screen.dart';
 import 'package:aprende_mas/views/widgets/widgets.dart';
@@ -69,22 +70,27 @@ class _StudentSubjectOptionsScreenState
     }
 
     return Scaffold(
-      body: Column(
-        children: [
-          ContainerNameGroupSubjects(
-            name: widget.subjectName,
-            color: const Color(0xFF31D492),
-            accessCode: widget.accessCode,
-          ),
-          StudentSubjectOptions(
-              lsSubjectOptions: lsSubjectOptions,
-              onOptionSelected: onOptionSelected,
-              selectedOptionIndex: ref.watch(itemTappedProvider)),
-          Expanded(
-            child:
-                getWidget(itemTapped), // Muestra el contenido correspondiente
-          ),
-        ],
+      body: MediaQuery.removePadding(
+        context: context,
+        removeTop: true,
+        child: Column(
+          children: [
+            ContainerNameGroupSubjects(
+              name: widget.subjectName,
+              color: getSubjectColor(widget.subjectId),
+              accessCode: widget.accessCode,
+            ),
+            StudentSubjectOptions(
+                lsSubjectOptions: lsSubjectOptions,
+                onOptionSelected: onOptionSelected,
+                selectedOptionIndex: ref.watch(itemTappedProvider),
+                subjectId: widget.subjectId),
+            Expanded(
+              child:
+                  getWidget(itemTapped), // Muestra el contenido correspondiente
+            ),
+          ],
+        ),
       ),
     );
   }

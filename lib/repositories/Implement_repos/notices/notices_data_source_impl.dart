@@ -31,7 +31,9 @@ class NoticesDataSourceImpl implements NoticesDataSource {
 
       final res = await dio.post(uri, data: data);
 
-      if (res.statusCode == 200) {
+      // CAMBIO: Accept both 200 (OK) and 400 (BadRequest) as successful if data is present
+      // Esto maneja el caso donde el backend retorna BadRequest pero incluye datos válidos
+      if (res.statusCode == 200 || (res.statusCode == 400 && res.data != null)) {
         final response = Map<String, dynamic>.from(res.data);
         final notice = NoticeModel.jsonToEntityNotice(response);
         List<NoticeModel> lsNotice = [notice];
@@ -39,7 +41,7 @@ class NoticesDataSourceImpl implements NoticesDataSource {
       }
       return [];
     } catch (e) {
-      debugPrint(e.toString());
+      debugPrint('Error creating notice: ${e.toString()}');
       return [];
     }
   }

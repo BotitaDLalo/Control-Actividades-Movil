@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 
 class NotificationContentScreen extends StatelessWidget {
@@ -50,7 +51,7 @@ String _formatDate(String rawDate) {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: SvgPicture.asset('assets/icons/retroceder.svg', width: 35, height: 35, color: Colors.white),
           onPressed: () {
             Navigator.pop(context);
           },
@@ -111,3 +112,4 @@ String _formatDate(String rawDate) {
     );
   }
 }
+

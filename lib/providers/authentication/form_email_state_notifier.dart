@@ -17,16 +17,17 @@ class FormEmailStateNotifier extends StateNotifier<FormEmailState> {
     _touchEveryField();
     if (!state.isValid) return;
     state = state.copyWith(isPosting: true);
-    bool res = await verifyEmailSignin(state.email.value);
-    if (res) {
-      state = state.copyWith(isFormPosted: res);
-    } else {
-      state = state.copyWith(isFormNotPosted: res);
+    try {
+      await verifyEmailSignin(state.email.value);
+      // Si llega aquí, el email está disponible
+      state = state.copyWith(isFormPosted: true);
+    } catch (e) {
+      debugPrint('❌ Notifier - Re-lanzando excepción: $e');
+      state = state.copyWith(isPosting: false);
+      rethrow; // Re-lanzar para que llegue al form
     }
     state = state.copyWith(isPosting: false);
-
-    state = state.copyWith(
-        isValid: false, isFormPosted: false, isFormNotPosted: false);
+    state = state.copyWith(isValid: false, isFormPosted: false, isFormNotPosted: false);
   }
 
   clearEmailSigninState() {

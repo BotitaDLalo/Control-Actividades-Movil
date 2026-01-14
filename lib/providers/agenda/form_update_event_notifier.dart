@@ -147,6 +147,7 @@ class FormUpdateEventNotifier extends StateNotifier<FormEventState>{
   void onUpdateGroupIdsChanged(List<int> ids) {
   state = state.copyWith(
     groupIds: ids, // Manteniendo el nombre original
+    subjectIds: [], // Limpiar subjects cuando se asignan groups
     isValid: Formz.validate([
       GenericInput.dirty(state.title.value),
       GenericInput.dirty(state.description.value),
@@ -162,6 +163,7 @@ class FormUpdateEventNotifier extends StateNotifier<FormEventState>{
 void onUpdateSubjectIdsChanged(List<int> ids) {
   state = state.copyWith(
     subjectIds: ids, // Manteniendo el nombre original
+    groupIds: [], // Limpiar groups cuando se asignan subjects
     isValid: Formz.validate([
       GenericInput.dirty(state.title.value),
       GenericInput.dirty(state.description.value),
@@ -239,7 +241,7 @@ Future<bool> onUpdateFormSubmit(int eventId, int teacherId) async {
     "Descripcion": state.description.value,
     "Color": colorToHex(state.colorCode.value), //"FF5733"
     "EventosGrupos": state.groupIds!.isNotEmpty ? state.groupIds!.map((id) => {"GrupoId": id}).toList() : null,
-    "EventosMaterias": state.subjectIds!.isNotEmpty ? state.groupIds!.map((id) => {"MateriaId": id}).toList() : null,
+    "EventosMaterias": state.subjectIds!.isNotEmpty ? state.subjectIds!.map((id) => {"MateriaId": id}).toList() : null,
   };
 
   print("eventLike: $eventLike");

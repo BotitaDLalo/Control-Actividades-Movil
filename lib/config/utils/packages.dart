@@ -14,3 +14,6 @@ export 'package:firebase_messaging/firebase_messaging.dart';
 export 'package:firebase_core/firebase_core.dart';
 export 'package:flutter_colorpicker/flutter_colorpicker.dart';
 export 'package:google_fonts/google_fonts.dart';
+
+// Utilidades responsive para diseño adaptable
+export 'package:aprende_mas/config/utils/responsive_utils.dart';

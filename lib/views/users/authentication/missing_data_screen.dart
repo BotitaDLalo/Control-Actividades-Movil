@@ -1,6 +1,7 @@
 import 'package:aprende_mas/config/utils/packages.dart';
 import 'package:aprende_mas/providers/providers.dart';
 import 'package:aprende_mas/views/users/authentication/form_missing_data.dart';
+import 'package:aprende_mas/views/widgets/structure/app_bar_home.dart';
 
 class MissingDataScreen extends ConsumerWidget {
   const MissingDataScreen({super.key});
@@ -10,10 +11,12 @@ class MissingDataScreen extends ConsumerWidget {
     return GestureDetector(
       onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
       child: Scaffold(
-        appBar: AppBar(
-          backgroundColor: Colors.transparent,
+        appBar: AppBarHome(
+          title: 'Datos faltantes',
+          showSettings: false,
+          titleFontSize: 20,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.black),
+            icon: SvgPicture.asset('assets/icons/retroceder.svg', width: 35, height: 35, color: Colors.white),
             onPressed: () {
               ref.read(authProvider.notifier).popAuth();
               context.go('/');
@@ -32,3 +35,4 @@ class MissingDataScreen extends ConsumerWidget {
     );
   }
 }
+

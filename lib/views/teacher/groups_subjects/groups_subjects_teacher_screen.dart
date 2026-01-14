@@ -1,6 +1,7 @@
 import 'package:aprende_mas/config/utils/packages.dart';
 import 'package:aprende_mas/views/users/groups_subjects/groups_subjects_screen.dart';
 import 'package:aprende_mas/views/widgets/structure/modal_bottom_sheet_custom.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class GroupsSubjectsTeacherScreen extends ConsumerStatefulWidget {
   const GroupsSubjectsTeacherScreen({super.key});
@@ -31,7 +32,7 @@ class _GroupsSubjectsTeacherScreenState
   Widget build(BuildContext context) {
     List<Widget> lsOptions = [
       ListTile(
-        leading: const Icon(Icons.group_add),
+        leading: SvgPicture.asset('assets/icons/user3.svg', width: 24, height: 24),
         title: const Text('Crear Grupo'),
         onTap: () {
           Navigator.pop(context);
@@ -39,7 +40,7 @@ class _GroupsSubjectsTeacherScreenState
         },
       ),
       ListTile(
-        leading: const Icon(Icons.create),
+        leading: SvgPicture.asset('assets/icons/book1.svg', width: 24, height: 24),
         title: const Text('Crear Materia'),
         onTap: () {
           Navigator.pop(context);

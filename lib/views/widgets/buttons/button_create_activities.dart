@@ -12,14 +12,13 @@ class ButtonCreateActvities extends StatelessWidget {
         alignment: Alignment.centerLeft,
         child: FilledButton(
           onPressed: () {},
-          style: ButtonStyle(
-            backgroundColor: const WidgetStatePropertyAll(Colors.blue), 
-            shape: WidgetStatePropertyAll(
-              RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12)
-              )),
-            padding: const WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 40))
-          ), 
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF00569E),
+            foregroundColor: Colors.white,
+            elevation: 6,
+            padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(40)),
+          ),
           child: const Text('Crear'),
         )),
     );

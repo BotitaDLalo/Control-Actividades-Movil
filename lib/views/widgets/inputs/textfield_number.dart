@@ -23,15 +23,9 @@ class TextfieldNumber extends ConsumerWidget {
           floatingLabelStyle: TextStyle(
               color: Colors.black, fontWeight: FontWeight.bold, fontSize: 18),
           isDense: true,
-          enabledBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: Color.fromARGB(100, 0, 0, 0)),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: Color.fromARGB(255, 0, 0, 0)),
-          ),
-          // focusColor: colors.primaryColor,
+          // Dejar que el tema global maneje los bordes (underline por defecto)
         ),
-        style: Theme.of(context).textTheme.headlineMedium,
+        style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: Colors.black),
         keyboardType: TextInputType.number,
         textAlign: TextAlign.center,
         inputFormatters: [

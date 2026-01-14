@@ -227,7 +227,8 @@ class AuthDataSourceImpl implements AuthDataSource {
   }
 
   @override
-  Future<bool> verifyEmailSignin(String email) async {
+  Future<void> verifyEmailSignin(String email) async {
+    debugPrint('🔍 verifyEmailSignin - Iniciando verificación para: $email');
     try {
       const uri = "/Login/VerificarEmailUsuario";
 
@@ -236,24 +237,48 @@ class AuthDataSourceImpl implements AuthDataSource {
         data: '"$email"',
       );
 
+      debugPrint('🔍 verifyEmailSignin - StatusCode recibido: ${res.statusCode}');
+      debugPrint('🔍 verifyEmailSignin - Response data: ${res.data}');
+
       if (res.statusCode == 200) {
-        return true;
+        debugPrint('✅ verifyEmailSignin - Email disponible para registro');
+        return; // Solo retorna sin error
       }
-      return false;
+
+      // Si no es 200, verificar si es error conocido
+      final extensions = res.data['Extensions'];
+      if (res.statusCode == 400 && extensions != null && extensions['errorCode'] == 1002) {
+        final errorMessage = extensions['errorMessage'];
+        final errorComment = extensions['errorComment'];
+        debugPrint('❌ verifyEmailSignin - Email ya registrado: $errorMessage');
+        throw InvalidEmailSignin(
+            errorMessage: errorMessage, errorComment: errorComment);
+      }
+
+      debugPrint('⚠️ verifyEmailSignin - StatusCode inesperado: ${res.statusCode}');
+      throw UncontrolledError(message: 'Respuesta inesperada del servidor');
     } on DioException catch (e) {
-      if (e.response?.statusCode == 400 &&
-          e.response?.data['errorCode'] == 1002) {
-        final errorMessage = e.response?.data['errorMessage'];
-        final errorComment = e.response?.data['errorComment'];
+      debugPrint('🔍 verifyEmailSignin - DioException - StatusCode: ${e.response?.statusCode}');
+      debugPrint('🔍 verifyEmailSignin - DioException - Response Data: ${e.response?.data}');
+      if (e.response?.statusCode == 400) {
+        final extensions = e.response?.data['Extensions'];
+        final errorMessage = extensions?['errorMessage'];
+        final errorComment = extensions?['errorComment'];
+        debugPrint('✅ Lanzando InvalidEmailSignin desde DioException: $errorMessage');
         throw InvalidEmailSignin(
             errorMessage: errorMessage, errorComment: errorComment);
       }
       if (e.type == DioExceptionType.connectionTimeout)
         throw ConnectionTimeout();
-      debugPrint(e.toString());
+      debugPrint('❌ verifyEmailSignin - Error no manejado: ${e.toString()}');
       throw UncontrolledError();
     } catch (e) {
-      debugPrint(e.toString());
+      // No capturar InvalidEmailSignin, ConnectionTimeout - dejar que se propaguen
+      if (e is InvalidEmailSignin || e is ConnectionTimeout) {
+        debugPrint('🔄 Re-lanzando excepción específica: ${e.runtimeType}');
+        rethrow;
+      }
+      debugPrint('❌ verifyEmailSignin - Exception general: ${e.toString()}');
       throw UncontrolledError();
     }
   }

@@ -4,6 +4,8 @@ import 'package:aprende_mas/views/views.dart';
 import '../../../config/utils/app_theme.dart';
 import '../../../providers/subjects/form_subjects_provider.dart';
 import '../../widgets/buttons/button_form.dart';
+import '../../widgets/alerts/error_dialog.dart';
+import '../../widgets/alerts/success_dialog.dart';
 
 class FormCreateSubject extends ConsumerStatefulWidget {
   const FormCreateSubject({super.key});
@@ -58,7 +60,8 @@ class FormCreateSubjectState extends ConsumerState<FormCreateSubject> {
 
     Widget groupsItems(int groupId, String nameGroup) {
       return Card(
-        color: Colors.white,
+        color: const Color.fromARGB(255, 167, 226, 254),
+        elevation: 2,
         child: ListTile(
           key: ValueKey(groupId),
           onTap: () {
@@ -66,8 +69,11 @@ class FormCreateSubjectState extends ConsumerState<FormCreateSubject> {
           },
           title: Text(
             nameGroup,
-            style:
-                Theme.of(context).textTheme.labelLarge?.copyWith(fontSize: 18),
+            style: const TextStyle(
+              color: Color.fromARGB(221, 0, 0, 0),
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           trailing: formCreateSubject.isSelectedGroup[groupId] ?? false
               ? Icon(Icons.check_circle, color: AppTheme.isSelectedGroup)
@@ -90,10 +96,6 @@ class FormCreateSubjectState extends ConsumerState<FormCreateSubject> {
           children: [
             Container(
               alignment: const Alignment(-0.8, 1),
-              child: Text(
-                'Crear materia',
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
             ),
             const SizedBox(
               height: 10,
@@ -167,7 +169,7 @@ class FormCreateSubjectState extends ConsumerState<FormCreateSubject> {
                   alignment: const Alignment(-0.8, 1),
                   child: Text(
                     'Grupos creados',
-                    style: Theme.of(context).textTheme.titleLarge,
+                    //style: Theme.of(context).textTheme.titleLarge,
                     // style: TextStyle(color: formCreateGroup.pickerColor),
                   ),
                 ),
@@ -201,8 +203,16 @@ class FormCreateSubjectState extends ConsumerState<FormCreateSubject> {
                     if (formCreateSubject.isPosting) {
                       return;
                     }
-                    await formCreateSubjectNotifier.onFormSubmit();
-                    goRouterPop();
+                    debugPrint("🔘 Botón Crear materia presionado");
+                    try {
+                      await formCreateSubjectNotifier.onFormSubmit();
+                      SuccessDialog.show(context, message: "Materia creada exitosamente", onOkPressed: goRouterPop);
+                      debugPrint("🔄 Refrescando lista de grupos...");
+                      await ref.read(groupsProvider.notifier).getGroupsSubjects();
+                      debugPrint("✅ Refresco completado");
+                    } catch (e) {
+                      ErrorDialog.show(context, message: "Error al crear la materia");
+                    }
                   }),
             )
           ],

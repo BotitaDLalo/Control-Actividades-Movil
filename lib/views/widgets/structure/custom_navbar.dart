@@ -20,6 +20,8 @@ class CustomNavbar extends StatelessWidget {
         items: widgetsOptionsItems,
         selectedItemColor: Colors.black,
         unselectedItemColor: Colors.grey,
+        showSelectedLabels: true,
+        showUnselectedLabels: false,
       ),
     );
   }

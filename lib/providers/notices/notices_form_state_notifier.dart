@@ -41,29 +41,35 @@ class NoticesFormStateNotifier extends StateNotifier<NoticesFormState> {
         isValid: Formz.validate([newDescription, state.title]));
   }
 
-  onFormSubmit(NoticeModel createNotice) async {
+  Future<bool> onFormSubmit(NoticeModel createNotice) async {
     _touchEveryField();
-    if (!state.isValid) return;
-    state = state.copyWith(isPosting: true);
+    if (!state.isValid) return false;
+    // CAMBIO: Limpiar mensaje de error antes de intentar crear
+    state = state.copyWith(isPosting: true, errorMessage: '');
     createNotice = createNotice.copyWith(
         title: state.title.value, description: state.description.value);
     bool createdNotice = await createNoticeCallback(createNotice);
     if (createdNotice) {
+      // CAMBIO: Solo marcar como exitoso si realmente se creó
       state = state.copyWith(isFormPosted: createdNotice);
+    } else {
+      // CAMBIO: Mostrar mensaje de error al usuario si falló
+      state = state.copyWith(errorMessage: 'Error al crear el aviso. Inténtalo de nuevo.');
     }
     state = state.copyWith(isPosting: false);
     resetStates();
+    return createdNotice;
   }
 
   // 🚨 AÑADIDO: LÓGICA PARA ACTUALIZAR AVISO
-  onUpdateSubmit(NoticeModel noticeToUpdate) async {
+  Future<bool> onUpdateSubmit(NoticeModel noticeToUpdate) async {
     _touchEveryField();
-    if (!state.isValid) return;
+    if (!state.isValid) return false;
     state = state.copyWith(isPosting: true);
 
     // 1. Clonar el modelo existente y actualizar solo el título y la descripción
     noticeToUpdate = noticeToUpdate.copyWith(
-        title: state.title.value, 
+        title: state.title.value,
         description: state.description.value);
 
     // 2. Llamar al callback de actualización
@@ -75,6 +81,7 @@ class NoticesFormStateNotifier extends StateNotifier<NoticesFormState> {
     }
     state = state.copyWith(isPosting: false);
     resetStates(); // Opcional: limpiar los estados del formulario después
+    return updatedNotice;
   }
 
   _touchEveryField() {
@@ -87,7 +94,7 @@ class NoticesFormStateNotifier extends StateNotifier<NoticesFormState> {
         isValid: Formz.validate([title, description]));
   }
 
-  onDeleteSubmit(int noticeId) async {
+  Future<bool> onDeleteSubmit(int noticeId) async {
     state = state.copyWith(isPosting: true);
     bool noticeDeleted = await deleteNoticeCallback(noticeId);
     if (noticeDeleted) {
@@ -95,12 +102,15 @@ class NoticesFormStateNotifier extends StateNotifier<NoticesFormState> {
     }
     state = state.copyWith(isPosting: false);
     resetStates();
+    return noticeDeleted;
   }
 
   resetStates() {
     //$ restablece estados
     state = state.copyWith(isFormPosted: false);
     state = state.copyWith(isDeleted: false);
+    // CAMBIO: Limpiar mensaje de error también
+    state = state.copyWith(errorMessage: '');
   }
   
    void initializeForm(NoticeModel notice) {

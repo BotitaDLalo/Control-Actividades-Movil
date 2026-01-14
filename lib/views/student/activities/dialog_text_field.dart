@@ -51,7 +51,7 @@ class _DialogTextFieldState extends ConsumerState<DialogTextField> {
               },
               decoration: const InputDecoration(
                 hintText: 'Escribe tu respuesta',
-                border: OutlineInputBorder(),
+                // dejar que el tema global maneje los bordes y estilo
               ),
             ),
           ),

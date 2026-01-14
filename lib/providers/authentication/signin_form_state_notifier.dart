@@ -14,17 +14,17 @@ class SigninFormStateNotifier extends StateNotifier<SigninFormState> {
       : super(SigninFormState());
 
   onNameChanged(String value) {
-    final newName = GenericInput.dirty(value);
-    state = state.copyWith(
-        name: newName,
-        isValid: Formz.validate([
-          newName,
-          state.lastName,
-          state.email,
-          state.password,
-          state.role
-        ]));
-  }
+     final newName = GenericInput.dirty(value);
+     state = state.copyWith(
+         name: newName,
+         isValid: Formz.validate([
+           newName,
+           state.lastName,
+           state.secondLastName,
+           state.password,
+           state.role
+         ]));
+   }
 
   onLastNameChanged(String value) {
     final newLastName = GenericInput.dirty(value);
@@ -33,7 +33,7 @@ class SigninFormStateNotifier extends StateNotifier<SigninFormState> {
         isValid: Formz.validate([
           state.name,
           newLastName,
-          state.email,
+          state.secondLastName,
           state.password,
           state.role
         ]));
@@ -46,7 +46,7 @@ class SigninFormStateNotifier extends StateNotifier<SigninFormState> {
         isValid: Formz.validate([
           state.name,
           state.lastName,
-          state.email,
+          secondLastName,
           state.password,
           state.role
         ]));
@@ -72,7 +72,7 @@ class SigninFormStateNotifier extends StateNotifier<SigninFormState> {
         isValid: Formz.validate([
           state.name,
           state.lastName,
-          state.email,
+          state.secondLastName,
           newPassword,
           state.role
         ]));
@@ -85,7 +85,7 @@ class SigninFormStateNotifier extends StateNotifier<SigninFormState> {
         isValid: Formz.validate([
           state.name,
           state.lastName,
-          state.email,
+          state.secondLastName,
           state.password,
           newRole
         ]));
@@ -105,21 +105,22 @@ class SigninFormStateNotifier extends StateNotifier<SigninFormState> {
 
       if (res) {
         state = state.copyWith(isFormPosted: true, isPosting: false);
+        // Limpiar formulario después de registro exitoso
+        clearFormSigninState();
       } else {
         state = state.copyWith(isFormNotPosted: true, isPosting: false);
       }
     } catch (e) {
       state = state.copyWith(isFormNotPosted: true, isPosting: false);
     } finally {
-      //* Reiniciamos el estado
+      //* Reiniciamos flags pero mantenemos datos para posibles reintentos
       state = state.copyWith(
-          isValid: false, isFormPosted: false, isFormNotPosted: false);
+          isFormPosted: false, isFormNotPosted: false);
     }
   }
 
   _touchEveryField() {
     final name = GenericInput.dirty(state.name.value);
-    // final email = Email.dirty(state.email.value);
     final lastName = GenericInput.dirty(state.lastName.value);
     final secondLastName = GenericInput.dirty(state.secondLastName.value);
     final password = Password.dirty(state.password.value);
@@ -127,12 +128,15 @@ class SigninFormStateNotifier extends StateNotifier<SigninFormState> {
 
     state = state.copyWith(
         name: name,
-        // email: email,
         lastName: lastName,
         secondLastName: secondLastName,
         password: password,
         role: role,
-        isValid: Formz.validate([name, lastName, password, role]));
+        isValid: Formz.validate([name, lastName, secondLastName, password, role]));
+  }
+
+  touchFields() {
+    _touchEveryField();
   }
 
   clearFormSigninState() {

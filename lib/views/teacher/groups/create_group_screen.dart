@@ -7,6 +7,9 @@ class CreateGroupScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return const FormScreen(form: FormCreateGroup());
+    return const FormScreen(
+      form: FormCreateGroup(),
+      title: 'Crear grupo',
+    );
   }
 }

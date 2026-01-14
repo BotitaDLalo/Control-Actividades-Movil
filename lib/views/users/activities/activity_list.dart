@@ -1,7 +1,7 @@
 import 'package:aprende_mas/config/utils/packages.dart';
 import 'package:aprende_mas/config/utils/catalog_names.dart';
 import 'package:aprende_mas/providers/providers.dart';
-import 'package:aprende_mas/views/widgets/alerts/custom_alert_dialog.dart';
+import 'package:aprende_mas/views/widgets/alerts/warning_confirmation_dialog.dart';
 import 'package:aprende_mas/models/models.dart';
 import 'package:aprende_mas/views/widgets/widgets.dart';
 import 'package:intl/intl.dart';
@@ -62,6 +62,8 @@ class _ActivityListState extends ConsumerState<ActivityList> {
     final activitiesAsync =
         ref.watch(filteredActivitiesProvider(widget.subjectId));
 
+    final subjectColor = getSubjectColor(widget.subjectId);
+
     void teacherActivityStudentsSubmissions(Activity activity) {
       context.push('/teacher-activities-students-options', extra: activity);
     }
@@ -75,25 +77,16 @@ class _ActivityListState extends ConsumerState<ActivityList> {
     }
 
     void showDialogDeleteConfirmation(int activityId) {
-      showDialog(
-        context: context,
-        builder: (context) {
-          return CustomAlertDialog(
-            message: '¿Desea eliminar la actividad?',
-            comment: 'Todas las entregas y calificaciones serán eliminadas',
-            buttonCancelName: 'Cancelar',
-            onPressedContinue: () async {
-              await ref
-                  .read(activityProvider.notifier)
-                  .deleteActivity(activityId);
-
-              ref.invalidate(
-                  activitiesBySubjectProvider(widget.subjectId));
-              closeDialog();
-            },
-            buttonContinueName: 'Eliminar',
-            onPressedCancel: closeDialog,
-          );
+      WarningConfirmationDialog.show(
+        context,
+        message: '¿Desea eliminar la actividad? Todas las entregas y calificaciones serán eliminadas',
+        onConfirmPressed: () async {
+          await ref
+              .read(activityProvider.notifier)
+              .deleteActivity(activityId);
+ 
+          ref.invalidate(
+              activitiesBySubjectProvider(widget.subjectId));
         },
       );
     }
@@ -114,7 +107,7 @@ class _ActivityListState extends ConsumerState<ActivityList> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 ListTile(
-                  leading: const Icon(Icons.edit),
+                  leading: SvgPicture.asset('assets/icons/edit2.svg', width: 24, height: 24),
                   title: const Text('Editar'),
                   onTap: () {
                     Navigator.pop(context);
@@ -132,7 +125,7 @@ class _ActivityListState extends ConsumerState<ActivityList> {
                   },
                 ),
                 ListTile(
-                  leading: const Icon(Icons.delete_forever),
+                  leading: SvgPicture.asset('assets/icons/eliminar1.svg', width: 24, height: 24),
                   title: const Text('Eliminar'),
                   onTap: () {
                     Navigator.pop(context);
@@ -152,10 +145,15 @@ class _ActivityListState extends ConsumerState<ActivityList> {
         children: [
           TextField(
             controller: _searchController,
-            decoration: const InputDecoration(
-              labelText: 'Buscar actividades',
-              prefixIcon: Icon(Icons.search),
+            decoration: InputDecoration(
+              labelText: '  Buscar actividades',
+              prefixIconConstraints: BoxConstraints(maxWidth: 40, maxHeight: 40),
+              prefixIcon: Padding(padding: EdgeInsets.only(left: 8, right: 8), child: SvgPicture.asset('assets/icons/buscar.svg', width: 24, height: 24, colorFilter: ColorFilter.mode(subjectColor, BlendMode.srcIn))),
               border: OutlineInputBorder(
+                borderRadius: BorderRadius.all(Radius.circular(25)),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: subjectColor, width: 2.0),
                 borderRadius: BorderRadius.all(Radius.circular(25)),
               ),
             ),
@@ -204,9 +202,9 @@ class _ActivityListState extends ConsumerState<ActivityList> {
                   }
 
                   return ElementTile(
-                    icon: Icons.assignment,
-                    iconSize: 28,
-                    iconColor: Colors.white,
+                    iconWidget: SvgPicture.asset('assets/icons/act1.svg', width: 40, height: 40),
+                    iconSize: 40,
+                    iconColor: Colors.black,
                     title: activity.nombreActividad,
                     subtitle: formattedDate,
                     trailingWidget: role == cn.getRoleTeacherName
@@ -217,7 +215,7 @@ class _ActivityListState extends ConsumerState<ActivityList> {
                               showModalBottomActivityOptions(activity);
                             },
                           )
-                        : null,
+                        : const SizedBox(),
                     onTapFunction: () async {
                       final activityData = Activity(
                         activityId: activity.activityId,

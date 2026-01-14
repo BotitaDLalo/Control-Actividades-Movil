@@ -26,7 +26,7 @@ abstract class AuthDataSource {
 
   Future<bool> verifyExistingFcmToken(int id, String fcmToken, String role);
 
-  Future<bool> verifyEmailSignin(String email);
+  Future<void> verifyEmailSignin(String email);
 
   Future<AuthUser> registerAuthorizationCodeUser(String code, String? idToken);
 }

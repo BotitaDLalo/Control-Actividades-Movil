@@ -39,7 +39,7 @@ class EventNotifier extends StateNotifier<EventState>{
     state = state.copyWith(events: events);
   }
 
-  Future<void> createEvents(
+  Future<List<Event>> createEvents(
     String title,
     String description,
     Color color,
@@ -47,8 +47,8 @@ class EventNotifier extends StateNotifier<EventState>{
     DateTime endDate, {
     List<int>? groupIds,
     List<int>? subjectIds,
-}) async{
-    
+  }) async {
+
     try {
       state = state.copyWith(isLoading: true);
       final event = await eventRepository.createEvent(
@@ -60,15 +60,23 @@ class EventNotifier extends StateNotifier<EventState>{
         groupIds: groupIds,
         subjectIds: subjectIds);
       _setCreateEvent(event);
+      return event; // Devolver la lista de eventos
     } catch (e) {
-     state = state.copyWith(errorMessage: e.toString()); 
+     state = state.copyWith(errorMessage: e.toString());
+     return []; // Devolver lista vacía en caso de error
     } finally {
       state = state.copyWith(isLoading: false);
     }
   }
 
-  _setCreateEvent(List<Event> event) {
-    state = state.copyWith(events: event);
+  _setCreateEvent(List<Event>? event) {
+    print("🔹 _setCreateEvent llamado con: $event");
+    if (event == null) {
+      print("❌ Error: event es nulo, usando lista vacía");
+      state = state.copyWith(events: []);
+    } else {
+      state = state.copyWith(events: event);
+    }
   }
 
   Future<void> updateEvents(Map<String, dynamic> eventLike) async{
