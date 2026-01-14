@@ -1,5 +1,6 @@
 import 'package:aprende_mas/config/utils/app_theme.dart';
 import 'package:aprende_mas/config/utils/packages.dart';
+import 'package:aprende_mas/config/utils/responsive_utils.dart';
 import 'package:aprende_mas/models/models.dart';
 import 'package:aprende_mas/providers/providers.dart';
 import 'package:aprende_mas/providers/subjects/students_subject_provider.dart';
@@ -105,13 +106,14 @@ class _ActividadesScreenState
               ContainerNameGroupSubjects(
                 name: widget.subjectName,
                 accessCode: widget.codeAccess,
-                color: AppTheme.mainColor,
+                color: getSubjectColor(widget.subjectId),
               ),
               TeacherSubjectOptions(
-                lsSubjectOptions: lsSubjectOptions,
-                onOptionSelected: onOptionSelected,
-                selectedOptionIndex: ref.watch(_itemTappedProvider),
-              ),
+                  lsSubjectOptions: lsSubjectOptions,
+                  onOptionSelected: onOptionSelected,
+                  selectedOptionIndex: ref.watch(_itemTappedProvider),
+                  subjectId: widget.subjectId,
+                ),
               Expanded(
                 child: getWidget(itemTapped),
               ),

@@ -97,8 +97,8 @@ class FormLoginState extends ConsumerState<FormLogin> {
 
             SizedBox(
                 width: double.infinity,
+                height: MediaQuery.of(context).size.height * 0.080,
                 //width: MediaQuery.of(context).size.width * 0.9,
-                height: MediaQuery.of(context).size.height * 0.100,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color.fromARGB(255, 20, 158, 218),
@@ -108,7 +108,7 @@ class FormLoginState extends ConsumerState<FormLogin> {
                       fontWeight: FontWeight.bold,
                     ),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(25),
+                      borderRadius: BorderRadius.circular(20),
                     ),
                   ),
                   onPressed: () {
@@ -150,7 +150,7 @@ class FormLoginState extends ConsumerState<FormLogin> {
                       fontWeight: FontWeight.bold,
                     ),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(25),
+                      borderRadius: BorderRadius.circular(20),
                     ),
                     side: BorderSide(color: const Color.fromARGB(255, 14, 155, 226)),
                   ),
@@ -192,7 +192,7 @@ class FormLoginState extends ConsumerState<FormLogin> {
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size(double.infinity, 50),
-                backgroundColor: const Color.fromARGB(255, 7, 142, 160),
+                backgroundColor: const Color.fromARGB(255, 97, 1, 123),
                 foregroundColor: const Color.fromARGB(255, 255, 255, 255),
                 textStyle: const TextStyle(
                   fontSize: 18,

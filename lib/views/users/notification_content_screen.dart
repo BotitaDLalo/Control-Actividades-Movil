@@ -21,7 +21,7 @@ class NotificationContentScreen extends StatelessWidget {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: SvgPicture.asset('assets/icons/retroceder.svg', width: 30, height: 30, color: Colors.white),
+          icon: SvgPicture.asset('assets/icons/retroceder.svg', width: 35, height: 35, color: Colors.white),
           onPressed: () {
             Navigator.pop(context);
           },
@@ -67,3 +67,4 @@ class NotificationContentScreen extends StatelessWidget {
     );
   }
 }
+

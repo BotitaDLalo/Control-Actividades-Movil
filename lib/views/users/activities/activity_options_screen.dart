@@ -1,5 +1,6 @@
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:aprende_mas/config/utils/packages.dart';
+import 'package:aprende_mas/config/utils/responsive_utils.dart';
 import 'package:aprende_mas/views/widgets/buttons/floating_action_button_custom.dart';
 import 'package:aprende_mas/views/widgets/buttons/custom_rounded_button.dart';
 import 'package:aprende_mas/providers/activity/activity_provider.dart';
@@ -36,6 +37,7 @@ class _ActivityOptionState extends ConsumerState<ActivityOptionScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final subjectColor = getSubjectColor(widget.subjectId);
     void buttonModal() {
       showModalBottomSheet(
         context: context,
@@ -80,6 +82,7 @@ class _ActivityOptionState extends ConsumerState<ActivityOptionScreen> {
                           buttonModal();
                         },
                         icon: Icons.add,
+                        backgroundColor: subjectColor,
                       )
                     : null;
 
@@ -102,6 +105,7 @@ class _ActivityOptionState extends ConsumerState<ActivityOptionScreen> {
                                       height: 180,
                                       width: 180,
                                       fit: BoxFit.contain,
+                                      colorFilter: ColorFilter.mode(subjectColor, BlendMode.srcIn),
                                     ),
                                   ),
                                   const SizedBox(height: 24),
@@ -111,16 +115,19 @@ class _ActivityOptionState extends ConsumerState<ActivityOptionScreen> {
                                     style: TextStyle(fontSize: 16),
                                   ),
                                   const SizedBox(height: 32),
-                                  CustomRoundedButton(
-                                    text: 'Crear primera actividad',
-                                    onPressed: () {
-                                      buttonModal();
-                                    },
-                                    backgroundColor: Color(0xFF283043),
-                                    textColor: Colors.white,
-                                    borderRadius: 24,
-                                    height: 48,
-                                    padding: EdgeInsets.symmetric(horizontal: 32),
+                                  SizedBox(
+                                    width: 300,
+                                    child: CustomRoundedButton(
+                                      text: 'Crear primera actividad',
+                                      onPressed: () {
+                                        buttonModal();
+                                      },
+                                      backgroundColor: subjectColor,
+                                      textColor: Colors.white,
+                                      borderRadius: 24,
+                                      height: 56,
+                                      padding: EdgeInsets.symmetric(horizontal: 8),
+                                    ),
                                   ),
                                 ],
                               ),
@@ -136,6 +143,7 @@ class _ActivityOptionState extends ConsumerState<ActivityOptionScreen> {
                                     height: 170,
                                     width: 170,
                                     fit: BoxFit.contain,
+                                    colorFilter: ColorFilter.mode(subjectColor, BlendMode.srcIn),
                                   ),
                                   const SizedBox(height: 16),
                                   const Text(

@@ -70,14 +70,17 @@ class _StudentsGroupState extends ConsumerState<StudentsGroupAssigment> {
       }
     });
 
-    return Column(
-      children: [
-        Expanded(
-          child: SingleChildScrollView(
+    return Scaffold(
+      resizeToAvoidBottomInset: false, // Evita que el contenido suba con el teclado
+      body: Stack(
+        children: [
+          // Contenido scrollable
+          SingleChildScrollView(
+            padding: const EdgeInsets.only(bottom: 100), // Espacio para el botón fijo
             child: Column(
               children: [
                 const SizedBox(height: 10),
-
+ 
                 // ======================
                 //     INPUT + SUGERENCIA
                 // ======================
@@ -90,7 +93,7 @@ class _StudentsGroupState extends ConsumerState<StudentsGroupAssigment> {
                         label: '  Agregar alumno',
                         icon: SizedBox(width: 20, height: 20, child: SvgPicture.asset('assets/icons/buscar.svg', colorFilter: ColorFilter.mode(Colors.blue, BlendMode.srcIn))),
                       ),
-
+ 
                       isNotEmpty
                           ? SizedBox(
                               width: 330,
@@ -121,7 +124,7 @@ class _StudentsGroupState extends ConsumerState<StudentsGroupAssigment> {
                     ],
                   ),
                 ),
-
+ 
                 // =========================
                 //        LISTA DE EMAILS
                 // =========================
@@ -136,7 +139,7 @@ class _StudentsGroupState extends ConsumerState<StudentsGroupAssigment> {
                           style: Theme.of(context).textTheme.titleLarge,
                         ),
                       ),
-
+ 
                       Expanded(
                         child: SizedBox(
                           width: 360,
@@ -180,29 +183,31 @@ class _StudentsGroupState extends ConsumerState<StudentsGroupAssigment> {
               ],
             ),
           ),
-        ),
-
-        // =========================
-        //       BOTÓN FIJO
-        // =========================
-        Padding(
-          padding: const EdgeInsets.only(right: 20, bottom: 20, top: 10),
-          child: Align(
-            alignment: Alignment.centerRight,
-            child: CustomRoundedButton(
-              text: "Agregar",
-              onPressed: canSubmit
-                  ? () async {
-                      print('--- ENVIANDO ${lsEmails.length} ALUMNOS A GRUPO ---');
-                      await ref
-                          .read(formStudentsGroupProvider.notifier)
-                          .onAddStudentsGroup(widget.id);
-                    }
-                  : null,
+ 
+          // Botón fijo en la parte inferior
+          Positioned(
+            bottom: 20,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: SizedBox(
+                width: 150,
+                child: CustomRoundedButton(
+                  text: "Agregar",
+                  onPressed: canSubmit
+                      ? () async {
+                          print('--- ENVIANDO ${lsEmails.length} ALUMNOS A GRUPO ---');
+                          await ref
+                              .read(formStudentsGroupProvider.notifier)
+                              .onAddStudentsGroup(widget.id);
+                        }
+                      : null,
+                ),
+              ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

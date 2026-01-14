@@ -62,8 +62,8 @@ class CustomAlertDialog extends ConsumerWidget {
                 CustomRoundedButton(
                     text: buttonContinueName, // 'Eliminar'
                     onPressed: onPressedContinue,
-                    // Estilo de botón destructivo (ROJO)
-                    backgroundColor: const Color(0xFF283043),
+                    // Estilo de botón destructivo (AZUL)
+                    backgroundColor: const Color(0xFF00569E),
                     textColor: Colors.white,
                     borderRadius: 10,
                 )

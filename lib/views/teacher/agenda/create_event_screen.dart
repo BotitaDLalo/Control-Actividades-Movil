@@ -19,7 +19,7 @@ class CreateEventScreen extends StatelessWidget {
           showSettings: false,
           leading: IconButton(
             onPressed: () => context.pop(),
-            icon: SvgPicture.asset('assets/icons/retroceder.svg', width: 30, height: 30, color: Colors.white),
+            icon: SvgPicture.asset('assets/icons/retroceder.svg', width: 35, height: 35, color: Colors.white),
           ),
         ),
         body: SingleChildScrollView(
@@ -36,4 +36,5 @@ class CreateEventScreen extends StatelessWidget {
     );
   }
 }
+
 

@@ -7,6 +7,9 @@ import 'package:aprende_mas/views/teacher/agenda/button_event_form.dart';
 import 'package:aprende_mas/views/teacher/agenda/update_dropdown.dart';
 import 'package:aprende_mas/views/widgets/inputs/custom_input_field.dart';
 import 'package:aprende_mas/views/widgets/inputs/custom_time_form_field.dart';
+import 'package:aprende_mas/views/widgets/alerts/success_dialog.dart';
+import 'package:aprende_mas/views/widgets/alerts/error_dialog.dart';
+import 'package:aprende_mas/views/widgets/alerts/warning_confirmation_dialog.dart';
 
 class FormUpdateEvent extends ConsumerWidget {
   final Event event;
@@ -269,13 +272,46 @@ class FormUpdateEvent extends ConsumerWidget {
                 buttonName: 'Actualizar Evento',
                 onPressed: () async {
                   if (!ref.watch(formUpdateEventProvider(event)).isPosting) {
-                    final success = await formUpdateEventNotifier.onUpdateFormSubmit(
-                      event.eventId!,
-                      event.teacherId,
+                    // Mostrar diálogo de confirmación antes de actualizar
+                    WarningConfirmationDialog.show(
+                      context,
+                      message: '¿Está seguro de que desea actualizar este evento?',
+                      onConfirmPressed: () async {
+                        try {
+                          final success = await formUpdateEventNotifier.onUpdateFormSubmit(
+                            event.eventId!,
+                            event.teacherId,
+                          );
+                          if (success) {
+                            // Mostrar mensaje de éxito
+                            SuccessDialog.show(
+                              context,
+                              message: 'Evento actualizado exitosamente',
+                              onOkPressed: () {
+                                goRouterPop();
+                              },
+                            );
+                          } else {
+                            // Mostrar mensaje de error
+                            ErrorDialog.show(
+                              context,
+                              message: 'No se pudo actualizar el evento. Por favor, intente de nuevo.',
+                            );
+                          }
+                        } catch (e) {
+                          // Captura cualquier error en la actualización del evento
+                          print("Error al actualizar el evento: $e");
+                          // Mostrar mensaje de error
+                          ErrorDialog.show(
+                            context,
+                            message: 'Error al actualizar el evento: $e',
+                          );
+                        }
+                      },
+                      onCancelPressed: () {
+                        // No hacer nada, solo cerrar el diálogo
+                      },
                     );
-                    if (success) {
-                      goRouterPop();
-                    }
                   }
                 },
               ),

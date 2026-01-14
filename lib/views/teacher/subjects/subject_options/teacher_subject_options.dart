@@ -1,20 +1,24 @@
 import 'package:aprende_mas/config/utils/packages.dart';
+import 'package:aprende_mas/config/utils/responsive_utils.dart';
 import 'package:aprende_mas/models/models.dart';
 
 class TeacherSubjectOptions extends StatelessWidget {
   final List<GroupSubjectWidgetOption> lsSubjectOptions;
   final ValueChanged<int> onOptionSelected;
   final int selectedOptionIndex;
+  final int subjectId;
 
   const TeacherSubjectOptions({
     super.key,
     required this.lsSubjectOptions,
     required this.onOptionSelected,
     required this.selectedOptionIndex,
+    required this.subjectId,
   });
 
   @override
   Widget build(BuildContext context) {
+    final subjectColor = getSubjectColor(subjectId);
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Padding(
@@ -39,7 +43,7 @@ class TeacherSubjectOptions extends StatelessWidget {
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
                                   color: selectedOptionIndex == e.optionId
-                                      ? Colors.blue
+                                      ? subjectColor
                                       : Colors.black,
                                 ),
                               ),
@@ -48,7 +52,7 @@ class TeacherSubjectOptions extends StatelessWidget {
                                 height: 2,
                                 width:
                                     selectedOptionIndex == e.optionId ? 90 : 0,
-                                color: Colors.blue,
+                                color: subjectColor,
                                 curve: Curves.easeInOut,
                               ),
                             ],

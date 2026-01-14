@@ -1,5 +1,6 @@
 import 'package:aprende_mas/config/utils/app_theme.dart';
 import 'package:aprende_mas/config/utils/packages.dart';
+import 'package:aprende_mas/config/utils/responsive_utils.dart';
 import 'package:aprende_mas/models/models.dart';
 import 'package:aprende_mas/views/student/notices/student_notice_options_screen.dart';
 import 'package:aprende_mas/views/widgets/widgets.dart';
@@ -76,13 +77,14 @@ class _StudentSubjectOptionsScreenState
           children: [
             ContainerNameGroupSubjects(
               name: widget.subjectName,
-              color: AppTheme.mainColor,
+              color: getSubjectColor(widget.subjectId),
               accessCode: widget.accessCode,
             ),
             StudentSubjectOptions(
                 lsSubjectOptions: lsSubjectOptions,
                 onOptionSelected: onOptionSelected,
-                selectedOptionIndex: ref.watch(itemTappedProvider)),
+                selectedOptionIndex: ref.watch(itemTappedProvider),
+                subjectId: widget.subjectId),
             Expanded(
               child:
                   getWidget(itemTapped), // Muestra el contenido correspondiente

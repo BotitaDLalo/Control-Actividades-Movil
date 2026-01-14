@@ -75,7 +75,7 @@ class AppBarHome extends ConsumerWidget implements PreferredSizeWidget {
                     height: 45,
                     // Estilo del icono de configuración
                      child: SvgPicture.asset(
-                       'assets/icons/settings1.svg',
+                       'assets/icons/user1.svg',
                        color: const Color.fromARGB(255, 255, 255, 255),
                        width: 20,
                        height: 20,

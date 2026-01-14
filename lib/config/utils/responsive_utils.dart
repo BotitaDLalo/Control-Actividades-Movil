@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
 
+/// Genera un color determinístico a partir del subjectId
+Color getSubjectColor(int id) {
+  final hue = (id * 47) % 360;
+  return HSLColor.fromAHSL(1, hue.toDouble(), 0.62, 0.48).toColor();
+}
+
 /// Utilidades para diseño responsive
 /// Proporciona métodos para calcular tamaños basados en porcentajes de pantalla
 class ResponsiveUtils {

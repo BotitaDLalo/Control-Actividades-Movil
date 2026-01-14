@@ -14,7 +14,7 @@ class CustomRoundedButton extends StatelessWidget {
     super.key,
     required this.text,
     this.onPressed,
-    this.backgroundColor = const Color(0xFF262B3A), // gris azul oscuro
+    this.backgroundColor = const Color(0xFF00569E), // azul consistente con otros botones
     this.textColor = Colors.white,
     this.borderRadius,
     this.height,
@@ -26,27 +26,26 @@ class CustomRoundedButton extends StatelessWidget {
     // Valores responsive por defecto
     final defaultBorderRadius = borderRadius ?? context.radius(0.05); // 5% del ancho
     final defaultHeight = height ?? context.height(0.06); // 6% de la altura
-    final defaultPadding = padding ?? ResponsiveUtils.padding(context, horizontal: 0.06); // 6% horizontal
+    final defaultPadding = padding ?? EdgeInsets.symmetric(horizontal: 16, vertical: 8); // Padding fijo para consistencia
 
-    return SizedBox(
-      height: defaultHeight,
-      child: FilledButton(
-        onPressed: onPressed,
-        style: ButtonStyle(
-          backgroundColor: WidgetStatePropertyAll(backgroundColor),
-          shape: WidgetStatePropertyAll(
-            RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(defaultBorderRadius),
-            ),
+    return FilledButton(
+      onPressed: onPressed,
+      style: ButtonStyle(
+        backgroundColor: WidgetStatePropertyAll(backgroundColor),
+        minimumSize: WidgetStatePropertyAll(Size(double.infinity, defaultHeight)),
+        shape: WidgetStatePropertyAll(
+          RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(defaultBorderRadius),
           ),
-          padding: WidgetStatePropertyAll(defaultPadding),
         ),
-        child: Text(
-          text,
-          style: TextStyle(
-            color: textColor,
-            fontSize: context.fontSize(16), // Tamaño base 16, escalado responsive
-          ),
+        padding: WidgetStatePropertyAll(defaultPadding),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          color: textColor,
+          fontSize: 16, // Tamaño fijo 16 para consistencia
+          fontWeight: FontWeight.w500,
         ),
       ),
     );

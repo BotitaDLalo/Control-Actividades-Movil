@@ -6,6 +6,7 @@ import 'package:aprende_mas/views/widgets/buttons/button_login.dart';
 import 'package:aprende_mas/views/widgets/structure/app_bar_home.dart';
 import 'package:aprende_mas/views/widgets/alerts/error_dialog.dart';
 import 'package:aprende_mas/views/widgets/alerts/success_dialog.dart';
+import 'package:aprende_mas/views/widgets/alerts/warning_confirmation_dialog.dart';
 
 class StudentJoinGroupSubject extends ConsumerWidget {
   const StudentJoinGroupSubject({super.key});
@@ -81,7 +82,7 @@ class StudentJoinGroupSubject extends ConsumerWidget {
                   FocusScope.of(context).unfocus();
                   context.pop();
                 },
-                icon: SvgPicture.asset('assets/icons/retroceder.svg', width: 30, height: 30, color: Colors.white),
+                icon: SvgPicture.asset('assets/icons/retroceder.svg', width: 35, height: 35, color: Colors.white),
                 color: Colors.white,
               ),
             ),
@@ -118,9 +119,30 @@ class StudentJoinGroupSubject extends ConsumerWidget {
                   text: 'Ingresar',
                   onPressed: () {
                     if (formCodeClass.isPosting) return;
-                    ref
-                        .read(formStudentJoinClassProvider.notifier)
-                        .onFormSubmit();
+                    
+                    // Mostrar diálogo de confirmación antes de unirse
+                    WarningConfirmationDialog.show(
+                      context,
+                      message: '¿Está seguro de que desea unirse a esta clase?',
+                      onConfirmPressed: () async {
+                        try {
+                          await ref
+                              .read(formStudentJoinClassProvider.notifier)
+                              .onFormSubmit();
+                        } catch (e) {
+                          // Captura cualquier error en la unión a la clase
+                          print("Error al unirse a la clase: $e");
+                          // Mostrar mensaje de error
+                          ErrorDialog.show(
+                            context,
+                            message: 'Error al unirse a la clase: $e',
+                          );
+                        }
+                      },
+                      onCancelPressed: () {
+                        // No hacer nada, solo cerrar el diálogo
+                      },
+                    );
                   },
                   buttonStyle: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF0FA4E0),
@@ -139,3 +161,4 @@ class StudentJoinGroupSubject extends ConsumerWidget {
     );
   }
 }
+

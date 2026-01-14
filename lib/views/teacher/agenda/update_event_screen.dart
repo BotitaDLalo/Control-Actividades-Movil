@@ -16,7 +16,7 @@ class UpdateEventScreen extends StatelessWidget {
     return GestureDetector(
       onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
       child: Scaffold(
-        appBar: AppBarHome(title: 'Editar Evento', showSettings: false, leading: IconButton(icon: SvgPicture.asset('assets/icons/retroceder.svg', width: 30, height: 30, color: Colors.white), onPressed: () => Navigator.pop(context))),
+        appBar: AppBarHome(title: 'Editar Evento', showSettings: false, leading: IconButton(icon: SvgPicture.asset('assets/icons/retroceder.svg', width: 35, height: 35, color: Colors.white), onPressed: () => Navigator.pop(context))),
         body: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
@@ -27,4 +27,5 @@ class UpdateEventScreen extends StatelessWidget {
     );
   }
 }
+
 

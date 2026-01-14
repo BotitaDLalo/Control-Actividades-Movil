@@ -52,10 +52,10 @@ class ButtonCreateGeneral extends StatelessWidget {
         child: FilledButton(
           onPressed: () => _showOptions(context), // Llama a _showOptions al presionar el botón
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF0FA4E0),
+            backgroundColor: const Color(0xFF00569E),
             foregroundColor: Colors.white,
             elevation: 6,
-            padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 14),
+            padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(40)),
           ),
           child: const Text('Crear'),
