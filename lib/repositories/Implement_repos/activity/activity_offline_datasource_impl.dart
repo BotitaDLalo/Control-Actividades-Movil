@@ -54,7 +54,7 @@ class ActivityOfflineDatasourceImpl implements ActivityOfflineDatasource {
               'ActividadId': activityId,
               'AlumnoId': id,
               'FechaEntrega': sub.submissionDate,
-              'EstatusEntrega': sub.status ? 1 : 0  // ✅ Convertir bool a int
+              'EstatusEntrega': sub.status! ? 1 : 0  // ✅ Convertir bool a int
             });
           },
         );
@@ -91,7 +91,7 @@ class ActivityOfflineDatasourceImpl implements ActivityOfflineDatasource {
         for (var sub in querylsSubmissions) {
           Submission submission = Submission(
               submissionId: sub['EntregaId'] as int,
-              studentActivityId: studentActivityId,
+              submissionActivityStudentId: studentActivityId,
               status: status,
               submissionDate: submissionDate);
           if (sub['Respuesta'] != null) {
@@ -157,7 +157,7 @@ class ActivityOfflineDatasourceImpl implements ActivityOfflineDatasource {
         for (var sub in querylsSubmissions) {
           Submission submission = Submission(
               submissionId: sub['EntregaId'] as int,
-              studentActivityId: studentActivityId,
+              submissionActivityStudentId: studentActivityId,
               status: status,
               submissionDate: submissionDate);
           if (sub['Respuesta'] != null) {
@@ -204,7 +204,7 @@ class ActivityOfflineDatasourceImpl implements ActivityOfflineDatasource {
         for (var sub in querylsSubmissions) {
           Submission submission = Submission(
               submissionId: sub['EntregaId'] as int,
-              studentActivityId: studentActivityId,
+              submissionActivityStudentId: studentActivityId,
               status: status,
               submissionDate: submissionDate);
           if (sub['Respuesta'] != null) {

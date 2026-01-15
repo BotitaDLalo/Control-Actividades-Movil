@@ -214,7 +214,7 @@ Future<void> updateActivity(
       await activityRepository.cancelSubmission(studentActivityId, activityId);
 
       List<Submission> lsSubmissions = lsSubmissionsState
-          .where((element) => element.studentActivityId != studentActivityId)
+          .where((element) => element.submissionActivityStudentId != studentActivityId)
           .toList();
       _updateLsSubmissions(lsSubmissions);
     } catch (e) {

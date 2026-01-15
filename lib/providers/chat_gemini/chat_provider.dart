@@ -1,6 +1,5 @@
-import 'dart:convert';
+import 'package:aprende_mas/config/environment/environment.dart';
 import 'package:aprende_mas/config/utils/packages.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import '../../models/message/message.dart';
 
@@ -33,7 +32,7 @@ class ChatProvider extends ChangeNotifier {
       _messages.add(Message(text: prompt, isUser: true));
       notifyListeners();
 
-      final model = GenerativeModel(model: 'gemini-1.5-flash', apiKey: dotenv.env['GOOGLE_API_KEY']!);
+      final model = GenerativeModel(model: Environment.apiGeminiModel, apiKey: Environment.apiKeyGoogle);
       final content = [Content.text(prompt)];
       final response = await model.generateContent(content);
 

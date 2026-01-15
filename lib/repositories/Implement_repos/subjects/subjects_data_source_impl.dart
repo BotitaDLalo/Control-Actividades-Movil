@@ -175,15 +175,12 @@ class SubjectsDataSourceImpl implements SubjectsDataSource {
     }
   }
 
-  // --- CÓDIGO CORREGIDO EN subjects_data_source_impl.dart ---
-
-// --- CÓDIGO CORREGIDO EN subjects_data_source_impl.dart ---
 
 @override
 Future<List<StudentGroupSubject>> addStudentsSubject(
     int subjectId, List<String> emails) async {
   
-  // Manejo del ID... (se asume que ya lo tienes fuera del try)
+// 1. Obtener el docenteId desde el almacenamiento
 final docenteId = await storageService.getId();
 
 // 2. Manejo de null: Si es null, lanzamos una excepción limpia.
@@ -200,7 +197,7 @@ try {
     data: {
       "Emails": emails, 
       "MateriaId": subjectId,
-      "DocenteId": docenteId // Usamos la variable verificada
+      "DocenteId": docenteId 
     }
     
   );
@@ -215,18 +212,15 @@ try {
     
     // 1. Manejo del 400 (Error de Negocio)
     if (statusCode == 400) {
-      // 🚨 Lanzamos una excepción con el mensaje del servidor
       final errorData = e.response?.data;
       final serverMessage = errorData?['mensaje'] ?? 'Error desconocido del servidor.';
       throw Exception(serverMessage);
     }
     
-    // 2. Manejo de otros errores (404, 500, etc.)
     debugPrint('Error general de la API al asignar alumnos: $statusCode');
     throw Exception('Error en la conexión o servidor.');
     
   } catch (e) {
-    // Errores de parsing o fallos de red
     throw Exception(e); 
   }
 }
@@ -237,11 +231,21 @@ try {
   Future<List<StudentGroupSubject>> getStudentsSubject(int? groupId,int subjectId) async {
     try {
       const uri = "/Alumnos/ObtenerListaAlumnosMateria";
-      final res = await dio.post(uri, data: {"GrupoId": groupId ?? 0
-      , "MateriaId": subjectId});
+      final res = await dio.post(uri, data: {
+      "GrupoId": groupId ?? 0, 
+      "MateriaId": subjectId 
+    });
 
       if (res.statusCode == 200) {
         final resList = List<Map<String, dynamic>>.from(res.data);
+
+          if (resList.isNotEmpty) {
+              debugPrint('--- JSON DE UN ALUMNO RECIBIDO DEL SERVIDOR ---');
+              debugPrint(resList.first.toString()); 
+              debugPrint('----------------------------------------------');
+          }
+
+
         final lsStudents =
             StudentGroupSubject.studentGroupSubjectJsonToEntity(resList);
         return lsStudents;
@@ -269,45 +273,39 @@ try {
     }
   }
 
-  @override
-  Future<bool> removeStudent({
-    required int subjectId, 
-    required int studentId
-  }) async {
+@override
+Future<bool> removeStudentFromSubject({
+  required int alumnoMateriaId,
+}) async {
     try {
-      // 💡 URI HIPOÉTÉTICA para eliminar un alumno de una materia
-      // Puedes ajustarla según tu API. Usaremos un POST similar a tus otros métodos,
-      // pero idealmente deberías usar DELETE.
-      const uri = "/Alumnos/EliminarAlumnoMateria"; // O /Materias/{subjectId}/Alumnos/{studentId}
+        debugPrint('--- [DEBUG ELIMINACIÓN] ---');
+        debugPrint('AlumnoMateriaId: $alumnoMateriaId');
+        debugPrint('---------------------------');
+        debugPrint('BODY ENVIADO: ${{
+          'AlumnoMateriaId': alumnoMateriaId,
+        }}');
 
-      final res = await dio.post(
-        uri, 
-        data: {
-          "MateriaId": subjectId,
-          "AlumnoId": studentId,
-          // Si necesitas el ID del docente, puedes obtenerlo aquí también:
-          // "DocenteId": await storageService.getId(), 
+        
+        const uri = "/Alumnos/EliminarAlumnoMateria"; 
+
+        final res = await dio.post(
+            uri, 
+            data: {
+            'AlumnoMateriaId': alumnoMateriaId,
+            }
+        );
+
+        if (res.statusCode == 200) {
+            return true;
         }
-      );
+        
+        return false; 
 
-      // Evaluar la respuesta del servidor
-      // Asumimos que un código 200 indica éxito
-      if (res.statusCode == 200) {
-        // La API debe devolver una respuesta que indique éxito, 
-        // a menudo simplemente devuelve un 200 o un booleano en el cuerpo.
-        // Si el cuerpo de la respuesta es un booleano:
-        // return res.data as bool; 
-
-        // Si solo el código 200 indica éxito:
-        return true; 
-      }
-      
-      return false;
-      
     } catch (e) {
-      // Si hay un error de conexión, timeout o error 5xx del servidor
-      debugPrint('Error en SubjectsDataSourceImpl.removeStudent: $e');
-      throw Exception(e);
+        // Si hay una excepción de red (DioException), se registra y se relanza.
+        debugPrint('Error en SubjectsDataSourceImpl.removeStudentFromSubject: $e');
+        
+        throw Exception(e); 
     }
-  }
+}
 }

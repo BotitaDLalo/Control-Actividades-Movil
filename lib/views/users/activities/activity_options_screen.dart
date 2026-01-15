@@ -165,7 +165,6 @@ class _ActivityOptionState extends ConsumerState<ActivityOptionScreen> {
               ),
             ),
 
-            // FAB fijo que NO sube con el teclado 🙌
             if (floatingButton != null)
               Positioned(
                 bottom: 16.0,
