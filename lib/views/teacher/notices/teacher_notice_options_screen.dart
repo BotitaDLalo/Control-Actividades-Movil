@@ -70,6 +70,8 @@ class _NoticeOptionsScreenState
     final futureNoticesls = ref.watch(futureNoticesProvider(notice));
     final String appBarTitle = widget.subjectName ?? 'Avisos';
     final subjectColor = getSubjectColor(widget.subjectId ?? 0);
+    final isGroup = widget.groupId != 0;
+    final displayColor = isGroup ? Colors.blue : subjectColor;
 
 
     void requestAgain() {
@@ -108,7 +110,7 @@ class _NoticeOptionsScreenState
                   context.push('/teacher-create-notice', extra: notice);
                   },
                   icon: Icons.add,
-                  backgroundColor: subjectColor,
+                  backgroundColor: displayColor,
                 )
               : null,
                 body: SafeArea(
@@ -123,12 +125,12 @@ class _NoticeOptionsScreenState
                             decoration: InputDecoration(
                               labelText: '  Buscar avisos',
                               prefixIconConstraints: BoxConstraints(maxWidth: 40, maxHeight: 40),
-                              prefixIcon: Padding(padding: EdgeInsets.only(left: 8, right: 8), child: SvgPicture.asset('assets/icons/buscar.svg', width: 24, height: 24, colorFilter: ColorFilter.mode(subjectColor, BlendMode.srcIn))),
+                              prefixIcon: Padding(padding: EdgeInsets.only(left: 8, right: 8), child: SvgPicture.asset('assets/icons/buscar.svg', width: 24, height: 24, colorFilter: ColorFilter.mode(displayColor, BlendMode.srcIn))),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.all(Radius.circular(25.0)),
                               ),
                               focusedBorder: OutlineInputBorder(
-                                borderSide: BorderSide(color: subjectColor, width: 2.0),
+                                borderSide: BorderSide(color: displayColor, width: 2.0),
                                 borderRadius: BorderRadius.all(Radius.circular(25.0)),
                               ),
                             ),
@@ -151,7 +153,7 @@ class _NoticeOptionsScreenState
                                           height: 180,
                                           width: 180,
                                           fit: BoxFit.contain,
-                                          colorFilter: ColorFilter.mode(subjectColor, BlendMode.srcIn),
+                                          colorFilter: ColorFilter.mode(displayColor, BlendMode.srcIn),
                                         ),
                                       ),
                                       const SizedBox(height: 24),
@@ -168,7 +170,7 @@ class _NoticeOptionsScreenState
                                           onPressed: () {
                                           context.push('/teacher-create-notice', extra: notice);
                                           },
-                                          backgroundColor: subjectColor,
+                                          backgroundColor: displayColor,
                                           textColor: Colors.white,
                                           borderRadius: 24,
                                           height: 56,

@@ -50,17 +50,19 @@ class _StudentNoticeOptionsScreenState
                 await Future.delayed(const Duration(seconds: 2));
                 requestAgain();
               },
-              child: const SingleChildScrollView(
+              child: SingleChildScrollView(
                 physics: AlwaysScrollableScrollPhysics(),
                 child: Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       SizedBox(height: 150),
-                      Icon(
-                        Icons.notifications_off_outlined,
-                        size: 200,
-                        color: Colors.grey,
+                      SvgPicture.asset(
+                        'assets/icons/campanaZ.svg',
+                        height: 200,
+                        width: 200,
+                        fit: BoxFit.contain,
+                        colorFilter: ColorFilter.mode(subjectColor, BlendMode.srcIn),
                       ),
                       SizedBox(height: 10),
                       Text(
@@ -90,7 +92,7 @@ class _StudentNoticeOptionsScreenState
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           SvgPicture.asset(
-                            'assets/icons/calendar2.svg',
+                            'assets/icons/campanaZ.svg',
                             height: 200,
                             width: 200,
                             fit: BoxFit.contain,

@@ -79,96 +79,118 @@ class _FormUpdateGroupState extends ConsumerState<FormUpdateGroup> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
       ),
-      child: Column(
-        children: [
-          Container(
-            alignment: const Alignment(-0.8, 1),
-            child: Text(
-              'Actualizar grupo',
-              style: Theme.of(context).textTheme.titleLarge,
-              // style: TextStyle(color: formCreateGroup.pickerColor),
+      child: SingleChildScrollView(
+        child: Column(
+          children: [
+            Container(
+              alignment: const Alignment(-0.8, 1),
+              child: Text(
+                'Actualizar grupo',
+                style: Theme.of(context).textTheme.titleLarge,
+                // style: TextStyle(color: formCreateGroup.pickerColor),
+              ),
             ),
-          ),
-          const SizedBox(height: 10),
-          CustomTextFormField(
-            label: widget.groupName,
-            onChanged: formUpdateGroupNotifier.onUpdateGroupNameChanged,
-          ),
-          const SizedBox(height: 10),
-          CustomTextFormField(
-            label: widget.description,
-            onChanged: formUpdateGroupNotifier.onUpdateGroupDescriptionChanged,
-          ),
-          const SizedBox(height: 15),
-          // Row(
-          //   mainAxisAlignment: MainAxisAlignment.end,
-          //   children: [
-          //     Container(
-          //         height: 45,
-          //         width: 45,
-          //         decoration: BoxDecoration(
-          //           color: formUpdateGroup.pickerColor ==
-          //                   const Color.fromARGB(0, 255, 255, 255)
-          //               ? AppTheme.stringToColor(widget.colorCode)
-          //               : formUpdateGroup.pickerColor,
-          //           border: Border.all(
-          //             color: formUpdateGroup.pickerColor ==
-          //                     const Color.fromARGB(0, 255, 255, 255)
-          //                 ? AppTheme.stringToColor(widget.colorCode)
-          //                 : formUpdateGroup.pickerColor,
-          //           ),
-          //           borderRadius: BorderRadius.circular(50),
-          //           boxShadow: [
-          //             BoxShadow(
-          //                 color: formUpdateGroup.pickerColor ==
-          //                         const Color.fromARGB(0, 255, 255, 255)
-          //                     ? AppTheme.stringToColor(widget.colorCode)
-          //                     : formUpdateGroup.pickerColor,
-          //                 spreadRadius: 0.1,
-          //                 blurRadius: 3,
-          //                 offset: const Offset(1, 1.5)),
-          //           ],
-          //         )),
-          //     const SizedBox(width: 10),
-          //     ButtonForm(
-          //       // style: AppTheme.buttonSecondary,
-          //       style: ElevatedButton.styleFrom(
-          //         backgroundColor: const Color.fromARGB(255, 255, 255, 255),
-          //         foregroundColor: formUpdateGroup.pickerColor ==
-          //                 const Color.fromARGB(0, 255, 255, 255)
-          //             ? AppTheme.stringToColor(widget.colorCode)
-          //             : formUpdateGroup.pickerColor,
-          //         fixedSize: const Size.fromHeight(45),
-          //         // side: BorderSide(color: _colorThemes[1]),
-          //         side: BorderSide(
-          //           color: formUpdateGroup.pickerColor ==
-          //                   const Color.fromARGB(0, 255, 255, 255)
-          //               ? AppTheme.stringToColor(widget.colorCode)
-          //               : formUpdateGroup.pickerColor,
-          //         ),
-          //         shape: RoundedRectangleBorder(
-          //           borderRadius: BorderRadius.circular(10), // border radius
-          //         ),
-          //       ),
-          //       buttonName: "Seleccionar Color",
-          //       onPressed: () => showColorDialog(),
-          //     ),
-          //   ],
-          // ),
-          // const SizedBox(height: 15),
-          Container(
-            alignment: const Alignment(0.9, 2),
-            child: ButtonForm(
-                buttonName: 'Actualizar',
-                onPressed: () async {
-                  if (!ref.read(formGroupsProvider).isPosting) {
-                    await formUpdateGroupNotifier.onUpdateGroupSubmit(widget.id,
-                        widget.groupName, widget.description);
-                  }
-                },
-                style: AppTheme.buttonPrimary),
-          )
-        ],
+            const SizedBox(height: 15),
+            TextField(
+              controller: TextEditingController(text: widget.groupName),
+              onChanged: formUpdateGroupNotifier.onUpdateGroupNameChanged,
+              decoration: InputDecoration(
+                labelText: 'Nombre del grupo',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(25.0)),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.blue, width: 2.0),
+                  borderRadius: BorderRadius.all(Radius.circular(25.0)),
+                ),
+              ),
+            ),
+            const SizedBox(height: 15),
+            TextField(
+              controller: TextEditingController(text: widget.description),
+              onChanged: formUpdateGroupNotifier.onUpdateGroupDescriptionChanged,
+              decoration: InputDecoration(
+                labelText: 'Descripción',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(25.0)),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.blue, width: 2.0),
+                  borderRadius: BorderRadius.all(Radius.circular(25.0)),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            // Row(
+            //   mainAxisAlignment: MainAxisAlignment.end,
+            //   children: [
+            //     Container(
+            //         height: 45,
+            //         width: 45,
+            //         decoration: BoxDecoration(
+            //           color: formUpdateGroup.pickerColor ==
+            //                   const Color.fromARGB(0, 255, 255, 255)
+            //               ? AppTheme.stringToColor(widget.colorCode)
+            //               : formUpdateGroup.pickerColor,
+            //           border: Border.all(
+            //             color: formUpdateGroup.pickerColor ==
+            //                     const Color.fromARGB(0, 255, 255, 255)
+            //                 ? AppTheme.stringToColor(widget.colorCode)
+            //                 : formUpdateGroup.pickerColor,
+            //           ),
+            //           borderRadius: BorderRadius.circular(50),
+            //           boxShadow: [
+            //             BoxShadow(
+            //                 color: formUpdateGroup.pickerColor ==
+            //                         const Color.fromARGB(0, 255, 255, 255)
+            //                     ? AppTheme.stringToColor(widget.colorCode)
+            //                     : formUpdateGroup.pickerColor,
+            //                 spreadRadius: 0.1,
+            //                 blurRadius: 3,
+            //                 offset: const Offset(1, 1.5)),
+            //           ],
+            //         )),
+            //     const SizedBox(width: 10),
+            //     ButtonForm(
+            //       // style: AppTheme.buttonSecondary,
+            //       style: ElevatedButton.styleFrom(
+            //       backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+            //       foregroundColor: formUpdateGroup.pickerColor ==
+            //               const Color.fromARGB(0, 255, 255, 255)
+            //           ? AppTheme.stringToColor(widget.colorCode)
+            //           : formUpdateGroup.pickerColor,
+            //       fixedSize: const Size.fromHeight(45),
+            //       // side: BorderSide(color: _colorThemes[1]),
+            //       side: BorderSide(
+            //         color: formUpdateGroup.pickerColor ==
+            //                 const Color.fromARGB(0, 255, 255, 255)
+            //             ? AppTheme.stringToColor(widget.colorCode)
+            //             : formUpdateGroup.pickerColor,
+            //       ),
+            //       shape: RoundedRectangleBorder(
+            //         borderRadius: BorderRadius.circular(10), // border radius
+            //       ),
+            //     ),
+            //     buttonName: "Seleccionar Color",
+            //     onPressed: () => showColorDialog(),
+            //     ),
+            //   ],
+            // ),
+            // const SizedBox(height: 15),
+            Container(
+              alignment: const Alignment(0.9, 2),
+              child: ButtonForm(
+                  buttonName: 'Actualizar',
+                  onPressed: () async {
+                    if (!ref.read(formGroupsProvider).isPosting) {
+                      await formUpdateGroupNotifier.onUpdateGroupSubmit(widget.id,
+                          widget.groupName, widget.description);
+                    }
+                  },
+                  style: AppTheme.buttonPrimary),
+            )
+          ],
+        ),
       ),
     );
   }

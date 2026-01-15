@@ -168,6 +168,7 @@ class _StudentsSubjectState extends ConsumerState<StudentsSubject> {
           child: StudentsGroupsSubjects(
             lsStudents: filteredStudents,
             studentOptionsFunction: showStudentOptions,
+            displayColor: subjectColor,
           ),
         ),
       ],
