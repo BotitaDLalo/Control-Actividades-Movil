@@ -38,6 +38,7 @@ class CustomInputMessage extends StatelessWidget {
                   keyboardType: TextInputType.multiline,
                   maxLines: null,
                   minLines: 1,
+                  style: TextStyle(fontSize: 18),
                   decoration: InputDecoration(
                     hintText: 'Envia una pregunta',
                     border: UnderlineInputBorder(

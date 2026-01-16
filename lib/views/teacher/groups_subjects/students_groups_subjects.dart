@@ -92,8 +92,8 @@ class _StudentsGroupsSubjectsState
                     ),
                     iconColor: Colors.white,
                     iconSize: 32,
-                    title: username,
-                    subtitle: '',
+                    title: "$name $lastname $lastname2",
+                    subtitle: username,
                     trailingWidget: IconButton(
                       onPressed: () {
                         widget.studentOptionsFunction!(
