@@ -86,93 +86,91 @@ class _ActivityOptionState extends ConsumerState<ActivityOptionScreen> {
                       )
                     : null;
 
-            return Stack(
-              children: [
-                SafeArea(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10),
-                    child: lsActivities.isEmpty
-                    ? widget.buttonCreateIsVisible
-                        ? Center(
-                            child: SingleChildScrollView(
-                              padding: const EdgeInsets.only(top: 60.0),
-                              child: Column(
-                                children: [
-                                  SizedBox(
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              child: Stack(
+                children: [
+                  lsActivities.isEmpty
+                  ? widget.buttonCreateIsVisible
+                      ? Center(
+                          child: SingleChildScrollView(
+                            padding: const EdgeInsets.only(top: 60.0),
+                            child: Column(
+                              children: [
+                                SizedBox(
+                                  height: 180,
+                                  child: SvgPicture.asset(
+                                    'assets/icons/agregarActividad.svg',
                                     height: 180,
-                                    child: SvgPicture.asset(
-                                      'assets/icons/agregarActividad.svg',
-                                      height: 180,
-                                      width: 180,
-                                      fit: BoxFit.contain,
-                                      colorFilter: ColorFilter.mode(subjectColor, BlendMode.srcIn),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 24),
-                                  const Text(
-                                    'Aquí podrás crear actividades,\nproyectos o evaluaciones para tus estudiantes',
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(fontSize: 16),
-                                  ),
-                                  const SizedBox(height: 32),
-                                  SizedBox(
-                                    width: 300,
-                                    child: CustomRoundedButton(
-                                      text: 'Crear primera actividad',
-                                      onPressed: () {
-                                        buttonModal();
-                                      },
-                                      backgroundColor: subjectColor,
-                                      textColor: Colors.white,
-                                      borderRadius: 24,
-                                      height: 56,
-                                      padding: EdgeInsets.symmetric(horizontal: 8),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          )
-                        : Center(
-                            child: SingleChildScrollView(
-                              padding: const EdgeInsets.only(top: 40.0),
-                              child: Column(
-                                children: [
-                                  SvgPicture.asset(
-                                    'assets/icons/sleep1.svg',
-                                    height: 170,
-                                    width: 170,
+                                    width: 180,
                                     fit: BoxFit.contain,
                                     colorFilter: ColorFilter.mode(subjectColor, BlendMode.srcIn),
                                   ),
-                                  const SizedBox(height: 16),
-                                  const Text(
-                                    'Excelente, no tienes actividades pendientes para esta materia',
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                                ),
+                                const SizedBox(height: 24),
+                                const Text(
+                                  'Aquí podrás crear actividades,\nproyectos o evaluaciones para tus estudiantes',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(fontSize: 16),
+                                ),
+                                const SizedBox(height: 32),
+                                SizedBox(
+                                  width: 300,
+                                  child: CustomRoundedButton(
+                                    text: 'Crear primera actividad',
+                                    onPressed: () {
+                                      buttonModal();
+                                    },
+                                    backgroundColor: subjectColor,
+                                    textColor: Colors.white,
+                                    borderRadius: 24,
+                                    height: 56,
+                                    padding: EdgeInsets.symmetric(horizontal: 8),
                                   ),
-                                ],
-                              ),
+                                ),
+                              ],
                             ),
-                          )
-                    : ActivityList(
-                        subjectId: widget.subjectId,
-                        nombreMateria: widget.subjectName,
-                      ),
-              ),
-            ),
+                          ),
+                        )
+                      : Center(
+                          child: SingleChildScrollView(
+                            padding: const EdgeInsets.only(top: 40.0),
+                            child: Column(
+                              children: [
+                                SvgPicture.asset(
+                                  'assets/icons/sleep1.svg',
+                                  height: 170,
+                                  width: 170,
+                                  fit: BoxFit.contain,
+                                  colorFilter: ColorFilter.mode(subjectColor, BlendMode.srcIn),
+                                ),
+                                const SizedBox(height: 16),
+                                const Text(
+                                  'Excelente, no tienes actividades pendientes para esta materia',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
+                  : ActivityList(
+                      subjectId: widget.subjectId,
+                      nombreMateria: widget.subjectName,
+                    ),
 
-            if (floatingButton != null)
-              Positioned(
-                bottom: 16.0,
-                right: 16.0,
-                child: floatingButton,
+                  if (floatingButton != null)
+                    Positioned(
+                      bottom: 16.0,
+                      right: 16.0,
+                      child: floatingButton,
+                    ),
+                ],
               ),
-          ],
-        );
+            );
           },
         );
       },
