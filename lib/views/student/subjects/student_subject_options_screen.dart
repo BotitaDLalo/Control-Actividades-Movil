@@ -70,6 +70,7 @@ class _StudentSubjectOptionsScreenState
     }
 
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: MediaQuery.removePadding(
         context: context,
         removeTop: true,

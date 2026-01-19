@@ -20,6 +20,8 @@ class StudentNoticeOptionsScreen extends ConsumerStatefulWidget {
 class _StudentNoticeOptionsScreenState
     extends ConsumerState<StudentNoticeOptionsScreen> {
   NoticeModel notice = NoticeModel();
+  final TextEditingController _searchController = TextEditingController();
+  String _searchTerm = '';
 
   @override
   void initState() {
@@ -28,7 +30,18 @@ class _StudentNoticeOptionsScreenState
     } else if (widget.subjectId != 0) {
       notice = notice.copyWith(subjectId: widget.subjectId);
     }
+    _searchController.addListener(() {
+      setState(() {
+        _searchTerm = _searchController.text;
+      });
+    });
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   @override
@@ -43,91 +56,100 @@ class _StudentNoticeOptionsScreenState
 
     return Scaffold(
       body: futureNoticesls.when(
-        data: (data) {
-          if (data.isEmpty) {
-            return RefreshIndicator(
-              onRefresh: () async {
-                await Future.delayed(const Duration(seconds: 2));
-                requestAgain();
-              },
-              child: const SingleChildScrollView(
-                physics: AlwaysScrollableScrollPhysics(),
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      SizedBox(height: 150),
-                      Icon(
-                        Icons.notifications_off_outlined,
-                        size: 200,
-                        color: Colors.grey,
-                      ),
-                      SizedBox(height: 10),
-                      Text(
-                        "Sin Avisos, \nespera a que tu profesor te envíe un Aviso",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.black,
+        data: (allNotices) {
+          // Filtrado local
+          final filteredNotices = allNotices.where((element) {
+            final titleLower = element.title.toLowerCase();
+            final descLower = element.description.toLowerCase();
+            final searchLower = _searchTerm.toLowerCase();
+
+            return titleLower.contains(searchLower) ||
+                   descLower.contains(searchLower);
+          }).toList();
+
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            child: Column(
+              children: [
+                // Campo de búsqueda (si hay avisos)
+                if (allNotices.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: TextField(
+                      controller: _searchController,
+                      decoration: InputDecoration(
+                        labelText: '  Buscar avisos',
+                        prefixIconConstraints: BoxConstraints(maxWidth: 40, maxHeight: 40),
+                        prefixIcon: Padding(padding: EdgeInsets.only(left: 8, right: 8), child: SvgPicture.asset('assets/icons/buscar.svg', width: 24, height: 24, colorFilter: ColorFilter.mode(subjectColor, BlendMode.srcIn))),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(25.0)),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: subjectColor, width: 2.0),
+                          borderRadius: BorderRadius.all(Radius.circular(25.0)),
                         ),
                       ),
-                    ],
+                    ),
                   ),
-                ),
-              ),
-            );
-          }
-          return RefreshIndicator(
-            onRefresh: () async {
-              await Future.delayed(const Duration(seconds: 2));
-              requestAgain();
-            },
-            child: SingleChildScrollView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              child: data.isEmpty
-                  ? Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          SvgPicture.asset(
-                            'assets/icons/calendar2.svg',
-                            height: 200,
-                            width: 200,
-                            fit: BoxFit.contain,
-                            colorFilter:
-                                ColorFilter.mode(subjectColor, BlendMode.srcIn),
-                          ),
-                          const SizedBox(height: 16),
-                          const Text(
-                            'No tienes avisos en esta materia',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    )
-                  : Column(
-                      children: data
-                          .map(
-                            (e) => Column(
+
+                // Contenido principal con Expanded
+                Expanded(
+                  child: allNotices.isEmpty
+                      ? SingleChildScrollView(
+                          padding: const EdgeInsets.only(top: 60.0),
+                          child: Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                NoticeBody(
-                                    optionsIsVisible: false,
-                                    noticeId: e.noticeId ?? 0,
-                                    teacherName: e.teacherFullName ?? "",
-                                    createdDate: e.createdDate.toString(),
-                                    title: e.title,
-                                    content: e.description),
-                                SizedBox(
-                                    height: MediaQuery.of(context).size.height *
-                                        0.02)
+                                SvgPicture.asset(
+                                  'assets/icons/campanaZ.svg',
+                                  height: 200,
+                                  width: 200,
+                                  fit: BoxFit.contain,
+                                  colorFilter: ColorFilter.mode(subjectColor, BlendMode.srcIn),
+                                ),
+                                const SizedBox(height: 16),
+                                Text(
+                                  "Sin Avisos, \nespera a que tu profesor te envíe un Aviso",
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.black,
+                                  ),
+                                ),
                               ],
                             ),
-                          )
-                          .toList()),
+                          ),
+                        )
+                      : filteredNotices.isEmpty
+                          ? const Center(
+                              child: Text(
+                                'No se encontraron avisos con esa búsqueda.',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(fontSize: 16),
+                              ),
+                            )
+                          : ListView.builder(
+                              padding: const EdgeInsets.all(8),
+                              itemCount: filteredNotices.length,
+                              itemBuilder: (context, i) {
+                                final e = filteredNotices[i];
+                                return Column(
+                                  children: [
+                                    NoticeBody(
+                                        optionsIsVisible: false,
+                                        noticeId: e.noticeId ?? 0,
+                                        teacherName: e.teacherFullName ?? "",
+                                        createdDate: e.createdDate.toString(),
+                                        title: e.title,
+                                        content: e.description),
+                                    SizedBox(height: 12)
+                                  ],
+                                );
+                              },
+                            ),
+                ),
+              ],
             ),
           );
         },

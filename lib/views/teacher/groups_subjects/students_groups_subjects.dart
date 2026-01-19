@@ -7,6 +7,7 @@ import 'package:aprende_mas/providers/providers.dart';
 class StudentsGroupsSubjects extends ConsumerStatefulWidget {
   final List<StudentGroupSubject> lsStudents;
   final VoidCallback? voidCallback;
+  final Color? displayColor;
 
   final void Function({
     // required int alumnoMateriaId,
@@ -23,7 +24,8 @@ class StudentsGroupsSubjects extends ConsumerStatefulWidget {
       {super.key,
       required this.lsStudents,
       this.voidCallback,
-      this.studentOptionsFunction});
+      this.studentOptionsFunction,
+      this.displayColor});
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() =>
@@ -86,12 +88,12 @@ class _StudentsGroupsSubjectsState
                       width: 32,
                       height: 32,
                       colorFilter:
-                          const ColorFilter.mode(Colors.black, BlendMode.srcIn),
+                          ColorFilter.mode(widget.displayColor ?? Colors.blue, BlendMode.srcIn),
                     ),
                     iconColor: Colors.white,
                     iconSize: 32,
-                    title: username,
-                    subtitle: "$lastname $lastname2 $name",
+                    title: "$name $lastname $lastname2",
+                    subtitle: username,
                     trailingWidget: IconButton(
                       onPressed: () {
                         widget.studentOptionsFunction!(
@@ -106,7 +108,7 @@ class _StudentsGroupsSubjectsState
                         width: 40,
                         height: 40,
                         decoration: BoxDecoration(
-                          color: Colors.red,
+                          color: widget.displayColor ?? Colors.blue,
                           shape: BoxShape.circle,
                         ),
                         child: Center(

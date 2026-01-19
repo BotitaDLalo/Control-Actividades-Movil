@@ -58,6 +58,8 @@ class _TeacherCreateNoticeState extends ConsumerState<TeacherCreateNotice> {
     final formNotice = ref.watch(noticesFormProvider);
     NoticeModel notice = widget.notice;
     final subjectColor = getSubjectColor(notice.subjectId ?? 0);
+    final isGroup = notice.groupId != null && notice.groupId! > 0;
+    final displayColor = isGroup ? Colors.blue : subjectColor;
 
     ref.listen(
       noticesFormProvider,
@@ -83,7 +85,7 @@ class _TeacherCreateNoticeState extends ConsumerState<TeacherCreateNotice> {
       resizeToAvoidBottomInset: false, // Evita que el contenido suba con el teclado
       appBar: CustomAppBar( // ⬅️ SIN 'const' aquí
         title: appBarTitle, // Título dinámico
-        subjectColor: subjectColor,
+        displayColor: displayColor,
       ),
 
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
@@ -91,7 +93,7 @@ class _TeacherCreateNoticeState extends ConsumerState<TeacherCreateNotice> {
         padding: const EdgeInsets.symmetric(horizontal: 70, vertical: 25),
         child: CustomRoundedButton(
           text: buttonText,
-          backgroundColor: subjectColor,
+          backgroundColor: displayColor,
           // 🚨 LÓGICA DE SUBMIT: Llama a CREAR o ACTUALIZAR
           onPressed: formNotice.isPosting || !formNotice.isValid
               ? null
@@ -189,7 +191,7 @@ class _TeacherCreateNoticeState extends ConsumerState<TeacherCreateNotice> {
                 decoration: InputDecoration(
                   labelText: 'Título',
                   focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: subjectColor, width: 2.0),
+                    borderSide: BorderSide(color: displayColor, width: 2.0),
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
@@ -202,7 +204,7 @@ class _TeacherCreateNoticeState extends ConsumerState<TeacherCreateNotice> {
                 decoration: InputDecoration(
                   labelText: 'Mensaje',
                   focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: subjectColor, width: 2.0),
+                    borderSide: BorderSide(color: displayColor, width: 2.0),
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
@@ -221,13 +223,13 @@ class _TeacherCreateNoticeState extends ConsumerState<TeacherCreateNotice> {
 class CustomAppBar extends ConsumerWidget implements PreferredSizeWidget {
   final String title;
   final Widget? leading;
-  final Color subjectColor;
+  final Color displayColor;
 
   CustomAppBar({ // Constructor sin const
     super.key,
     required this.title,
     this.leading,
-    required this.subjectColor,
+    required this.displayColor,
   });
 
   // 🔴 ¡IMPLEMENTACIÓN CORRECTA DEL BUILD DE CONSUMERWIDGET!
@@ -246,7 +248,7 @@ class CustomAppBar extends ConsumerWidget implements PreferredSizeWidget {
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 18,
-                    color: subjectColor,
+                    color: displayColor,
                   ),
                 ),
               ),
@@ -258,7 +260,7 @@ class CustomAppBar extends ConsumerWidget implements PreferredSizeWidget {
                     Transform.translate(
                   offset: const Offset(-14, 0),
                   child: IconButton(
-                    icon: SvgPicture.asset('assets/icons/retroceder.svg', width: 35, height: 35, color: subjectColor),
+                    icon: SvgPicture.asset('assets/icons/retroceder.svg', width: 35, height: 35, color: displayColor),
                     onPressed: () => context.pop(),
                   ),
                 ),
