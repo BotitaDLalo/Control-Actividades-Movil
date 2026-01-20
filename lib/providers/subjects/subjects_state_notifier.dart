@@ -124,22 +124,22 @@ class SubjectsStateNotifier extends StateNotifier<SubjectsState> {
     }
   }
 
-  Future<bool> deleteSubject(int subjectId) async {
+  Future<Map<String, dynamic>> deleteSubject(int subjectId) async {
     try {
       debugPrint("🗑️ Iniciando eliminación de materia ID: $subjectId");
-      bool success = await subjectsRepository.deleteSubject(subjectId);
-      if (success) {
+      final result = await subjectsRepository.deleteSubject(subjectId);
+      if (result['success']) {
         debugPrint("✅ Materia eliminada del backend, actualizando state");
         _deleteSubjectFromState(subjectId);
         debugPrint("✅ Materia removida del state local");
-        return true;
+        return result;
       } else {
-        debugPrint("❌ El backend reportó fallo en eliminación de materia");
-        return false;
+        debugPrint("❌ El backend reportó fallo en eliminación de materia: ${result['message']}");
+        return result;
       }
     } catch (e) {
       debugPrint("❌ Error inesperado al eliminar materia: $e");
-      return false;
+      return {'success': false, 'message': 'Error inesperado: $e'};
     }
   }
 

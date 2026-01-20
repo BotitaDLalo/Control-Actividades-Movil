@@ -25,7 +25,7 @@ class SubjectsRespositoryImpl implements SubjectsRepository {
   }
 
   @override
-  Future<bool> deleteSubject(int subjectId) {
+  Future<Map<String, dynamic>> deleteSubject(int subjectId) {
     return subjectsDataSource.deleteSubject(subjectId);
   }
 
@@ -58,7 +58,7 @@ class SubjectsRespositoryImpl implements SubjectsRepository {
   }
 
   @override
-  Future<bool> removeStudentFromSubject({
+  Future<Map<String, dynamic>> removeStudentFromSubject({
     required int alumnoMateriaId,
   }) {
     return subjectsDataSource.removeStudentFromSubject(

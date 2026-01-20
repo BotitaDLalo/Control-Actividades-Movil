@@ -92,17 +92,17 @@ class GroupsNotifier extends StateNotifier<GroupsState> {
     state = state.copyWith(lsGroups: groups);
   }
 
-  Future<bool> deleteGroup(int groupId) async {
+  Future<Map<String, dynamic>> deleteGroup(int groupId) async {
     try {
-      bool success = await groupsRepository.deleteGroup(groupId);
-      if (success) {
+      final result = await groupsRepository.deleteGroup(groupId);
+      if (result['success']) {
         _deleteGroupFromState(groupId);
-        return true;
+        return result;
       } else {
-        return false;
+        return result;
       }
     } catch (e) {
-      return false;
+      return {'success': false, 'message': 'Error: $e'};
     }
   }
 

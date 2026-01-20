@@ -59,20 +59,20 @@ class CustomExpansionTileState extends ConsumerState<GroupCard>
   }
 
   void _showDeleteConfirmation(BuildContext context, Group groupData) {
-  WarningConfirmationDialog.show(
-    context,
-    message: '¿Estás seguro de que deseas eliminar este grupo? Esta acción no se puede deshacer.',
-    onConfirmPressed: () async {
-      bool success = await ref.read(groupsProvider.notifier).deleteGroup(groupData.grupoId!);
-      if (success) {
-        SuccessDialog.show(context, message: "Grupo eliminado exitosamente");
-        await ref.read(groupsProvider.notifier).getGroupsSubjects();
-      } else {
-        ErrorDialog.show(context, message: "Error al eliminar el grupo");
-      }
-    },
-  );
-}
+    WarningConfirmationDialog.show(
+      context,
+      message: '¿Estás seguro de que deseas eliminar este grupo? Esta acción no se puede deshacer.',
+      onConfirmPressed: () async {
+        final result = await ref.read(groupsProvider.notifier).deleteGroup(groupData.grupoId!);
+        if (result['success']) {
+          SuccessDialog.show(context, message: "Grupo eliminado exitosamente");
+          await ref.read(groupsProvider.notifier).getGroupsSubjects();
+        } else {
+          ErrorDialog.show(context, message: result['message']);
+        }
+      },
+    );
+  }
 
 
   @override

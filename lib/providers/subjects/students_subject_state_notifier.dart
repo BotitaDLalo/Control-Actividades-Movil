@@ -84,36 +84,36 @@ Future<bool> addStudentsSubject(int subjectId) async {
   }
 
 
- Future<bool> removeStudentFromSubject({
-  // required int alumnoMateriaId,
-  required int studentId,
-  required int subjectId
+ Future<Map<String, dynamic>> removeStudentFromSubject({
+ // required int alumnoMateriaId,
+ required int studentId,
+ required int subjectId
 }) async {
-  try {
-    final success = await subjectsRepository.removeStudentFromSubject(
-      alumnoMateriaId: studentId,
-    );
+ try {
+   final result = await subjectsRepository.removeStudentFromSubject(
+     alumnoMateriaId: studentId,
+   );
 
-    if (success) {
-      final updatedList = state.lsStudentsSubject
-          .where(
-            (student) =>
-                student.alumnoMateriaId != studentId,
-          )
-          .toList();
+   if (result['success']) {
+     final updatedList = state.lsStudentsSubject
+         .where(
+           (student) =>
+               student.alumnoMateriaId != studentId,
+         )
+         .toList();
 
-      state = state.copyWith(
-        lsStudentsSubject: updatedList,
-      );
+     state = state.copyWith(
+       lsStudentsSubject: updatedList,
+     );
 
-      return true;
-    }
+     return result;
+   }
 
-    return false;
-  } catch (e) {
-    debugPrint('Error en provider removeStudentFromSubject: $e');
-    return false;
-  }
+   return result;
+ } catch (e) {
+   debugPrint('Error en provider removeStudentFromSubject: $e');
+   return {'success': false, 'message': 'Error: $e'};
+ }
 }
 
 

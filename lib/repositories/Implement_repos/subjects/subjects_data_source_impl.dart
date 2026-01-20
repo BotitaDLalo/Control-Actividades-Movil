@@ -123,7 +123,7 @@ class SubjectsDataSourceImpl implements SubjectsDataSource {
   }
 
   @override
-  Future<bool> deleteSubject(int subjectId) async {
+  Future<Map<String, dynamic>> deleteSubject(int subjectId) async {
     try {
       const uri = "/Materias/DeleteSubject";
       final fullUri = "$uri/$subjectId";
@@ -135,14 +135,25 @@ class SubjectsDataSourceImpl implements SubjectsDataSource {
 
       if (response.statusCode == 200) {
         debugPrint("✅ Materia eliminada exitosamente");
-        return true;
+        return {'success': true, 'message': 'Materia eliminada exitosamente'};
+      } else if (response.statusCode == 409) {
+        // Conflict - tiene dependencias
+        String message = 'No se puede eliminar la materia';
+        if (response.data is Map<String, dynamic>) {
+          final data = response.data as Map<String, dynamic>;
+          if (data['Mensaje'] != null) message = data['Mensaje'];
+          if (data['Detalles'] != null) message += '\n${data['Detalles']}';
+        }
+        debugPrint("❌ Error del servidor: $message");
+        return {'success': false, 'message': message};
+      } else if (response.statusCode == 500) {
+        return {'success': false, 'message': 'Error interno del servidor. Por favor, contacte al soporte técnico.'};
       } else {
-        debugPrint("❌ Error del servidor: ${response.statusCode} - ${response.data}");
-        return false;
+        return {'success': false, 'message': 'Error desconocido al eliminar la materia'};
       }
     } catch (e) {
       debugPrint("❌ Error de conexión al eliminar materia: $e");
-      return false;
+      return {'success': false, 'message': 'Error de conexión: $e'};
     }
   }
 
@@ -274,7 +285,7 @@ try {
   }
 
 @override
-Future<bool> removeStudentFromSubject({
+Future<Map<String, dynamic>> removeStudentFromSubject({
   required int alumnoMateriaId,
 }) async {
     try {
@@ -285,27 +296,43 @@ Future<bool> removeStudentFromSubject({
           'AlumnoMateriaId': alumnoMateriaId,
         }}');
 
-        
-        const uri = "/Alumnos/EliminarAlumnoMateria"; 
+        const uri = "/Alumnos/EliminarAlumnoMateria";
 
         final res = await dio.post(
-            uri, 
+            uri,
             data: {
             'AlumnoMateriaId': alumnoMateriaId,
             }
         );
 
         if (res.statusCode == 200) {
-            return true;
+            return {'success': true, 'message': 'Alumno eliminado de la materia exitosamente'};
+        } else if (res.statusCode == 409) {
+          String message = 'No se puede eliminar al alumno de la materia';
+          if (res.data is Map<String, dynamic>) {
+            final data = res.data as Map<String, dynamic>;
+            if (data['Mensaje'] != null) message = data['Mensaje'];
+            if (data['Detalles'] != null) message += '\n${data['Detalles']}';
+          }
+          return {'success': false, 'message': message};
+        } else if (res.statusCode == 500) {
+          return {'success': false, 'message': 'Error interno del servidor. Por favor, contacte al soporte técnico.'};
+        } else {
+          return {'success': false, 'message': 'Error desconocido al eliminar al alumno de la materia'};
         }
-        
-        return false; 
 
+    } on DioException catch (e) {
+        final statusCode = e.response?.statusCode;
+        if (statusCode == 400) {
+          final errorData = e.response?.data;
+          final serverMessage = errorData?['mensaje'] ?? 'Error desconocido del servidor.';
+          return {'success': false, 'message': serverMessage};
+        }
+        debugPrint('Error general de la API: $statusCode');
+        return {'success': false, 'message': 'Error en la conexión o servidor.'};
     } catch (e) {
-        // Si hay una excepción de red (DioException), se registra y se relanza.
         debugPrint('Error en SubjectsDataSourceImpl.removeStudentFromSubject: $e');
-        
-        throw Exception(e); 
+        return {'success': false, 'message': 'Error: $e'};
     }
 }
 }
