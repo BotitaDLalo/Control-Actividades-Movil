@@ -79,12 +79,12 @@ class _StudentsGroupState extends ConsumerState<StudentsGroup> {
             // 3. IMPLEMENTACIÓN DE LA LÓGICA
 
             // Usar el notifier ya leído
-            final success = await groupNotifier.removeStudentFromGroup(
+            final result = await groupNotifier.removeStudentFromGroup(
               groupId: widget.id,
               studentId: studentId,
             );
 
-            if (success) {
+            if (result['success']) {
               // Mostrar mensaje de éxito
               SuccessDialog.show(
                 context,
@@ -97,7 +97,7 @@ class _StudentsGroupState extends ConsumerState<StudentsGroup> {
               // Mostrar mensaje de error
               ErrorDialog.show(
                 context,
-                message: 'No se pudo eliminar al alumno del grupo. Por favor, intente de nuevo.',
+                message: result['message'],
               );
             }
           } catch (e) {

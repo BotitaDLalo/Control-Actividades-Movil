@@ -85,20 +85,20 @@ Future<bool> addStudentsSubject(int subjectId) async {
 
 
  Future<Map<String, dynamic>> removeStudentFromSubject({
- // required int alumnoMateriaId,
- required int studentId,
- required int subjectId
-}) async {
+   required int studentId,
+   required int subjectId
+ }) async {
  try {
    final result = await subjectsRepository.removeStudentFromSubject(
-     alumnoMateriaId: studentId,
+     subjectId: subjectId,
+     studentId: studentId,
    );
 
    if (result['success']) {
      final updatedList = state.lsStudentsSubject
          .where(
            (student) =>
-               student.alumnoMateriaId != studentId,
+               student.alumnoId != studentId,
          )
          .toList();
 

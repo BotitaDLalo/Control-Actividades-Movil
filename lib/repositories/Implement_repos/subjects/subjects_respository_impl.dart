@@ -59,10 +59,12 @@ class SubjectsRespositoryImpl implements SubjectsRepository {
 
   @override
   Future<Map<String, dynamic>> removeStudentFromSubject({
-    required int alumnoMateriaId,
+    required int subjectId,
+    required int studentId,
   }) {
     return subjectsDataSource.removeStudentFromSubject(
-      alumnoMateriaId: alumnoMateriaId,
+      subjectId: subjectId,
+      studentId: studentId,
     );
   }
 

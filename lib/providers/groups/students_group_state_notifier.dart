@@ -99,7 +99,7 @@ Future<Map<String, dynamic>> removeStudentFromGroup({
 
      if (result['success']) {
        // 2. Actualizar el estado local (Filtrar la lista)
-       // Nota: Asegúrate de usar .alumnoId o la propiedad correcta que definimos antes
+       // Nota: Asegúrate de usar .alumnoMateriaId o la propiedad correcta que definimos antes
        final updatedList = state.lsStudentsGroup
            .where((student) => student.alumnoId != studentId)
            .toList();

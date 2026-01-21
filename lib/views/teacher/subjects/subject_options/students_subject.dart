@@ -53,7 +53,6 @@ class _StudentsSubjectState extends ConsumerState<StudentsSubject> {
 
     void showStudentOptions({
       required int studentId,
-      //required int studentId,
       required String username,
       required String name,
       required String lastName,
@@ -71,12 +70,12 @@ class _StudentsSubjectState extends ConsumerState<StudentsSubject> {
             if (!context.mounted) return;
 
             // Usar el notifier ya leído
-            final success = await subjectNotifier.removeStudentFromSubject(
+            final result = await subjectNotifier.removeStudentFromSubject(
               subjectId: widget.id,
               studentId: studentId,
             );
 
-            if (success) {
+            if (result['success']) {
               // Mostrar mensaje de éxito
               SuccessDialog.show(
                 context,
@@ -89,7 +88,7 @@ class _StudentsSubjectState extends ConsumerState<StudentsSubject> {
               // Mostrar mensaje de error
               ErrorDialog.show(
                 context,
-                message: 'No se pudo eliminar al alumno de la materia. Por favor, intente de nuevo.',
+                message: result['message'],
               );
             }
           } catch (e) {

@@ -22,6 +22,7 @@ abstract class SubjectsRepository {
   Future<List<StudentGroupSubject>> getStudentsSubject(int? groupId,int subjectId);
 
   Future<Map<String, dynamic>> removeStudentFromSubject({
-  required int alumnoMateriaId,
+    required int subjectId,
+    required int studentId,
   });
 }

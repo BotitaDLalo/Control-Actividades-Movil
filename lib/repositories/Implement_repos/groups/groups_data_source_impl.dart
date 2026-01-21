@@ -183,6 +183,14 @@ class GroupsDataSourceImpl implements GroupsDataSource {
 
       if (response.statusCode == 200) {
         return {'success': true, 'message': 'Grupo eliminado exitosamente'};
+      } else if (response.statusCode == 400) {
+        String message = 'Datos inválidos';
+        if (response.data is Map<String, dynamic>) {
+          final data = response.data as Map<String, dynamic>;
+          if (data['Mensaje'] != null) message = data['Mensaje'];
+          if (data['Detalles'] != null) message += '\n${data['Detalles']}';
+        }
+        return {'success': false, 'message': message};
       } else if (response.statusCode == 409) {
         String message = 'No se puede eliminar el grupo';
         if (response.data is Map<String, dynamic>) {
@@ -300,6 +308,14 @@ class GroupsDataSourceImpl implements GroupsDataSource {
 
       if (res.statusCode == 200) {
         return {'success': true, 'message': 'Alumno eliminado del grupo exitosamente'};
+      } else if (res.statusCode == 400) {
+        String message = 'Datos inválidos';
+        if (res.data is Map<String, dynamic>) {
+          final data = res.data as Map<String, dynamic>;
+          if (data['Mensaje'] != null) message = data['Mensaje'];
+          if (data['Detalles'] != null) message += '\n${data['Detalles']}';
+        }
+        return {'success': false, 'message': message};
       } else if (res.statusCode == 409) {
         String message = 'No se puede eliminar al alumno del grupo';
         if (res.data is Map<String, dynamic>) {

@@ -136,6 +136,14 @@ class SubjectsDataSourceImpl implements SubjectsDataSource {
       if (response.statusCode == 200) {
         debugPrint("✅ Materia eliminada exitosamente");
         return {'success': true, 'message': 'Materia eliminada exitosamente'};
+      } else if (response.statusCode == 400) {
+        String message = 'Datos inválidos';
+        if (response.data is Map<String, dynamic>) {
+          final data = response.data as Map<String, dynamic>;
+          if (data['Mensaje'] != null) message = data['Mensaje'];
+          if (data['Detalles'] != null) message += '\n${data['Detalles']}';
+        }
+        return {'success': false, 'message': message};
       } else if (response.statusCode == 409) {
         // Conflict - tiene dependencias
         String message = 'No se puede eliminar la materia';
@@ -286,14 +294,16 @@ try {
 
 @override
 Future<Map<String, dynamic>> removeStudentFromSubject({
-  required int alumnoMateriaId,
+  required int subjectId,
+  required int studentId,
 }) async {
     try {
         debugPrint('--- [DEBUG ELIMINACIÓN] ---');
-        debugPrint('AlumnoMateriaId: $alumnoMateriaId');
+        debugPrint('SubjectId: $subjectId, StudentId: $studentId');
         debugPrint('---------------------------');
         debugPrint('BODY ENVIADO: ${{
-          'AlumnoMateriaId': alumnoMateriaId,
+          'MateriaId': subjectId,
+          'AlumnoId': studentId,
         }}');
 
         const uri = "/Alumnos/EliminarAlumnoMateria";
@@ -301,12 +311,21 @@ Future<Map<String, dynamic>> removeStudentFromSubject({
         final res = await dio.post(
             uri,
             data: {
-            'AlumnoMateriaId': alumnoMateriaId,
+            'MateriaId': subjectId,
+            'AlumnoId': studentId,
             }
         );
 
         if (res.statusCode == 200) {
             return {'success': true, 'message': 'Alumno eliminado de la materia exitosamente'};
+        } else if (res.statusCode == 400) {
+          String message = 'Datos inválidos';
+          if (res.data is Map<String, dynamic>) {
+            final data = res.data as Map<String, dynamic>;
+            if (data['Mensaje'] != null) message = data['Mensaje'];
+            if (data['Detalles'] != null) message += '\n${data['Detalles']}';
+          }
+          return {'success': false, 'message': message};
         } else if (res.statusCode == 409) {
           String message = 'No se puede eliminar al alumno de la materia';
           if (res.data is Map<String, dynamic>) {

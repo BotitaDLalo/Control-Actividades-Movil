@@ -75,8 +75,7 @@ class _StudentsGroupsSubjectsState
               child: ListView.builder(
                 itemCount: lsStudents.length,
                 itemBuilder: (context, index) {
-                  //final studentId = lsStudents[index].alumnoId;
-                  final studentId = lsStudents[index].alumnoMateriaId;
+                  final studentId = lsStudents[index].alumnoId;
                   final username = lsStudents[index].username;
                   final lastname = lsStudents[index].lastName;
                   final lastname2 = lsStudents[index].lastName2;
