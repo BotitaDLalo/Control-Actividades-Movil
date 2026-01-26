@@ -5,52 +5,63 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:aprende_mas/config/utils/responsive_utils.dart';
 import 'package:aprende_mas/views/teacher/activities/options/create_activies/form_activities.dart'; // Asegúrate de importar tu formulario
 import 'package:aprende_mas/models/models.dart'; // Asegúrate de importar el modelo Activity
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:aprende_mas/providers/activity/activty_form_provider.dart';
 
-class CreateActivitiesScreen extends StatelessWidget {
+
+class CreateActivitiesScreen extends StatefulWidget {
   final int subjectId;
   final String nombreMateria;
-  // 1. AGREGAR ESTA VARIABLE
-  final Activity? activity; 
+  final Activity? activity;
 
   const CreateActivitiesScreen({
     super.key,
     required this.subjectId,
     required this.nombreMateria,
-    // 2. AGREGAR AL CONSTRUCTOR
-    this.activity, 
+    this.activity,
   });
 
   @override
-  Widget build(BuildContext context) {
-    // Ejemplo: se asume que los controladores se obtienen de alguna forma
-    final nombreController = TextEditingController();
-    final descripcionController = TextEditingController();
-    // Si tienes otra forma de obtenerlos (por ejemplo, desde un provider), reemplaza esto
+  State<CreateActivitiesScreen> createState() => _CreateActivitiesScreenState();
+}
 
-    final subjectColor = getSubjectColor(subjectId);
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(activity == null ? 'Crear Actividad' : 'Editar Actividad'),
-        leading: IconButton(
-          icon: SvgPicture.asset('assets/icons/retroceder.svg', width: 35, height: 35, color: subjectColor),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            FormActivities(
-              subjectId: subjectId,
-              nombreMateria: nombreMateria,
-              activity: activity,
+class _CreateActivitiesScreenState extends State<CreateActivitiesScreen> {
+  @override
+  Widget build(BuildContext context) {
+    final subjectColor = getSubjectColor(widget.subjectId);
+
+    // Usar Consumer para obtener los controladores del provider
+    return Consumer(
+      builder: (context, ref, _) {
+        final activityNotifier = ref.read(activityFormProvider.notifier);
+        return Scaffold(
+          appBar: AppBar(
+            title: Text(widget.activity == null ? 'Crear Actividad' : 'Editar Actividad'),
+            leading: IconButton(
+              icon: SvgPicture.asset('assets/icons/retroceder.svg', width: 35, height: 35, color: subjectColor),
+              onPressed: () => Navigator.of(context).pop(),
             ),
-          ],
-        ),
-      ),
-      floatingActionButton: ButtonAI(
-        tituloController: nombreController,
-        descripcionController: descripcionController,
-      ),
+          ),
+          body: SingleChildScrollView(
+            child: Column(
+              children: [
+                FormActivities(
+                  subjectId: widget.subjectId,
+                  nombreMateria: widget.nombreMateria,
+                  activity: widget.activity,
+                ),
+              ],
+            ),
+          ),
+          floatingActionButton: ButtonAI(
+            tituloController: activityNotifier.nombreController,
+            descripcionController: activityNotifier.descripcionController,
+            onSuggestionUsed: () {
+              setState(() {});
+            },
+          ),
+        );
+      },
     );
   }
 }

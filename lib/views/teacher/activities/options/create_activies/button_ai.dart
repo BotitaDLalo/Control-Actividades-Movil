@@ -5,11 +5,13 @@ import 'package:aprende_mas/providers/chat_gemini/ai_activity.dart';
 class ButtonAI extends ConsumerWidget {
   final TextEditingController tituloController;
   final TextEditingController descripcionController;
+  final VoidCallback? onSuggestionUsed;
 
   const ButtonAI({
     super.key,
     required this.tituloController,
     required this.descripcionController,
+    this.onSuggestionUsed,
   });
 
   @override
@@ -57,8 +59,7 @@ class ButtonAI extends ConsumerWidget {
       context: context,
       builder: (context) {
         return Dialog(
-          insetPadding:
-              EdgeInsets.zero, // Eliminar márgenes para ocupar toda la pantalla
+          insetPadding: EdgeInsets.zero, // Eliminar márgenes para ocupar toda la pantalla
           child: SafeArea(
             child: StatefulBuilder(
               // Usamos StatefulBuilder para actualizar el estado dentro del diálogo
@@ -90,8 +91,7 @@ class ButtonAI extends ConsumerWidget {
                                 onChanged: (String? value) {
                                   if (value != null) {
                                     setState(() {
-                                      selectedSuggestion =
-                                          value; // Actualizamos la selección
+                                      selectedSuggestion = value; // Actualizamos la selección
                                     });
                                   }
                                 },
@@ -103,20 +103,25 @@ class ButtonAI extends ConsumerWidget {
                     Container(
                       padding: const EdgeInsets.all(16),
                       child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          TextButton(
-                            onPressed: () => Navigator.pop(context),
-                            child: const Text("❌ Cancelar"),
+                          Expanded(
+                            child: TextButton(
+                              onPressed: () => Navigator.pop(context),
+                              child: const Text("❌ Cancelar"),
+                            ),
                           ),
-                          TextButton(
-                            onPressed: () {
-                              descripcionController.text =
-                                  selectedSuggestion; // Llenar el input con la selección
-                              ref.read(activityFormProvider.notifier).onDescripcionChanged(selectedSuggestion);
-                              Navigator.pop(context);
-                            },
-                            child: const Text("✔️ Usar sugerencia"),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: TextButton(
+                              onPressed: () async {
+                                descripcionController.text = selectedSuggestion;
+                                ref.read(activityFormProvider.notifier).onDescripcionChanged(selectedSuggestion);
+                                if (onSuggestionUsed != null) onSuggestionUsed!();
+                                await Future.delayed(const Duration(milliseconds: 50));
+                                Navigator.pop(context);
+                              },
+                              child: const Text("✔️ Usar sugerencia"),
+                            ),
                           ),
                         ],
                       ),
