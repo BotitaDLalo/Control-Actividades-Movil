@@ -13,6 +13,7 @@ import 'package:aprende_mas/repositories/Interface_repos/authentication/auth_rep
 import 'package:aprende_mas/config/data/key_value_storage_service.dart';
 import 'package:aprende_mas/config/services/services.dart';
 import 'package:aprende_mas/config/utils/utils.dart';
+import 'package:aprende_mas/config/data/db_local.dart';
 
 class AuthStateNotifier extends StateNotifier<AuthState> {
   final AuthRepository authRepository;
@@ -373,10 +374,17 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
       AuthCallers caller,
       AuthenticatedType authType) async {
 
+
     if (authType == AuthenticatedType.auth && caller != AuthCallers.checkAuthStatus) {
-      //& Guardar el usuario offline
-      await authUserOffline.insertUser(user.userId, user.userName, user.email,
-          user.activeDueDate, user.role);
+      debugPrint('Intentando guardar usuario offline: ${user.userId}, ${user.userName}, ${user.email}, ${user.activeDueDate}, ${user.role}');
+      try {
+        await authUserOffline.insertUser(user.userId, user.userName, user.email,
+            user.activeDueDate, user.role);
+        debugPrint('Usuario offline guardado correctamente.');
+        await DbLocal.printUsuariosActivos();
+      } catch (e) {
+        debugPrint('Error al guardar usuario offline: $e');
+      }
 
       //& Guardar los grupos, materias y actividades offline (secuencial para evitar conflictos de BD)
       await groupsOffline.saveGroupSubjects(lsGroups);
@@ -456,23 +464,28 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
     try {
       DateTime dateNow = DateTime.now();
       final dbUser = await authUserOffline.getUser();
+      debugPrint('Resultado de getUser() offline: $dbUser');
       if (dbUser.isNotEmpty) {
         final userOffline = AuthOfflineUser.userOffilineJsonToEntity(dbUser);
+        debugPrint('Usuario recuperado offline: ${userOffline.userId}, ${userOffline.userName}, ${userOffline.email}, ${userOffline.activeDueDate}, ${userOffline.role}');
         final userDateLimit = DateTime.parse(userOffline.activeDueDate);
 
         if (dateNow.isBefore(userDateLimit)) {
+          debugPrint('Usuario offline vigente. Cargando grupos y materias...');
           List<Group> lsGroups = await groupsOffline.getGroupsSubjects();
           List<Subject> lsSubjectsWithoutGroup =
               await subjectsOffline.getSujectsWithoutGroup();
-          //TODO: MANDAR A TRAER Materias sin grupo
           _setLoggedOfflineUser(userOffline, lsGroups, lsSubjectsWithoutGroup);
         } else {
+          debugPrint('Usuario offline expirado.');
           return;
         }
       } else {
+        debugPrint('No hay usuario offline guardado.');
         return;
       }
     } catch (e) {
+      debugPrint('Error en checkAuthStatusOffline: $e');
       throw Exception(e);
     }
   }
@@ -738,12 +751,15 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
 
   void _deleteUserData() async {
     await authUserOffline.deleteUser();
+    // Llamada al metodo para borrar la base de datos local
+    //await DbLocal.deleteDatabaseLocal();
     await storageService.removeAuthType();
     await storageService.removeEmail();
     await storageService.removeId();
     await storageService.removeRole();
     await storageService.removeToken();
     await storageService.removeUserName();
+
   }
 
   Future<void> _getGroupsAndSubjects(

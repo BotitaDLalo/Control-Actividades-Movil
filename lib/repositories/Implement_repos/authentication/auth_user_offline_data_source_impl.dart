@@ -46,17 +46,20 @@ class AuthUserOfflineDataSourceImpl implements AuthUserOfflineDataSource {
   Future<void> insertUser(int usuarioId, String nombreUsuario, String correo,
       String fechaLimiteActivo, rol) async {
     try {
+      debugPrint('[insertUser] Intentando insertar usuario: $usuarioId, $nombreUsuario, $correo, $fechaLimiteActivo, $rol');
       final db = await DbLocal.database;
       final query = Querys.querytbUsuarioActivoInsert();
 
       await db.transaction(
         (txn) async {
-          await txn.rawInsert(query,
+          int res = await txn.rawInsert(query,
               [usuarioId, nombreUsuario, correo, fechaLimiteActivo, rol]);
+          debugPrint('[insertUser] Resultado de rawInsert: $res');
         },
       );
+      debugPrint('[insertUser] Usuario insertado correctamente en tbUsuarioActivo.');
     } catch (e) {
-      debugPrint(e.toString());
+      debugPrint('[insertUser] Error al insertar usuario: $e');
       rethrow;
     }
   }

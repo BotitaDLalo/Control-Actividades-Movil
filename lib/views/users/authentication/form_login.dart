@@ -5,6 +5,7 @@ import 'package:aprende_mas/config/utils/utils.dart';
 import 'package:aprende_mas/providers/providers.dart';
 import 'package:aprende_mas/views/views.dart';
 import 'package:aprende_mas/views/widgets/alerts/error_dialog.dart';
+import 'package:aprende_mas/config/data/db_local.dart';
 
 
 class FormLogin extends ConsumerStatefulWidget {
@@ -111,7 +112,7 @@ class FormLoginState extends ConsumerState<FormLogin> {
                       borderRadius: BorderRadius.circular(20),
                     ),
                   ),
-                  onPressed: () {
+                  onPressed: () async {
                     if (loginForm.isPosting) {
                       return;
                     }
@@ -122,6 +123,7 @@ class FormLoginState extends ConsumerState<FormLogin> {
                     }
                     if (fcm.status == AuthorizationStatus.authorized) {
                       loginFormNotifier.onFormSubmit();
+                      await DbLocal.printUsuariosActivos(); // Depuración: muestra usuarios offline en consola
                       if (loginForm.isValid) {
                         hideSnackBar();
                         // showLoadingScreen(context);
@@ -137,6 +139,30 @@ class FormLoginState extends ConsumerState<FormLogin> {
             const SizedBox(
               height: 18,
             ),
+            // Botón temporal para depuración de usuarios offline
+           /* SizedBox(
+                width: double.infinity,
+                height: MediaQuery.of(context).size.height * 0.080,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.orange,
+                    foregroundColor: Colors.white,
+                    textStyle: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
+                  onPressed: () async {
+                    await DbLocal.printUsuariosActivos();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Consulta realizada, revisa la consola')),
+                    );
+                  },
+                  child: const Text('Ver usuarios offline (debug)'),
+                )),*/
             SizedBox(
                 width: double.infinity,
                 //width: MediaQuery.of(context).size.width * 0.9,

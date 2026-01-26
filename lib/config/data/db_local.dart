@@ -2,6 +2,22 @@ import 'package:aprende_mas/config/data/querys.dart';
 import 'package:aprende_mas/config/utils/packages.dart';
 
 class DbLocal {
+    /// Método temporal para depuración: imprime el contenido de tbUsuarioActivo
+    static Future<void> printUsuariosActivos() async {
+      try {
+        final db = await database;
+        final usuarios = await db.rawQuery('SELECT * FROM tbUsuarioActivo');
+        debugPrint('Contenido de tbUsuarioActivo:');
+        for (var usuario in usuarios) {
+          debugPrint(usuario.toString());
+        }
+        if (usuarios.isEmpty) {
+          debugPrint('La tabla tbUsuarioActivo está vacía.');
+        }
+      } catch (e) {
+        debugPrint('Error al leer tbUsuarioActivo: $e');
+      }
+    }
   static Database? _database;
   static const String _databaseName = 'Movil.db';
   static const int _databaseVersion = 2;  // ✅ Incrementado para migración
@@ -43,6 +59,8 @@ class DbLocal {
         );
 
         debugPrint("✅ BD CREADA: $_databaseName");
+        debugPrint("✅ Versión BD: $_databaseVersion");
+        print('📦 Creando base de datos local');
         return db;
       } else {
         Database db = await openDatabase(
@@ -146,4 +164,25 @@ class DbLocal {
   static Future<Database> initDatabase() async {
     return await database;
   }
+
+  //Método para eliminar la base de datos (usar con cuidado)
+    /*static Future<void> deleteDatabaseLocal() async {
+    try {
+      final databasesPath = await getDatabasesPath();
+      final path = join(databasesPath, _databaseName);
+
+      // Cerrar BD si está abierta
+      if (_database != null && _database!.isOpen) {
+        await _database!.close();
+        _database = null;
+      }
+
+      // Eliminar archivo físico
+      await deleteDatabase(path);
+
+      debugPrint('🗑️ Base de datos eliminada correctamente');
+    } catch (e) {
+      debugPrint('❌ Error eliminando la base de datos: $e');
+    }
+  }*/
 }
