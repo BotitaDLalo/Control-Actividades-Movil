@@ -1,14 +1,16 @@
+import 'dart:io';
 import 'package:aprende_mas/config/utils/packages.dart';
 import 'package:aprende_mas/models/models.dart';
 import 'package:aprende_mas/providers/activity/activity_form_state.dart';
 import 'package:aprende_mas/views/widgets/inputs/generic_input.dart';
+import 'package:file_picker/file_picker.dart';
 
 class ActivityFormNotifier extends StateNotifier<ActivityFormState> {
   final Function(Map<String, dynamic> activityLike)? activityCallback;
  // En la parte superior de la clase ActivityFormNotifier
   final Function(
       int activityId, 
-      String nombre, 
+      String nombre,
       String descripcion, 
       DateTime fechaLimite, 
       int puntaje,   // <--- Agregamos int puntaje
@@ -313,6 +315,7 @@ _touchEveryField() {
     fechaController.clear();
     horaController.clear();
     puntajeController.clear();
+    answerController.clear();
     state = ActivityFormState();
     debugPrint("Formulario reseteado: $state");
   }
@@ -344,7 +347,7 @@ _touchEveryField() {
   }
 
   dropAnswer() {
-    state = state.copyWith(existsAnswer: false, answer: "");
+    state = state.copyWith(existsAnswer: false, answer: "", files: [], links: []);
   }
 
   onSubmissionGradeChanged(String grade) {
@@ -379,5 +382,13 @@ _touchEveryField() {
 
     state = state.copyWith(
         isFormPosted: true, newGrade: grade, isValid: Formz.validate([grade]));
+  }
+
+  void onFilesChanged(List<PlatformFile> files) {
+    state = state.copyWith(files: files);
+  }
+
+  void onLinksChanged(List<String> links) {
+    state = state.copyWith(links: links);
   }
 }

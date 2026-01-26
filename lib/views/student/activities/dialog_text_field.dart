@@ -1,6 +1,7 @@
 import 'package:aprende_mas/config/utils/packages.dart';
 import 'package:aprende_mas/config/utils/utils.dart';
 import 'package:aprende_mas/providers/providers.dart';
+import 'package:file_picker/file_picker.dart';
 
 final dialogHeightProvider = StateProvider<double>(
   (ref) => 150.0,
@@ -23,24 +24,62 @@ class _DialogTextFieldState extends ConsumerState<DialogTextField> {
     super.initState();
     controller = TextEditingController(text: widget.answer ?? "");
   }
+
+  void _showLinkDialog(BuildContext context, WidgetRef ref) {
+    TextEditingController linkController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Insertar Enlace'),
+          content: TextField(
+            controller: linkController,
+            decoration: const InputDecoration(hintText: 'Ingresa la URL'),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancelar'),
+            ),
+            TextButton(
+              onPressed: () {
+                if (linkController.text.isNotEmpty) {
+                  List<String> updatedLinks = List.from(ref.read(activityFormProvider).links);
+                  updatedLinks.add(linkController.text);
+                  ref.read(activityFormProvider.notifier).onLinksChanged(updatedLinks);
+                }
+                Navigator.of(context).pop();
+              },
+              child: const Text('Agregar'),
+            ),
+          ],
+        );
+      },
+    );
+  }
   // double dialogHeight = 150.0;
 
   @override
   Widget build(BuildContext context) {
     return Dialog(
       insetPadding: const EdgeInsets.all(20),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(context).size.height * 0.8,
+        ),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
           Container(
-            margin: const EdgeInsets.symmetric(vertical: 20),
+            padding: const EdgeInsets.all(16.0),
             child: const Text(
               'Respuesta',
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
             ),
           ),
           Container(
-            margin: const EdgeInsets.symmetric(horizontal: 20),
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: TextField(
               controller: controller,
               maxLines: null,
@@ -56,18 +95,153 @@ class _DialogTextFieldState extends ConsumerState<DialogTextField> {
             ),
           ),
           const SizedBox(height: 16),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              OutlinedButton.icon(
+                onPressed: () async {
+                  FilePickerResult? result = await FilePicker.platform.pickFiles(
+                    allowMultiple: true,
+                    type: FileType.custom,
+                    allowedExtensions: ['pdf', 'doc', 'docx', 'txt', 'jpg', 'jpeg', 'png', 'gif', 'mp4', 'avi', 'mov', 'zip', 'rar', 'ppt', 'pptx', 'xls', 'xlsx', 'csv'],
+                  );
+                  if (result != null) {
+                    List<PlatformFile> files = result.files;
+                    ref.read(activityFormProvider.notifier).onFilesChanged([...ref.read(activityFormProvider).files, ...files]);
+                  }
+                },
+                icon: SvgPicture.asset('assets/icons/documento.svg', width: 20, height: 20, colorFilter: const ColorFilter.mode(Colors.blue, BlendMode.srcIn)),
+                label: const Text('Archivo'),
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(color: Colors.blue),
+                  foregroundColor: Colors.blue,
+                  minimumSize: Size.zero,
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+              ),
+              const SizedBox(height: 8),
+              OutlinedButton.icon(
+                onPressed: () {
+                  _showLinkDialog(context, ref);
+                },
+                icon: SvgPicture.asset('assets/icons/link.svg', width: 20, height: 20, colorFilter: const ColorFilter.mode(Colors.blue, BlendMode.srcIn)),
+                label: const Text('Enlace'),
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(color: Colors.blue),
+                  foregroundColor: Colors.blue,
+                  minimumSize: Size.zero,
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          // Mostrar archivos seleccionados
+          if (ref.watch(activityFormProvider).files.isNotEmpty)
+            Container(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('Archivos adjuntos:', style: TextStyle(fontWeight: FontWeight.bold)),
+                  ...ref.watch(activityFormProvider).files.map((file) => Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4.0),
+                    child: Row(
+                      children: [
+                        SvgPicture.asset('assets/icons/documento.svg', width: 50, height: 50, colorFilter: const ColorFilter.mode(Colors.blue, BlendMode.srcIn)),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            file.name ?? 'Archivo desconocido',
+                            style: const TextStyle(fontSize: 14),
+                            maxLines: null,
+                          ),
+                        ),
+                        IconButton(
+                          icon: SvgPicture.asset('assets/icons/eliminar4.svg', width: 35, height: 35, colorFilter: const ColorFilter.mode(Colors.red, BlendMode.srcIn)),
+                          onPressed: () {
+                            List<PlatformFile> updatedFiles = List.from(ref.read(activityFormProvider).files);
+                            updatedFiles.remove(file);
+                            ref.read(activityFormProvider.notifier).onFilesChanged(updatedFiles);
+                          },
+                        ),
+                      ],
+                    ),
+                  )),
+                ],
+              ),
+            ),
+          // Mostrar enlaces seleccionados
+          if (ref.watch(activityFormProvider).links.isNotEmpty)
+            Container(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('Enlaces:', style: TextStyle(fontWeight: FontWeight.bold)),
+                  ...ref.watch(activityFormProvider).links.map((link) => Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4.0),
+                    child: Row(
+                      children: [
+                        SvgPicture.asset('assets/icons/link.svg', width: 50, height: 50, colorFilter: const ColorFilter.mode(Colors.blue, BlendMode.srcIn)),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            link,
+                            style: const TextStyle(fontSize: 14),
+                            maxLines: null,
+                          ),
+                        ),
+                        IconButton(
+                          icon: SvgPicture.asset('assets/icons/eliminar4.svg', width: 35, height: 35, colorFilter: const ColorFilter.mode(Colors.red, BlendMode.srcIn)),
+                          onPressed: () {
+                            List<String> updatedLinks = List.from(ref.read(activityFormProvider).links);
+                            updatedLinks.remove(link);
+                            ref.read(activityFormProvider.notifier).onLinksChanged(updatedLinks);
+                          },
+                        ),
+                      ],
+                    ),
+                  )),
+                ],
+              ),
+            ),
+          const SizedBox(height: 16),
           Container(
-            margin: const EdgeInsets.symmetric(vertical: 20),
-            child: ElevatedButton(
-              style: AppTheme.buttonSecondary,
-              onPressed: () {
-                Navigator.of(context).pop();
-                ref.read(activityFormProvider.notifier).onHasSubmission();
-              },
-              child: Text(widget.buttonName),
+            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ElevatedButton(
+                  style: AppTheme.buttonSecondary,
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    ref.read(activityFormProvider.notifier).onHasSubmission();
+                  },
+                  child: Text(widget.buttonName),
+                ),
+                const SizedBox(height: 16),
+                OutlinedButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: Colors.red),
+                    foregroundColor: Colors.red,
+                    minimumSize: Size.zero,
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                  child: const Text('Cancelar'),
+                ),
+              ],
             ),
           ),
         ],
+          ),
+        ),
       ),
     );
   }

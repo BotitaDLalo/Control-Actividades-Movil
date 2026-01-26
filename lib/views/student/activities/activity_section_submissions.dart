@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:aprende_mas/models/models.dart';
 import 'package:aprende_mas/views/views.dart';
 import 'package:aprende_mas/providers/providers.dart';
+import 'package:aprende_mas/providers/activity/activity_form_state.dart';
 import 'package:aprende_mas/config/utils/utils.dart';
 
 final hasSubmissionsProvider = StateProvider(
@@ -184,6 +185,25 @@ class _ActivitySectionSubmissionState
       errorMessage(context, message);
     }
 
+    String _buildSubmissionSummary(ActivityFormState form) {
+      String summary = '';
+      if (form.answer.isNotEmpty) {
+        summary += form.answer.length > 50 ? '${form.answer.substring(0, 50)}...' : form.answer;
+      }
+      List<String> attachments = [];
+      if (form.files.isNotEmpty) {
+        attachments.add('${form.files.length} archivo(s)');
+      }
+      if (form.links.isNotEmpty) {
+        attachments.add('${form.links.length} enlace(s)');
+      }
+      if (attachments.isNotEmpty) {
+        summary += summary.isNotEmpty ? ' | ' : '';
+        summary += attachments.join(', ');
+      }
+      return summary;
+    }
+
     DateTime dateNow = DateTime.now();
 
     return Scaffold(
@@ -308,7 +328,9 @@ class _ActivitySectionSubmissionState
                                           iconColor: Colors.white,
                                           iconSize: 28,
                                           title: "Respuesta",
-                                          subtitle: "",
+                                          subtitle: submission.answer != null && submission.answer!.isNotEmpty
+                                              ? (submission.answer!.length > 50 ? '${submission.answer!.substring(0, 50)}...' : submission.answer!)
+                                              : "Sin texto",
                                           onTapFunction: () {
                                             //TODO: Respuesta content
                                             showDialog(
@@ -363,17 +385,79 @@ class _ActivitySectionSubmissionState
                               onLongPress: () {
                                 showModalBottomDropAnswer(context);
                               },
-                              child: ElementTile(
-                                iconWidget: SvgPicture.asset('assets/icons/activities20.svg', width: 28, height: 28),
-                                iconSize: 28,
-                                iconColor: Colors.white,
-                                title: 'Respuesta',
-                                subtitle: '',
-                                trailingString: 'Sin enviar',
-                                onTapFunction: () {
-                                  showDialogAnswer(
-                                      context, activitiesForm.answer);
-                                },
+                              child: SizedBox(
+                                height: 180, // Altura mucho mayor con footer
+                                child: Container(
+                                  margin: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 8.0),
+                                  decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(10),
+                                      border: Border.all(color: Colors.grey.shade300, width: 1.0),
+                                  ),
+                                  child: Stack(
+                                    children: [
+                                      ListTile(
+                                        leading: CircleAvatar(
+                                          backgroundColor: Colors.transparent,
+                                          radius: 35,
+                                          child: SvgPicture.asset('assets/icons/activities20.svg', width: 50, height: 50),
+                                        ),
+                                        title: const Text(
+                                          'Respuesta',
+                                          style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.w700,
+                                            color: Colors.black,
+                                          ),
+                                        ),
+                                        subtitle: Text(
+                                          activitiesForm.answer.isNotEmpty ? activitiesForm.answer : 'Sin texto',
+                                          style: const TextStyle(
+                                            fontSize: 16,
+                                            color: Colors.grey,
+                                          ),
+                                          maxLines: 3,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        trailing: IconButton(
+                                          onPressed: () {
+                                            ref.read(activityFormProvider.notifier).dropAnswer();
+                                          },
+                                          icon: SvgPicture.asset(
+                                            'assets/icons/eliminar4.svg',
+                                            width: 40,
+                                            height: 40,
+                                            colorFilter: const ColorFilter.mode(Colors.red, BlendMode.srcIn),
+                                          ),
+                                        ),
+                                        onTap: () {
+                                          showDialogAnswer(context, activitiesForm.answer);
+                                        },
+                                      ),
+                                      Positioned(
+                                        bottom: 16,
+                                        right: 8,
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            if (activitiesForm.files.isNotEmpty)
+                                              Text(
+                                                '${activitiesForm.files.length} archivo(s)',
+                                                style: const TextStyle(fontSize: 12, color: Colors.blue),
+                                              ),
+                                            if (activitiesForm.files.isNotEmpty && activitiesForm.links.isNotEmpty)
+                                              const SizedBox(width: 8),
+                                            if (activitiesForm.links.isNotEmpty)
+                                              Text(
+                                                '${activitiesForm.links.length} enlace(s)',
+                                                style: const TextStyle(fontSize: 12, color: Colors.blue),
+                                              ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
                               ),
                             )
                           : const SizedBox(),
