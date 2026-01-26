@@ -1,7 +1,8 @@
 import 'package:aprende_mas/config/utils/packages.dart';
-import 'package:aprende_mas/config/utils/utils.dart';
+import 'package:aprende_mas/config/utils/app_theme.dart';
 import 'package:aprende_mas/providers/providers.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 final dialogHeightProvider = StateProvider<double>(
   (ref) => 150.0,
@@ -188,10 +189,18 @@ class _DialogTextFieldState extends ConsumerState<DialogTextField> {
                         SvgPicture.asset('assets/icons/link.svg', width: 50, height: 50, colorFilter: const ColorFilter.mode(Colors.blue, BlendMode.srcIn)),
                         const SizedBox(width: 12),
                         Expanded(
-                          child: Text(
-                            link,
-                            style: const TextStyle(fontSize: 14),
-                            maxLines: null,
+                          child: GestureDetector(
+                            onTap: () async {
+                              final uri = Uri.parse(link.startsWith('http') ? link : 'https://$link');
+                              if (await canLaunchUrl(uri)) {
+                                await launchUrl(uri, mode: LaunchMode.externalApplication);
+                              }
+                            },
+                            child: Text(
+                              link,
+                              style: const TextStyle(fontSize: 14, color: Colors.blue, decoration: TextDecoration.underline),
+                              maxLines: null,
+                            ),
                           ),
                         ),
                         IconButton(
