@@ -228,7 +228,7 @@ class _ActivitySectionSubmissionState
         builder: (context) => AlertDialog(
           title: const Text(
             'Enviar',
-            style: TextStyle(fontWeight: FontWeight.w500),
+            style: TextStyle(fontWeight: FontWeight.w500, color: Colors.black),
           ),
           content: const Text('¿Quiere realizar el envio?'),
           contentPadding: const EdgeInsets.all(10),

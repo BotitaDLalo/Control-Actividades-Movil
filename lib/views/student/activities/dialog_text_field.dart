@@ -33,17 +33,27 @@ class _DialogTextFieldState extends ConsumerState<DialogTextField> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Insertar Enlace'),
+          title: const Text('Insertar Enlace', style: TextStyle(color: Colors.black)),
           content: TextField(
             controller: linkController,
             decoration: const InputDecoration(hintText: 'Ingresa la URL'),
           ),
           actions: [
-            TextButton(
+            OutlinedButton(
+              style: OutlinedButton.styleFrom(
+                side: const BorderSide(color: Colors.red),
+                foregroundColor: Colors.red,
+                backgroundColor: Colors.white,
+              ),
               onPressed: () => Navigator.of(context).pop(),
               child: const Text('Cancelar'),
             ),
-            TextButton(
+            OutlinedButton(
+              style: OutlinedButton.styleFrom(
+                side: const BorderSide(color: Colors.blue),
+                foregroundColor: Colors.blue,
+                backgroundColor: Colors.white,
+              ),
               onPressed: () {
                 if (linkController.text.isNotEmpty) {
                   List<String> updatedLinks = List.from(ref.read(activityFormProvider).links);
@@ -224,8 +234,15 @@ class _DialogTextFieldState extends ConsumerState<DialogTextField> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                ElevatedButton(
-                  style: AppTheme.buttonSecondary,
+                OutlinedButton(
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: Colors.blue),
+                    foregroundColor: Colors.blue,
+                    backgroundColor: Colors.white,
+                    minimumSize: Size.zero,
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
                   onPressed: () {
                     Navigator.of(context).pop();
                     ref.read(activityFormProvider.notifier).onHasSubmission();
@@ -240,6 +257,7 @@ class _DialogTextFieldState extends ConsumerState<DialogTextField> {
                   style: OutlinedButton.styleFrom(
                     side: const BorderSide(color: Colors.red),
                     foregroundColor: Colors.red,
+                    backgroundColor: Colors.white,
                     minimumSize: Size.zero,
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
