@@ -20,6 +20,7 @@ class DialogTextField extends ConsumerStatefulWidget {
 
 class _DialogTextFieldState extends ConsumerState<DialogTextField> {
   late TextEditingController controller;
+
   @override
   void initState() {
     super.initState();

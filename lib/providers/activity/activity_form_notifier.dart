@@ -320,14 +320,18 @@ _touchEveryField() {
     debugPrint("Formulario reseteado: $state");
   }
 
+  /// Calcular si hay contenido en alguno de los campos (texto, enlaces o archivos)
+  bool _hasContent() {
+    return state.answer.isNotEmpty || state.links.isNotEmpty || state.files.isNotEmpty;
+  }
   onAnswerChanged(String answer) {
-    state = state.copyWith(answer: answer);
+    state = state.copyWith(answer: answer, existsAnswer: _hasContent());
     debugPrint("CONTENIDO DEL CAMPO");
     debugPrint(state.answer);
   }
 
   onHasSubmission() async {
-    state = state.copyWith(existsAnswer: true);
+    state = state.copyWith(existsAnswer: _hasContent());
   }
 
   onSendSubmission(int activityId) async {
@@ -385,10 +389,10 @@ _touchEveryField() {
   }
 
   void onFilesChanged(List<PlatformFile> files) {
-    state = state.copyWith(files: files);
+    state = state.copyWith(files: files, existsAnswer: _hasContent());
   }
 
   void onLinksChanged(List<String> links) {
-    state = state.copyWith(links: links);
+    state = state.copyWith(links: links, existsAnswer: _hasContent());
   }
 }
