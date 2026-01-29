@@ -1,39 +1,104 @@
 class Querys {
   static List<String> querysCreateTables() => [
         """
-        CREATE TABLE tbUsuarioActivo(UsuarioId INTEGER PRIMARY KEY, 
-                                     NombreUsuario TEXT, 
-                                     Correo TEXT, 
-                                     FechaLimiteActivo TEXT,
-                                     Rol TEXT);
+          CREATE TABLE cEstadoEntregas (
+          EstadoEntregaId INTEGER PRIMARY KEY,
+          Nombre TEXT NOT NULL
+        );
+        """
+ ,
+
+        """
+        CREATE TABLE cTipoEntregas (
+          TipoActividadId INTEGER PRIMARY KEY,
+          Nombre TEXT NOT NULL
+        );
         """,
         """
-        CREATE TABLE tbGrupos(GrupoId INTEGER PRIMARY KEY, 
-                              NombreGrupo TEXT, 
-                              Descripcion TEXT, 
-                              CodigoAcceso TEXT,
-                              CodigoColor TEXT);
+        CREATE TABLE cTipoNotificacion (
+          TipoNotificacionId INTEGER PRIMARY KEY,
+          Nombre TEXT NOT NULL
+        );
         """,
         """
-        CREATE TABLE tbMaterias(MateriaId INTEGER PRIMARY KEY, 
-                                NombreMateria TEXT, 
-                                Descripcion TEXT, 
-                                CodigoColor TEXT,
-                                CodigoAcceso TEXT);
+        CREATE TABLE tbUsuarioActivo (
+          UsuarioId INTEGER PRIMARY KEY CHECK (UsuarioId = 1),
+          NombreUsuario TEXT NOT NULL,
+          Correo TEXT NOT NULL,
+          FechaLimiteActivo TEXT,
+          Rol TEXT NOT NULL
+        );
         """,
         """
-            
-        CREATE TABLE tbActividades(ActividadId INTEGER PRIMARY KEY, 
-                        NombreActividad TEXT, 
-                        Descripcion TEXT, 
-                        TipoActividadId INTEGER,
-                        FechaCreacion TEXT, 
-                        FechaLimite TEXT,
-                        MateriaId INTEGER,
-                        Puntaje INTEGER
-                        );
-                                   
+        CREATE TABLE tbGrupos (
+        GrupoId INTEGER PRIMARY KEY,
+        NombreGrupo TEXT NOT NULL,
+        Descripcion TEXT,
+        CodigoAcceso TEXT,
+        CodigoColor TEXT
+        );
         """,
+        """
+        CREATE TABLE tbMaterias(
+        MateriaId INTEGER PRIMARY KEY,
+        NombreMateria TEXT NOT NULL,
+        Descripcion TEXT,
+        CodigoColor TEXT,
+        CodigoAcceso TEXT
+        );
+        """,
+        """
+        CREATE TABLE tbActividades ( ActividadId INTEGER PRIMARY KEY,
+          NombreActividad TEXT NOT NULL,
+          Descripcion TEXT NOT NULL,
+          FechaCreacion TEXT NOT NULL,
+          FechaLimite TEXT NOT NULL,
+          Puntaje INTEGER NOT NULL,
+          MateriaId INTEGER,
+          Enviado INTEGER,
+          FechaProgramada TEXT,
+          FOREIGN KEY (MateriaId) REFERENCES tbMaterias(MateriaId));
+        """,
+        """
+        CREATE TABLE tbAvisos (
+          AvisoId INTEGER PRIMARY KEY,
+          UsuarioId INTEGER NOT NULL,
+          Titulo TEXT NOT NULL,
+          Descripcion TEXT NOT NULL,
+          GrupoId INTEGER,
+          MateriaId INTEGER,
+          FechaCreacion TEXT NOT NULL,
+          FOREIGN KEY (UsuarioId) REFERENCES tbUsuarioActivo(UsuarioId)
+        );
+        """,
+        """
+        CREATE TABLE tbEntregableActividadAlumno (
+          EntregaActividadAlumnoId INTEGER PRIMARY KEY,
+          ActividadId INTEGER NOT NULL,
+          UsuarioId INTEGER NOT NULL,
+          FechaEntrega TEXT NOT NULL,
+          EstadoEntregaId INTEGER NOT NULL,
+          FechaCalificado TEXT,
+          FOREIGN KEY (ActividadId) REFERENCES tbActividades(ActividadId),
+          FOREIGN KEY (UsuarioId) REFERENCES tbUsuarioActivo(UsuarioId)
+        );
+        """,
+        """
+        CREATE TABLE tbEntregables (
+          EntregableId INTEGER PRIMARY KEY,
+          EntregaActividadAlumnoId INTEGER NOT NULL,
+          TipoEntregaId INTEGER NOT NULL,
+          Contenido TEXT,
+          Calificacion INTEGER,
+          FechaCalificado TEXT,
+          FOREIGN KEY (EntregaActividadAlumnoId)
+            REFERENCES tbEntregableActividadAlumno(EntregaActividadAlumnoId),
+          FOREIGN KEY (TipoEntregaId)
+            REFERENCES cTipoEntregas(TipoActividadId)
+        );
+        """
+        ,
+
         """
         CREATE TABLE tbGruposMaterias(GrupoMateriaId INTEGER PRIMARY KEY, 
                                      GrupoId INTEGER,
@@ -42,67 +107,50 @@ class Querys {
                                      FOREIGN KEY (MateriaId) REFERENCES tbMaterias(MateriaId)
                                      );
         """,
+
         """
-        CREATE TABLE tbMateriasActividades(MateriaActividadId INTEGER PRIMARY KEY,
-                                           MateriaId INTEGER,
-                                           ActividadId INTEGER,
-                      FOREIGN KEY (ActividadId) REFERENCES tbActividades(ActividadId),
-                      FOREIGN KEY (MateriaId) REFERENCES tbMaterias(MateriaId)
-                                          );
-        """,
-        """
-        CREATE TABLE tbAlumnosActividades(AlumnoActividadId INTEGER PRIMARY KEY,
-                                          ActividadId INTEGER,
-                                          AlumnoId INTEGER,
-                                          FechaEntrega TEXT,
-                                          EstatusEntrega INTEGER,
-                     FOREIGN KEY (ActividadId) REFERENCES tbActividades(ActividadId)
-                                         );
-        """,
-        """
-        CREATE TABLE tbEntregableActividades(EntregaId INTEGER PRIMARY KEY,
-                                             AlumnoActividadId INTEGER,
-                                             Respuesta TEXT,
-                                             Enlace TEXT, 
-                                             Archivo TEXT,
-    				FOREIGN KEY (AlumnoActividadId) REFERENCES tbAlumnosActividades(AlumnoActividadId)
-                                            );
-        """,
-        """
-        CREATE TABLE tbNotificaciones(MensajeId TEXT PRIMARY KEY, 
-                                      Titulo TEXT, 
-                                      Descripcion TEXT, 
-                                      FechaEnvio TEXT, 
-                                      Data TEXT, 
-                                      ImagenURL TEXT);
+        CREATE TABLE tbNotificaciones(
+          NotificacionId INTEGER PRIMARY KEY,
+          UsuarioId INTEGER NOT NULL,
+          MessageId TEXT NOT NULL,
+          Titulo TEXT NOT NULL,
+          Cuerpo TEXT NOT NULL,
+          FechaRecibido TEXT NOT NULL,
+          TipoNotificacionId INTEGER NOT NULL,
+          MateriaId INTEGER,
+          GrupoId INTEGER,
+          FOREIGN KEY (UsuarioId) REFERENCES tbUsuarioActivo(UsuarioId),
+          FOREIGN KEY (TipoNotificacionId) REFERENCES cTipoNotificacion(TipoNotificacionId),
+          FOREIGN KEY (MateriaId) REFERENCES tbMaterias(MateriaId),
+          FOREIGN KEY (GrupoId) REFERENCES tbGrupos(GrupoId)
+        );
         """
       ];
 
-  static List<String> querysDeleteTables() => [
-        "DELETE FROM tbUsuarioActivo;",
-        "DELETE FROM tbGrupos;",
-        "DELETE FROM tbMaterias;",
-        "DELETE FROM tbActividades;",
-        "DELETE FROM tbGruposMaterias;",
-        "DELETE FROM tbMateriasActividades;",
-        "DELETE FROM tbAlumnosActividades;",
-        "DELETE FROM tbEntregableActividades;",
-        "DELETE FROM tbNotificaciones;"
-      ];
+    static List<String> querysDeleteTables() => [
+      "DELETE FROM tbNotificaciones;",
+      "DELETE FROM tbEntregableActividadAlumno;",
+      "DELETE FROM tbGruposMaterias;",
+      "DELETE FROM tbActividades;",
+      "DELETE FROM tbAvisos;",
+      "DELETE FROM tbMaterias;",
+      "DELETE FROM tbGrupos;",
+      "DELETE FROM tbUsuarioActivo;",
+    ];
 
 //& tbUsuarioActivo
   static String querytbUsuarioActivoInsert() =>
-      "INSERT INTO tbUsuarioActivo(UsuarioId, NombreUsuario, Correo, FechaLimiteActivo, Rol) VALUES(?,?,?,?,?)";
+      "INSERT OR REPLACE INTO tbUsuarioActivo (UsuarioId, NombreUsuario, Correo, FechaLimiteActivo, Rol) VALUES (1, ?, ?, ?, ?)";
 
   static String querytbUsuarioActivoUpdate() =>
       "UPDATE tbUsuarioActivo SET FechaLimiteActivo = ?";
 
 //& tbNotificaciones
   static String querytbNotificacionesInsert() =>
-      "INSERT INTO tbNotificaciones(MensajeId, Titulo, Descripcion, FechaEnvio, Data, ImagenURL) VALUES(?,?,?,?,?,?);";
+      "INSERT INTO tbNotificaciones (UsuarioId, MessageId, Titulo, Cuerpo, FechaRecibido, TipoNotificacionId, MateriaId, GrupoId) VALUES (?,?,?,?,?,?,?,?);";
 
   static String querytbNotificacionesDeleteWhere() =>
-      "DELETE FROM tbNotificaciones WHERE FechaEnvio = ?";
+      "DELETE FROM tbNotificaciones WHERE FechaRecibido = ?";
 
 //& tbGrupos
   static String querytbGruposInsert() => "INSERT INTO tbGrupos (GrupoId, NombreGrupo, Descripcion, CodigoAcceso, CodigoColor) VALUES (?, ?, ?, ?, ?);";
