@@ -1,9 +1,9 @@
 import 'package:aprende_mas/config/utils/packages.dart';
 import 'package:aprende_mas/providers/activity/activity_provider.dart';
 import 'package:aprende_mas/providers/activity/activty_form_provider.dart';
-import 'package:aprende_mas/views/teacher/activities/options/create_activies/button_activity_form.dart';
+import 'package:aprende_mas/views/widgets/alerts/error_dialog.dart';
+import 'package:aprende_mas/views/widgets/alerts/success_dialog.dart';
 import 'package:aprende_mas/views/widgets/inputs/custom_time_form_field.dart';
-import 'package:aprende_mas/views/widgets/widgets.dart';
 import 'package:aprende_mas/models/models.dart'; 
 import 'package:intl/intl.dart'; 
 import 'package:aprende_mas/views/widgets/buttons/custom_rounded_button.dart';
@@ -223,25 +223,52 @@ class _FormActivitiesState extends ConsumerState<FormActivities> {
                     // El notifier que contiene la lógica de envío
                     final activityNotifier = ref.read(activityFormProvider.notifier);
                     
-                    // Si estamos en modo EDICIÓN
-                    if (widget.activity != null) {
-                        await activityNotifier.onFormUpdate(
-                           widget.subjectId, 
-                           widget.nombreMateria,
-                           widget.activity!.activityId! 
+                    try {
+                      // Si estamos en modo EDICIÓN
+                      if (widget.activity != null) {
+                          await activityNotifier.onFormUpdate(
+                             widget.subjectId, 
+                             widget.nombreMateria,
+                             widget.activity!.activityId! 
+                          );
+                          
+                          // Mostrar diálogo de éxito
+                          if (mounted) {
+                            SuccessDialog.show(
+                              context,
+                              message: 'Actividad actualizada correctamente',
+                              onOkPressed: () {
+                                ref.invalidate(activitiesBySubjectProvider(widget.subjectId));
+                                goRouterPop();
+                              },
+                            );
+                          }
+                      } 
+                      // Si estamos en modo CREACIÓN
+                      else {
+                        await activityNotifier.onFormSubmit(
+                              widget.subjectId, widget.nombreMateria);
+                        
+                        // Mostrar diálogo de éxito
+                        if (mounted) {
+                          SuccessDialog.show(
+                            context,
+                            message: 'Actividad creada correctamente',
+                            onOkPressed: () {
+                              ref.invalidate(activitiesBySubjectProvider(widget.subjectId));
+                              goRouterPop();
+                            },
+                          );
+                        }
+                      }
+                    } catch (e) {
+                      // Mostrar diálogo de error
+                      if (mounted) {
+                        ErrorDialog.show(
+                          context,
+                          message: 'Ocurrió un error: ${e.toString()}',
                         );
-                    } 
-                    // Si estamos en modo CREACIÓN
-                    else {
-                      await activityNotifier.onFormSubmit(
-                            widget.subjectId, widget.nombreMateria);
-                    }
-
-                    
-                    final activityForm = ref.read(activityFormProvider);
-                    if (activityForm.isFormPosted) {
-                      ref.invalidate(activitiesBySubjectProvider(widget.subjectId));
-                       goRouterPop();
+                      }
                     }
                   }),
             ),
