@@ -120,17 +120,23 @@ class ActivityDataSourceImpl implements ActivityDataSource {
   @override
   Future<List<Submission>> sendSubmission(int activityId, String answer) async {
     try {
-      const uri = "/Alumnos/RegistrarEnvioActividadAlumno";
+      //const uri = "/Alumnos/RegistrarEnvioActividadAlumno";
+      const uri = "/Alumnos/RegistrarEnvioActividadAlumnoConEnlaces";
       DateTime dateNow = DateTime.now();
       final id = await storageService.getId();
 
-      final res = await dio.post(uri, data: {
-        "ActividadId": activityId,
-        "AlumnoId": id,
-        "Respuesta": answer,
-        "FechaEntrega": dateNow.toString(),
-        "TipoEntregaId": 1
-      });
+      // Usar FormData para multipart/form-data (requerido por el backend)
+      final formData = FormData();
+      formData.fields.addAll([
+        MapEntry('ActividadId', activityId.toString()),
+        MapEntry('AlumnoId', id.toString()),
+        MapEntry('Respuesta', answer ?? ''),
+        MapEntry('Enlaces', '[]'),
+        MapEntry('FechaEntrega', dateNow.toString()),
+        MapEntry('TipoEntregaId', '1'),
+      ]);
+
+      final res = await dio.post(uri, data: formData);
 
       if (res.statusCode == 200) {
         // final resList = Map<String, dynamic>.from(res.data);

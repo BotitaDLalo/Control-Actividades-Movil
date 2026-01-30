@@ -18,6 +18,7 @@ class ActivityFormNotifier extends StateNotifier<ActivityFormState> {
   )? updateActivityCallback;
   
   final Function(int, String) sendSubmissionCallback;
+  final Function(int, String, List<String>)? sendSubmissionWithLinksCallback;
   final Function(int, String) sendSubmissionOfflineCallback;
   final Function({required int submissionId, required int grade})
       submissionGradingCallback;
@@ -34,7 +35,8 @@ class ActivityFormNotifier extends StateNotifier<ActivityFormState> {
       required this.sendSubmissionCallback,
       required this.sendSubmissionOfflineCallback,
       required this.submissionGradingCallback,
-      this.updateActivityCallback, // Agregar al constructor
+      this.updateActivityCallback,
+      this.sendSubmissionWithLinksCallback,
       })
       : fechaController = TextEditingController(),
         horaController = TextEditingController(),
@@ -335,8 +337,12 @@ _touchEveryField() {
   }
 
   onSendSubmission(int activityId) async {
-    bool submissionSent =
-        await sendSubmissionCallback(activityId, state.answer);
+    bool submissionSent = false;
+    if (sendSubmissionWithLinksCallback != null) {
+      submissionSent = await sendSubmissionWithLinksCallback!(activityId, state.answer, state.links);
+    } else {
+      submissionSent = await sendSubmissionCallback(activityId, state.answer);
+    }
     if (submissionSent) {
       dropAnswer();
     }

@@ -13,6 +13,7 @@ final activityFormProvider =
     // Extraemos las funciones necesarias
     final createActivity = activityNotifier.createdActivity;
     final sendActivity = activityNotifier.sendSubmission;
+    final sendActivityWithLinks = activityNotifier.sendSubmissionWithLinks;
     final sendActivityOffline = activityNotifier.sendSubmissionOffline;
     final submissionGrading = activityNotifier.submissionGrading;
     
@@ -27,6 +28,7 @@ final activityFormProvider =
         updateActivityCallback: updateActivity, 
         
         sendSubmissionCallback: sendActivity,
+        sendSubmissionWithLinksCallback: sendActivityWithLinks,
         sendSubmissionOfflineCallback: sendActivityOffline);
   },
 );

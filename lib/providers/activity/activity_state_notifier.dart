@@ -207,6 +207,20 @@ Future<void> updateActivity(
     }
   }
 
+  Future<bool> sendSubmissionWithLinks(int activityId, String answer, List<String> links) async {
+    try {
+      final submissionSent =
+          await activityRepository.sendSubmission(activityId, answer);
+      if (submissionSent.isNotEmpty) {
+        _setLsSubmissions(submissionSent);
+        return true;
+      }
+      return false;
+    } catch (e) {
+      return false;
+    }
+  }
+
   Future<void> cancelSubmission(int studentActivityId, int activityId) async {
     try {
       List<Submission> lsSubmissionsState = List.from(state.lsSubmissions);
