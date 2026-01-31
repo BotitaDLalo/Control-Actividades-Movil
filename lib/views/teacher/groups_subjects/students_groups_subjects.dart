@@ -1,8 +1,6 @@
 import 'package:aprende_mas/config/utils/packages.dart';
 import 'package:aprende_mas/models/models.dart';
-import 'package:aprende_mas/providers/subjects/students_subject_provider.dart';
 import 'package:aprende_mas/views/widgets/widgets.dart';
-import 'package:aprende_mas/providers/providers.dart';
 
 class StudentsGroupsSubjects extends ConsumerStatefulWidget {
   final List<StudentGroupSubject> lsStudents;
@@ -17,7 +15,6 @@ class StudentsGroupsSubjects extends ConsumerStatefulWidget {
     required String lastName,
     required String lastName2,
   })? studentOptionsFunction;
-
 
 
   const StudentsGroupsSubjects(
@@ -37,31 +34,6 @@ class _StudentsGroupsSubjectsState
   @override
   Widget build(BuildContext context) {
     final lsStudents = widget.lsStudents;
-
-    // return SingleChildScrollView(
-    //   child: Column(
-    //     children: [
-    //       SizedBox(
-    //         height: MediaQuery.of(context).size.height,
-    //         width: 360,
-    //         child: ListView.builder(
-    //           itemCount: lsStudents.length,
-    //           itemBuilder: (context, index) {
-    //             return ElementTile(
-    //                 icon: Icons.person,
-    //                 iconColor: Colors.white,
-    //                 iconSize: 28,
-    //                 title: lsStudents[index].username,
-    //                 subtitle:
-    //                     "${lsStudents[index].lastName} ${lsStudents[index].lastName2} ${lsStudents[index].name}",
-    //                 onTapFunction: () {},
-    //                 trailing: '');
-    //           },
-    //         ),
-    //       )
-    //     ],
-    //   ),
-    // );
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
@@ -106,8 +78,8 @@ class _StudentsGroupsSubjectsState
                       icon: Container(
                         width: 40,
                         height: 40,
-                        decoration: BoxDecoration(
-                          color: widget.displayColor ?? Colors.blue,
+                        decoration: const BoxDecoration(
+                          color: Colors.red,
                           shape: BoxShape.circle,
                         ),
                         child: Center(

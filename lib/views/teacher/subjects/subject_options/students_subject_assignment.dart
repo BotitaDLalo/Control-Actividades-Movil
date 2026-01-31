@@ -181,8 +181,8 @@ class _StudentsSubjectAssignmentState
                                   icon: Container(
                                     width: 40,
                                     height: 40,
-                                    decoration: BoxDecoration(
-                                      color: displayColor,
+                                    decoration: const BoxDecoration(
+                                      color: Colors.red,
                                       shape: BoxShape.circle,
                                     ),
                                     child: Center(

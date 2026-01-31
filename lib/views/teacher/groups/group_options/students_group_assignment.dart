@@ -181,8 +181,8 @@ class _StudentsGroupState extends ConsumerState<StudentsGroupAssigment> {
                                     icon: Container(
                                       width: 40,
                                       height: 40,
-                                      decoration: BoxDecoration(
-                                        color: Colors.blue,
+                                      decoration: const BoxDecoration(
+                                        color: Colors.red,
                                         shape: BoxShape.circle,
                                       ),
                                       child: Center(
