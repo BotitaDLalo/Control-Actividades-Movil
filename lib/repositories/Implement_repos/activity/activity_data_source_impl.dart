@@ -1,10 +1,13 @@
 import 'package:aprende_mas/models/models.dart';
+import 'dart:convert';
+import 'dart:io';
 import 'package:aprende_mas/config/network/dio_client.dart';
 import 'package:aprende_mas/config/utils/packages.dart';
 import 'package:aprende_mas/models/activities/activity/activity_mapper.dart';
 import 'package:aprende_mas/repositories/Interface_repos/activity/activty_datasource.dart';
 import 'package:aprende_mas/config/data/data.dart';
 import 'package:intl/intl.dart';
+import 'package:file_picker/file_picker.dart';
 
 class ActivityDataSourceImpl implements ActivityDataSource {
   final storageService = KeyValueStorageServiceImpl();
@@ -118,20 +121,29 @@ class ActivityDataSourceImpl implements ActivityDataSource {
   }
 
   @override
-  Future<List<Submission>> sendSubmission(int activityId, String answer) async {
+  Future<List<Submission>> sendSubmission(int activityId, String answer, {List<String> links = const [], List<String> files = const []}) async {
     try {
       //const uri = "/Alumnos/RegistrarEnvioActividadAlumno";
       const uri = "/Alumnos/RegistrarEnvioActividadAlumnoConEnlaces";
       DateTime dateNow = DateTime.now();
       final id = await storageService.getId();
 
+      // Construir el JSON con la estructura completa (texto, enlaces, archivos)
+      final respuestaJson = {
+        "texto": answer,
+        "enlaces": links,
+        "archivos": files,
+        "fechaEntrega": dateNow.toIso8601String(),
+        "totalArchivos": files.length,
+        "totalEnlaces": links.length,
+      };
+
       // Usar FormData para multipart/form-data (requerido por el backend)
       final formData = FormData();
       formData.fields.addAll([
         MapEntry('ActividadId', activityId.toString()),
         MapEntry('AlumnoId', id.toString()),
-        MapEntry('Respuesta', answer ?? ''),
-        MapEntry('Enlaces', '[]'),
+        MapEntry('Respuesta', jsonEncode(respuestaJson)),
         MapEntry('FechaEntrega', dateNow.toString()),
         MapEntry('TipoEntregaId', '1'),
       ]);
@@ -151,6 +163,47 @@ class ActivityDataSourceImpl implements ActivityDataSource {
     } catch (e) {
       debugPrint(e.toString());
       return [];
+    }
+  }
+
+  // Método para subir un archivo y obtener la URL
+  @override
+  Future<String> uploadFile(PlatformFile file) async {
+    try {
+      const uri = "/Archivos/SubirArchivo";
+      
+      // Crear FormData con el archivo
+      final formData = FormData();
+      
+      // Leer el archivo como bytes
+      final fileBytes = await File(file.path!).readAsBytes();
+      
+      // Agregar el archivo al FormData
+      formData.files.add(MapEntry(
+        'archivo',
+        MultipartFile.fromBytes(
+          fileBytes,
+          filename: file.name,
+        ),
+      ));
+      
+      final res = await dio.post(uri, data: formData);
+      
+      if (res.statusCode == 200) {
+        // El backend debe devolver la URL del archivo
+        final url = res.data['url'] as String? ?? res.data['fileUrl'] as String?;
+        if (url != null) {
+          debugPrint("✅ Archivo subido exitosamente: $url");
+          return url;
+        } else {
+          throw Exception("El servidor no devolvió una URL");
+        }
+      } else {
+        throw Exception("Error al subir archivo: Status ${res.statusCode}");
+      }
+    } catch (e) {
+      debugPrint("❌ Error subiendo archivo: $e");
+      throw Exception("Error al subir archivo: $e");
     }
   }
 

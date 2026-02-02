@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:aprende_mas/config/utils/packages.dart';
 import 'package:aprende_mas/models/models.dart';
 import 'package:flutter/services.dart';
@@ -19,54 +18,6 @@ class TeacherStudentSubmissionGrading extends ConsumerStatefulWidget {
 class _TeacherStudentSubmissionGradingState
     extends ConsumerState<TeacherStudentSubmissionGrading> {
   final gradeController = TextEditingController();
-  
-  // Datos parseados del JSON
-  String respuestaTexto = '';
-  List<String> respuestaEnlaces = [];
-  List<dynamic> respuestaArchivos = [];
-  String respuestaFechaEntrega = '';
-
-  @override
-  void initState() {
-    super.initState();
-    _parseAnswer();
-  }
-
-  void _parseAnswer() {
-    try {
-      final answer = widget.data.answer;
-      if (answer == null || answer.isEmpty) return;
-
-      // Intentar parsear como JSON
-      final decoded = jsonDecode(answer);
-      
-      if (decoded is Map<String, dynamic>) {
-        respuestaTexto = decoded['texto'] ?? '';
-        respuestaFechaEntrega = decoded['fechaEntrega'] ?? '';
-        
-        // Parsear enlaces
-        if (decoded['enlaces'] != null) {
-          respuestaEnlaces = List<String>.from(decoded['enlaces']);
-        } else if (decoded['Enlaces'] != null) {
-          respuestaEnlaces = List<String>.from(decoded['Enlaces']);
-        }
-        
-        // Parsear archivos
-        if (decoded['archivos'] != null) {
-          respuestaArchivos = decoded['archivos'];
-        } else if (decoded['Archivos'] != null) {
-          respuestaArchivos = decoded['Archivos'];
-        }
-      } else {
-        // Si no es JSON, mostrar como texto plano
-        respuestaTexto = answer;
-      }
-    } catch (e) {
-      // Si falla el parsing, mostrar como texto plano
-      respuestaTexto = widget.data.answer;
-      debugPrint('Error parseando respuesta: $e');
-    }
-  }
 
   @override
   void dispose() {
@@ -81,6 +32,9 @@ class _TeacherStudentSubmissionGradingState
     final fullName = data.fullName;
     final userName = data.userName;
     final score = data.score;
+    final answer = data.answer;
+    final links = data.links;
+    final files = data.files;
 
     final activity = ref.watch(activityProvider);
     final activityNotifier = ref.read(activityProvider.notifier);
@@ -202,16 +156,6 @@ class _TeacherStudentSubmissionGradingState
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        if (respuestaFechaEntrega.isNotEmpty) ...[
-                          const SizedBox(height: 4),
-                          Text(
-                            'Entregado: ${respuestaFechaEntrega.split('T')[0]} ${respuestaFechaEntrega.split('T')[1].substring(0, 5)}',
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey,
-                            ),
-                          ),
-                        ],
                       ],
                     ),
                     const SizedBox(height: 12),
@@ -224,7 +168,7 @@ class _TeacherStudentSubmissionGradingState
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: TextField(
-                        controller: TextEditingController(text: respuestaTexto),
+                        controller: TextEditingController(text: answer),
                         maxLines: null,
                         readOnly: true,
                         decoration: const InputDecoration(
@@ -246,7 +190,7 @@ class _TeacherStudentSubmissionGradingState
                       style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                     ),
                     const SizedBox(height: 8),
-                    respuestaArchivos.isEmpty
+                    files.isEmpty
                         ? const Center(
                             child: Text(
                               'No hay archivos adjuntos',
@@ -254,8 +198,7 @@ class _TeacherStudentSubmissionGradingState
                             ),
                           )
                         : Column(
-                            children: respuestaArchivos.map<Widget>((archivo) {
-                              String nombreArchivo = archivo['nombre'] ?? archivo['name'] ?? 'Archivo';
+                            children: files.map<Widget>((archivo) {
                               return Padding(
                                 padding: const EdgeInsets.symmetric(vertical: 4.0),
                                 child: Row(
@@ -269,7 +212,7 @@ class _TeacherStudentSubmissionGradingState
                                     const SizedBox(width: 12),
                                     Expanded(
                                       child: Text(
-                                        nombreArchivo,
+                                        archivo,
                                         style: const TextStyle(fontSize: 14),
                                         maxLines: null,
                                       ),
@@ -288,7 +231,7 @@ class _TeacherStudentSubmissionGradingState
                       style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                     ),
                     const SizedBox(height: 8),
-                    respuestaEnlaces.isEmpty
+                    links.isEmpty
                         ? const Center(
                             child: Text(
                               'No hay enlaces',
@@ -296,7 +239,7 @@ class _TeacherStudentSubmissionGradingState
                             ),
                           )
                         : Column(
-                            children: respuestaEnlaces.map<Widget>((enlace) {
+                            children: links.map<Widget>((enlace) {
                               return Padding(
                                 padding: const EdgeInsets.symmetric(vertical: 4.0),
                                 child: Row(

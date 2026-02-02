@@ -129,7 +129,9 @@ class _TeacherActivityStudentsSubmissionsState
                                       score: data.score,
                                       userName: e.userName,
                                       fullName: fullName,
-                                      answer: e.answer);
+                                      answer: e.answer,
+                                      links: e.links ?? [],
+                                      files: e.files ?? [],);
 
                                   context.push(
                                       '/teacher-student-submission-grading',

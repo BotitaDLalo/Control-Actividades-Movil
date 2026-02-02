@@ -1,4 +1,5 @@
 import 'package:aprende_mas/models/models.dart';
+import 'package:file_picker/file_picker.dart';
 
 abstract class ActivityDataSource {
   Future<List<Activity>> getAllActivities(int materiaId);
@@ -10,7 +11,9 @@ abstract class ActivityDataSource {
   Future<Activity> updateActivity(int activityId, String nombreActividad,
       String descripcion, DateTime fechaLimite, int puntaje, int materiaId);
 
-  Future<List<Submission>> sendSubmission(int activityId, String answer);
+  Future<List<Submission>> sendSubmission(int activityId, String answer, {List<String> links = const [], List<String> files = const []});
+
+  Future<String> uploadFile(PlatformFile file);
 
   Future<List<Submission>> getSubmissions(int activityId);
 

@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'student_submission.dart';
 
 class ActivityStudentSubmissionsData {
@@ -28,16 +29,45 @@ class ActivityStudentSubmissionsData {
         totalSubmissions: response['TotalEntregados'] as int,
         lsStudentsSubmissions: lsResponse
             .map(
-              (e) => StudentSubmission(
-                  submissionId: e['EntregaId'] as int,
-                  studentId: e['AlumnoId'] as int,
-                  userName: e['NombreUsuario'] as String,
-                  names: e['Nombres'] as String,
-                  lastName: e['ApellidoPaterno'] as String,
-                  lastName2: e['ApellidoMaterno'] as String,
-                  submissionDate: e['FechaEntrega'].toString(),
-                  answer: e['Respuesta'] as String,
-                  grade: e['Calificacion'] as int),
+              (e) {
+                final respuestaJson = e['Respuesta'] as String?;
+                List<String> links = [];
+                List<String> files = [];
+                String texto = '';
+                
+                // Parsear JSON de respuesta
+                if (respuestaJson != null && respuestaJson.isNotEmpty) {
+                  try {
+                    final decoded = jsonDecode(respuestaJson);
+                    if (decoded is Map<String, dynamic>) {
+                      texto = decoded['texto'] ?? '';
+                      links = (decoded['enlaces'] as List?)
+                          ?.map((item) => item.toString())
+                          .toList() ?? [];
+                      files = (decoded['archivos'] as List?)
+                          ?.map((item) => item.toString())
+                          .toList() ?? [];
+                    } else {
+                      texto = respuestaJson;
+                    }
+                  } catch (err) {
+                    texto = respuestaJson;
+                  }
+                }
+                
+                return StudentSubmission(
+                    submissionId: e['EntregaId'] as int,
+                    studentId: e['AlumnoId'] as int,
+                    userName: e['NombreUsuario'] as String,
+                    names: e['Nombres'] as String,
+                    lastName: e['ApellidoPaterno'] as String,
+                    lastName2: e['ApellidoMaterno'] as String,
+                    submissionDate: e['FechaEntrega'].toString(),
+                    answer: texto,
+                    links: links,
+                    files: files,
+                    grade: e['Calificacion'] as int);
+              },
             )
             .toList());
   }

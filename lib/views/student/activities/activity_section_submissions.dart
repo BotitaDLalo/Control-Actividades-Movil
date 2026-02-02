@@ -9,6 +9,7 @@ import 'package:aprende_mas/config/utils/utils.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 final hasSubmissionsProvider = StateProvider(
   (ref) => false,
@@ -471,8 +472,68 @@ class _ActivitySectionSubmissionState
                                                       fontWeight:
                                                           FontWeight.w500),
                                                 ),
-                                                content: Text(
-                                                    submission.answer ?? ""),
+                                                content: SingleChildScrollView(
+                                                  child: Column(
+                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                    mainAxisSize: MainAxisSize.min,
+                                                    children: [
+                                                      // Mostrar texto
+                                                      if (submission.answer != null && submission.answer!.isNotEmpty)
+                                                        Text(
+                                                          submission.answer!,
+                                                          style: const TextStyle(fontSize: 16),
+                                                        ),
+                                                      // Mostrar enlaces como links clicables
+                                                      if (submission.links != null && submission.links!.isNotEmpty) ...[
+                                                        const SizedBox(height: 16),
+                                                        const Text(
+                                                          'Enlaces:',
+                                                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                                        ),
+                                                        ...submission.links!.map((link) => Padding(
+                                                          padding: const EdgeInsets.only(top: 8.0),
+                                                          child: InkWell(
+                                                            onTap: () async {
+                                                              final uri = Uri.parse(link);
+                                                              if (await canLaunchUrl(uri)) {
+                                                                await launchUrl(uri);
+                                                              } else {
+                                                                if (mounted) {
+                                                                  ScaffoldMessenger.of(context).showSnackBar(
+                                                                    const SnackBar(content: Text('No se pudo abrir el enlace')),
+                                                                  );
+                                                                }
+                                                              }
+                                                            },
+                                                            child: Text(
+                                                              link,
+                                                              style: const TextStyle(
+                                                                color: Colors.blue,
+                                                                fontSize: 14,
+                                                                decoration: TextDecoration.underline,
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        )),
+                                                      ],
+                                                      // Mostrar archivos
+                                                      if (submission.files != null && submission.files!.isNotEmpty) ...[
+                                                        const SizedBox(height: 16),
+                                                        const Text(
+                                                          'Archivos:',
+                                                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                                        ),
+                                                        ...submission.files!.map((file) => Padding(
+                                                          padding: const EdgeInsets.only(top: 8.0),
+                                                          child: Text(
+                                                            file,
+                                                            style: const TextStyle(fontSize: 14),
+                                                          ),
+                                                        )),
+                                                      ],
+                                                    ],
+                                                  ),
+                                                ),
                                                 contentPadding:
                                                     const EdgeInsets.all(10),
                                                 actions: [
