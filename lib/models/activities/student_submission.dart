@@ -7,10 +7,12 @@ class StudentSubmission {
   final String lastName2;
   final String submissionDate;
   final String answer;
-   int grade;
+  final List<String> links;
+  final List<String> files;
+  int grade;
 
-  StudentSubmission(
-      {required this.submissionId,
+  StudentSubmission({
+      required this.submissionId,
       required this.studentId,
       required this.userName,
       required this.names,
@@ -18,5 +20,7 @@ class StudentSubmission {
       required this.lastName2,
       required this.submissionDate,
       required this.answer,
+      this.links = const [],
+      this.files = const [],
       required this.grade});
 }

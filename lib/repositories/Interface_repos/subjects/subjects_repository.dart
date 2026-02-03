@@ -10,7 +10,7 @@ abstract class SubjectsRepository {
   Future<List<Subject>> createSubjectWithoutGroup(
       String subjectName, String description, Color colorCode);
 
-  Future<bool> deleteSubject(int subjectId);
+  Future<Map<String, dynamic>> deleteSubject(int subjectId);
 
   Future<Subject> updateSubject(int subjectId, String name, String description);
 
@@ -21,7 +21,8 @@ abstract class SubjectsRepository {
 
   Future<List<StudentGroupSubject>> getStudentsSubject(int? groupId,int subjectId);
 
-  Future<bool> removeStudentFromSubject({
-  required int alumnoMateriaId,
+  Future<Map<String, dynamic>> removeStudentFromSubject({
+    required int subjectId,
+    required int studentId,
   });
 }

@@ -3,6 +3,7 @@ import 'package:aprende_mas/models/models.dart';
 import 'package:aprende_mas/providers/providers.dart';
 import 'package:aprende_mas/views/views.dart';
 import 'package:aprende_mas/views/widgets/activities_body/container_information_activity.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class TeacherActivityStudentsSubmissions extends ConsumerStatefulWidget {
   final Activity activity;
@@ -122,27 +123,48 @@ class _TeacherActivityStudentsSubmissionsState
                                       .setSubmissionGrade(e.grade);
                                   TeacherStudentSubmissionGradingModel
                                       extraData =
-                                      TeacherStudentSubmissionGradingModel(
-                                          submissionId: e.submissionId,
-                                          grade: e.grade,
-                                          score: data.score,
-                                          userName: e.userName,
-                                          fullName: fullName,
-                                          answer: e.answer);
+                                  TeacherStudentSubmissionGradingModel(
+                                      submissionId: e.submissionId,
+                                      grade: e.grade,
+                                      score: data.score,
+                                      userName: e.userName,
+                                      fullName: fullName,
+                                      answer: e.answer,
+                                      links: e.links ?? [],
+                                      files: e.files ?? [],);
 
                                   context.push(
                                       '/teacher-student-submission-grading',
                                       extra: extraData);
                                 },
-                                icon: Icons.person,
+                                iconWidget: SvgPicture.asset(
+                                  'assets/icons/user2.svg',
+                                  width: 32,
+                                  height: 32,
+                                  colorFilter: const ColorFilter.mode(
+                                      Colors.black, BlendMode.srcIn),
+                                ),
                                 iconColor: Colors.white,
                                 iconSize: 32,
-                                title: e.userName,
-                                subtitle:
-                                    "${e.lastName} ${e.lastName2} ${e.names}",
-                                trailingString: e.grade == -1
-                                    ? 'Sin calificar'
-                                    : "${e.grade}/${data.score}",
+                                title: fullName,
+                                subtitle: e.userName,
+                                trailingWidget: Container(
+                                  width: 40,
+                                  height: 40,
+                                  decoration: const BoxDecoration(
+                                    color: Color.fromARGB(255, 0, 0, 0),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Center(
+                                    child: SvgPicture.asset(
+                                      'assets/icons/edit2.svg',
+                                      width: 20,
+                                      height: 20,
+                                      colorFilter: const ColorFilter.mode(
+                                          Colors.white, BlendMode.srcIn),
+                                    ),
+                                  ),
+                                ),
                               );
                             }).toList()),
                       ),
@@ -153,4 +175,3 @@ class _TeacherActivityStudentsSubmissionsState
             )));
   }
 }
-

@@ -19,6 +19,7 @@ final groupsProvider =
       ref.read(activityProvider.notifier).getSubmissions;
 
   return GroupsNotifier(
+      ref: ref,
       activityOffline: activityOffline,
       getAllActivitiesCallback: getAllActivitiesCallback,
       getSubmissionsCallback: getSubmissionsCallback,

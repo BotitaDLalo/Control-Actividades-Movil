@@ -1,5 +1,7 @@
+import 'dart:io';
 import 'package:aprende_mas/models/activities/activity/activity.dart';
 import 'package:aprende_mas/views/widgets/inputs/generic_input.dart';
+import 'package:file_picker/file_picker.dart';
 // import 'package:aprende_mas/views/widgets/inputs/hour_input.dart';
 // import 'package:aprende_mas/views/widgets/inputs/time_input.dart';
 
@@ -17,6 +19,8 @@ class ActivityFormState {
   final String answer;
   final int grade;
   final bool existsAnswer;
+  final List<PlatformFile> files;
+  final List<String> links;
 
   ActivityFormState({
     this.activities = const [],
@@ -32,6 +36,8 @@ class ActivityFormState {
     this.answer = "",
     this.existsAnswer = false,
     this.grade = 0,
+    this.files = const [],
+    this.links = const [],
   });
 
   // Método para crear una nueva instancia con campos actualizados
@@ -49,6 +55,8 @@ class ActivityFormState {
     String? answer,
     bool? existsAnswer,
     int? grade,
+    List<PlatformFile>? files,
+    List<String>? links,
   }) =>
       ActivityFormState(
           activities: activities ?? this.activities,
@@ -63,7 +71,9 @@ class ActivityFormState {
           answer: answer ?? this.answer,
           grade: grade ?? this.grade,
           newGrade: newGrade ?? this.newGrade,
-          existsAnswer: existsAnswer ?? this.existsAnswer);
+          existsAnswer: existsAnswer ?? this.existsAnswer,
+          files: files ?? this.files,
+          links: links ?? this.links);
 
   @override
   String toString() {

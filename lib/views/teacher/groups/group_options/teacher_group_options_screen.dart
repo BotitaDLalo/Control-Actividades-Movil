@@ -92,6 +92,9 @@ class _GroupTeacherOptionsState extends ConsumerState<GroupTeacherOptions> {
     return PopScope(
       onPopInvokedWithResult: (didPop, result) async {
         clearScreen();
+        if (didPop) {
+          ref.read(groupsProvider.notifier).refreshAll();
+        }
       },
       child: Scaffold(
         body: Column(

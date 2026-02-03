@@ -172,7 +172,7 @@ class GroupsDataSourceImpl implements GroupsDataSource {
   }
 
   @override
-  Future<bool> deleteGroup(int groupId) async {
+  Future<Map<String, dynamic>> deleteGroup(int groupId) async {
     try {
       const uri = "/Grupos/DeleteGroup";
       final fullUri = "$uri/$groupId";
@@ -180,10 +180,33 @@ class GroupsDataSourceImpl implements GroupsDataSource {
       final response = await dio.delete(fullUri);
       debugPrint("🔍 Response status: ${response.statusCode}");
       debugPrint("🔍 Response data: ${response.data}");
-      return response.statusCode == 200;
+
+      if (response.statusCode == 200) {
+        return {'success': true, 'message': 'Grupo eliminado exitosamente'};
+      } else if (response.statusCode == 400) {
+        String message = 'Datos inválidos';
+        if (response.data is Map<String, dynamic>) {
+          final data = response.data as Map<String, dynamic>;
+          if (data['Mensaje'] != null) message = data['Mensaje'];
+          if (data['Detalles'] != null) message += '\n${data['Detalles']}';
+        }
+        return {'success': false, 'message': message};
+      } else if (response.statusCode == 409) {
+        String message = 'No se puede eliminar el grupo';
+        if (response.data is Map<String, dynamic>) {
+          final data = response.data as Map<String, dynamic>;
+          if (data['Mensaje'] != null) message = data['Mensaje'];
+          if (data['Detalles'] != null) message += '\n${data['Detalles']}';
+        }
+        return {'success': false, 'message': message};
+      } else if (response.statusCode == 500) {
+        return {'success': false, 'message': 'Error interno del servidor. Por favor, contacte al soporte técnico.'};
+      } else {
+        return {'success': false, 'message': 'Error desconocido al eliminar el grupo'};
+      }
     } catch (e) {
       debugPrint("❌ Error en deleteGroup: $e");
-      return false;
+      return {'success': false, 'message': 'Error de conexión: $e'};
     }
   }
 
@@ -267,7 +290,7 @@ class GroupsDataSourceImpl implements GroupsDataSource {
   }
 
   @override
-  Future<bool> removeStudentFromGroup({
+  Future<Map<String, dynamic>> removeStudentFromGroup({
     required int groupId,
     required int studentId
   }) async {
@@ -284,12 +307,40 @@ class GroupsDataSourceImpl implements GroupsDataSource {
       );
 
       if (res.statusCode == 200) {
-        return true;
+        return {'success': true, 'message': 'Alumno eliminado del grupo exitosamente'};
+      } else if (res.statusCode == 400) {
+        String message = 'Datos inválidos';
+        if (res.data is Map<String, dynamic>) {
+          final data = res.data as Map<String, dynamic>;
+          if (data['Mensaje'] != null) message = data['Mensaje'];
+          if (data['Detalles'] != null) message += '\n${data['Detalles']}';
+        }
+        return {'success': false, 'message': message};
+      } else if (res.statusCode == 409) {
+        String message = 'No se puede eliminar al alumno del grupo';
+        if (res.data is Map<String, dynamic>) {
+          final data = res.data as Map<String, dynamic>;
+          if (data['Mensaje'] != null) message = data['Mensaje'];
+          if (data['Detalles'] != null) message += '\n${data['Detalles']}';
+        }
+        return {'success': false, 'message': message};
+      } else if (res.statusCode == 500) {
+        return {'success': false, 'message': 'Error interno del servidor. Por favor, contacte al soporte técnico.'};
+      } else {
+        return {'success': false, 'message': 'Error desconocido al eliminar al alumno del grupo'};
       }
-      return false;
+    } on DioException catch (e) {
+      final statusCode = e.response?.statusCode;
+      if (statusCode == 400) {
+        final errorData = e.response?.data;
+        final serverMessage = errorData?['mensaje'] ?? 'Error desconocido del servidor.';
+        return {'success': false, 'message': serverMessage};
+      }
+      debugPrint('Error general de la API: $statusCode');
+      return {'success': false, 'message': 'Error en la conexión o servidor.'};
     } catch (e) {
       debugPrint('Error en GroupsDataSourceImpl: $e');
-      throw Exception(e);
+      return {'success': false, 'message': 'Error: $e'};
     }
   }
 }

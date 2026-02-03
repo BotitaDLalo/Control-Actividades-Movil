@@ -79,12 +79,12 @@ class _StudentsGroupState extends ConsumerState<StudentsGroup> {
             // 3. IMPLEMENTACIÓN DE LA LÓGICA
 
             // Usar el notifier ya leído
-            final success = await groupNotifier.removeStudentFromGroup(
+            final result = await groupNotifier.removeStudentFromGroup(
               groupId: widget.id,
               studentId: studentId,
             );
 
-            if (success) {
+            if (result['success']) {
               // Mostrar mensaje de éxito
               SuccessDialog.show(
                 context,
@@ -97,7 +97,7 @@ class _StudentsGroupState extends ConsumerState<StudentsGroup> {
               // Mostrar mensaje de error
               ErrorDialog.show(
                 context,
-                message: 'No se pudo eliminar al alumno del grupo. Por favor, intente de nuevo.',
+                message: result['message'],
               );
             }
           } catch (e) {
@@ -116,69 +116,69 @@ class _StudentsGroupState extends ConsumerState<StudentsGroup> {
       );
     }
 
-    if (lsStudents.isEmpty && _searchTerm.isEmpty) {
-      // Caso 1: La lista inicial está vacía y no hay búsqueda activa
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            SvgPicture.asset(
-              'assets/icons/studentcap1.svg',
-              height: 200,
-              width: 200,
-              color: Colors.black,
-            ),
-            const SizedBox(height: 16),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 40),
-              child: Text(
-                "Aquí se mostrarán los estudiantes que agregues al grupo.",
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.black,
+    return Column(
+      children: [
+        // Mostrar barra de búsqueda solo si hay estudiantes
+        if (lsStudents.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.all(8),
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                labelText: '  Buscar estudiantes por nombre o usuario',
+                prefixIconConstraints: BoxConstraints(maxWidth: 40, maxHeight: 40),
+                prefixIcon: Padding(padding: EdgeInsets.only(left: 8, right: 8), child: SvgPicture.asset('assets/icons/buscar.svg', width: 24, height: 24, colorFilter: ColorFilter.mode(Colors.blue, BlendMode.srcIn))),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(25.0)),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.blue, width: 2.0),
+                  borderRadius: BorderRadius.all(Radius.circular(25.0)),
                 ),
               ),
             ),
-          ],
-        ),
-      );
-    } else if (lsStudents.isNotEmpty && filteredStudents.isEmpty) {
-      // Caso 2: Hay estudiantes, pero la búsqueda no encontró coincidencias
-      return const Center(
-        child: Text(
-          'No se encontraron estudiantes con esa búsqueda.',
-          textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 16),
-        ),
-      );
-    }
+          ),
 
-    // Caso 3: Mostrar la lista (filtrada o completa)
-    return Column(
-      children: [
-        // 3. CAMPO DE BÚSQUEDA
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 8.0),
-          child: TextField(
-            controller: _searchController,
-            decoration: InputDecoration(
-              labelText: '  Buscar estudiantes por nombre o usuario',
-              prefixIconConstraints: BoxConstraints(maxWidth: 24, maxHeight: 24),
-              prefixIcon: SizedBox(width: 20, height: 20, child: SvgPicture.asset('assets/icons/buscar.svg', colorFilter: ColorFilter.mode(Colors.blue, BlendMode.srcIn))),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.all(Radius.circular(25.0)),
-              ),
-            ),
-          ),
-        ),
-        
-        // 4. LISTA DE ESTUDIANTES (usa la lista filtrada)
+        // Contenido
         Expanded(
-          child: StudentsGroupsSubjects(
-            lsStudents: filteredStudents, // <-- Lista filtrada
-            studentOptionsFunction: showStudentOptions,
-          ),
+          child: lsStudents.isEmpty && _searchTerm.isEmpty
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SvgPicture.asset(
+                        'assets/icons/studentcap1.svg',
+                        height: 200,
+                        width: 200,
+                        color: Colors.blue,
+                      ),
+                      const SizedBox(height: 16),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 40),
+                        child: Text(
+                          "Aquí se mostrarán los estudiantes que agregues al grupo.",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              : lsStudents.isNotEmpty && filteredStudents.isEmpty
+                  ? const Center(
+                      child: Text(
+                        'No se encontraron estudiantes con esa búsqueda.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontSize: 16),
+                      ),
+                    )
+                  : StudentsGroupsSubjects(
+                      lsStudents: filteredStudents, // <-- Lista filtrada
+                      studentOptionsFunction: showStudentOptions,
+                    ),
         ),
       ],
     );

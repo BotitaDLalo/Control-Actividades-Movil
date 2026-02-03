@@ -88,35 +88,48 @@ class _StudentsGroupState extends ConsumerState<StudentsGroupAssigment> {
                   width: 350,
                   child: Column(
                     children: [
-                      CustomTextFormField(
-                        textEditingController: controller,
-                        label: '  Agregar alumno',
-                        icon: SizedBox(width: 20, height: 20, child: SvgPicture.asset('assets/icons/buscar.svg', colorFilter: ColorFilter.mode(Colors.blue, BlendMode.srcIn))),
+                      TextField(
+                        controller: controller,
+                        decoration: InputDecoration(
+                          labelText: '  Agregar alumno',
+                          prefixIconConstraints: BoxConstraints(maxWidth: 40, maxHeight: 40),
+                          prefixIcon: Padding(padding: EdgeInsets.only(left: 8, right: 8), child: SvgPicture.asset('assets/icons/buscar.svg', width: 24, height: 24, colorFilter: ColorFilter.mode(Colors.blue, BlendMode.srcIn))),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(25.0)),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.blue, width: 2.0),
+                            borderRadius: BorderRadius.all(Radius.circular(25.0)),
+                          ),
+                        ),
                       ),
  
                       isNotEmpty
                           ? SizedBox(
                               width: 330,
-                              child: Container(
-                                color: Colors.grey.shade200,
-                                child: ListTile(
-                                  onTap: () async {
-                                    if (!formStudentsGroups.isPosting) {
-                                      await ref
-                                          .read(formStudentsGroupProvider
-                                              .notifier)
-                                          .onVerifyEmailSubmit(content);
-                                    }
-                                  },
-                                  title: const Text(
-                                    'Agregar',
-                                    style: TextStyle(fontSize: 16.5),
-                                  ),
-                                  subtitle: Text(
-                                    content,
-                                    style: const TextStyle(fontSize: 16.5),
-                                  ),
-                                  trailing: const Icon(Icons.person_add, size: 30),
+                              child: ElementTile(
+                                iconWidget: SvgPicture.asset(
+                                  'assets/icons/user2.svg',
+                                  width: 32,
+                                  height: 32,
+                                  colorFilter: ColorFilter.mode(Colors.blue, BlendMode.srcIn),
+                                ),
+                                iconColor: Colors.white,
+                                iconSize: 32,
+                                title: 'Agregar',
+                                subtitle: content,
+                                onTapFunction: () async {
+                                  if (!formStudentsGroups.isPosting) {
+                                    await ref
+                                        .read(formStudentsGroupProvider
+                                            .notifier)
+                                        .onVerifyEmailSubmit(content);
+                                  }
+                                },
+                                trailingWidget: IconButton(
+                                  icon: Icon(Icons.person_add, color: Colors.blue),
+                                  iconSize: 30,
+                                  onPressed: () {},
                                 ),
                               ),
                             )
@@ -148,26 +161,38 @@ class _StudentsGroupState extends ConsumerState<StudentsGroupAssigment> {
                             itemBuilder: (context, index) {
                               final email = lsEmails[index];
                               if (email.isEmailValid) {
-                                return Container(
-                                  margin: const EdgeInsets.only(bottom: 10),
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(10),
-                                    color: Colors.grey.shade200,
+                                return ElementTile(
+                                  iconWidget: SvgPicture.asset(
+                                    'assets/icons/user2.svg',
+                                    width: 32,
+                                    height: 32,
+                                    colorFilter: ColorFilter.mode(Colors.blue, BlendMode.srcIn),
                                   ),
-                                  child: ListTile(
-                                    leading: const Icon(Icons.person, size: 30),
-                                    title: Text(
-                                      email.email,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(fontSize: 16.5),
-                                    ),
-                                    trailing: IconButton(
-                                      icon: const Icon(Icons.delete),
-                                      onPressed: () {
-                                        ref
-                                            .read(studentsGroupProvider.notifier)
-                                            .onDeleteVeryfyEmail(index);
-                                      },
+                                  iconColor: Colors.white,
+                                  iconSize: 32,
+                                  title: email.email,
+                                  subtitle: '',
+                                  trailingWidget: IconButton(
+                                    onPressed: () {
+                                      ref
+                                          .read(studentsGroupProvider.notifier)
+                                          .onDeleteVeryfyEmail(index);
+                                    },
+                                    icon: Container(
+                                      width: 40,
+                                      height: 40,
+                                      decoration: const BoxDecoration(
+                                        color: Colors.red,
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Center(
+                                        child: SvgPicture.asset(
+                                          'assets/icons/eliminar4.svg',
+                                          width: 20,
+                                          height: 20,
+                                          colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+                                        ),
+                                      ),
                                     ),
                                   ),
                                 );

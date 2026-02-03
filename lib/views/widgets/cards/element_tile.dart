@@ -48,6 +48,7 @@ Widget build(BuildContext context, WidgetRef ref) {
         child: ListTile(
             
             // --- Trailing (Ícono de tres puntos) ---
+            
             trailing: trailingWidget ?? (
                 trailingIcon != null
                     ? IconButton(
@@ -60,13 +61,14 @@ Widget build(BuildContext context, WidgetRef ref) {
                     : IconButton(
                         onPressed: trailingVoidCallback,
                         icon: SvgPicture.asset(
-                          'assets/icons/eliminarUsuario.svg',
+                          'assets/icons/eliminar4.svg',
                           width: 24,
                           height: 24,
                           colorFilter: const ColorFilter.mode(Colors.black, BlendMode.srcIn),
                         ),
                       )
             ),
+            
             
             // --- Leading (Ícono de la actividad) ---
             leading: CircleAvatar(

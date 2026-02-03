@@ -34,7 +34,7 @@ class GroupsRepositoryImpl implements GroupsRepository {
   }
 
   @override
-  Future<bool> deleteGroup(int groupId) {
+  Future<Map<String, dynamic>> deleteGroup(int groupId) {
     return groupsDataSource.deleteGroup(groupId);
   }
 
@@ -60,12 +60,12 @@ class GroupsRepositoryImpl implements GroupsRepository {
     return groupsDataSource.getStudentsGroup(subjectId);
   }
 @override
-  Future<bool> removeStudentFromGroup({
-    required int groupId, 
+  Future<Map<String, dynamic>> removeStudentFromGroup({
+    required int groupId,
     required int studentId
   }) {
     return groupsDataSource.removeStudentFromGroup(
-      groupId: groupId, 
+      groupId: groupId,
       studentId: studentId
     );
   }

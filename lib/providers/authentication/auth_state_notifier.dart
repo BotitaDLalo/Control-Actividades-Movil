@@ -505,26 +505,41 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
     setGroupsSubjectsState(lsGroups);
     setSubjectsWithoutGroupState(lsSubjectsWithoutGroup);
 
-    //& Recolectar todas las operaciones para ejecutar en paralelo
-    List<Future<void>> allFutures = [];
+    //& Recolectar todas las materias
+    List<Subject> allSubjects = [];
 
     for (var group in lsGroups) {
-      for (var sub in group.materias ?? []) {
-        final subject = sub as Subject;
+      for (var subj in group.materias ?? []) {
+        allSubjects.add(subj as Subject);
+      }
+    }
+    allSubjects.addAll(lsSubjectsWithoutGroup);
+
+    //& Procesar materias en lotes para evitar saturar la app
+    const int batchSize = 5; // Límite de materias por lote
+    for (int i = 0; i < allSubjects.length; i += batchSize) {
+      final batch = allSubjects.sublist(i, i + batchSize > allSubjects.length ? allSubjects.length : i + batchSize);
+      List<Future<void>> batchFutures = [];
+
+      for (var subject in batch) {
         final subjectId = subject.materiaId;
 
-        allFutures.add(
+        batchFutures.add(
           Future(() async {
             try {
               await getAllActivitiesOfflineCallback(subjectId);
               List<Future<void>> submissionFutures = [];
-              for (var act in sub.actividades ?? []) {
+              for (var act in subject.actividades ?? []) {
                 final activity = act as Activity;
                 final activityId = activity.activityId;
-                submissionFutures
-                    .add(getSubmissionsOfflineCallback(activityId!));
+                submissionFutures.add(getSubmissionsOfflineCallback(activityId!));
               }
-              await Future.wait(submissionFutures);
+              //& Procesar submissions en lotes de 10 para limitar concurrencia
+              const int submissionBatchSize = 10;
+              for (int j = 0; j < submissionFutures.length; j += submissionBatchSize) {
+                final subBatch = submissionFutures.sublist(j, j + submissionBatchSize > submissionFutures.length ? submissionFutures.length : j + submissionBatchSize);
+                await Future.wait(subBatch);
+              }
             } catch (error) {
               debugPrint(
                   "⚠️ [LOGIN] Error cargando actividades offline para materia $subjectId: $error");
@@ -532,31 +547,10 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
           }),
         );
       }
+
+      //& Ejecutar el lote de materias en paralelo
+      await Future.wait(batchFutures);
     }
-
-    for (var subject in lsSubjectsWithoutGroup) {
-      final subjectId = subject.materiaId;
-
-      allFutures.add(
-        Future(() async {
-          try {
-            await getAllActivitiesOfflineCallback(subjectId);
-            List<Future<void>> submissionFutures = [];
-            for (var act in subject.actividades ?? []) {
-              final activity = act as Activity;
-              final activityId = activity.activityId;
-              submissionFutures.add(getSubmissionsOfflineCallback(activityId!));
-            }
-            await Future.wait(submissionFutures);
-          } catch (error) {
-            debugPrint(
-                "⚠️ [LOGIN] Error cargando actividades offline para materia $subjectId: $error");
-          }
-        }),
-      );
-    }
-
-    await Future.wait(allFutures);
   }
 
   //# LOGIN GOOGLE USER
@@ -758,58 +752,27 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
       AuthenticatedType authType,
       List<Group> lsGroups,
       List<Subject> lsSubjectsWithoutGroup) async {
-    //& Recolectar todas las actividades y entregables para cargar en paralelo
-    List<Future<void>> allFutures = [];
+    //& Recolectar todas las materias
+    List<Subject> allSubjects = [];
 
-    //& set para activity state grupos y materias (paralelizado)
     for (var group in lsGroups) {
       for (var subj in group.materias ?? []) {
-        final subject = subj as Subject;
-        final subjectId = subject.materiaId;
-
-        //& Cargar actividades en paralelo
-        allFutures.add(
-          getAllActivitiesCallback(subjectId).then((_) async {
-            //& Cargar entregables en paralelo para cada actividad
-            List<Future<void>> submissionFutures = [];
-            for (var act in subj.actividades ?? []) {
-              final activity = act as Activity;
-              final activityId = activity.activityId;
-
-              submissionFutures.add(
-                getSubmissionsCallback(activityId!).then((submissions) async {
-                  if (caller != AuthCallers.checkAuthStatus &&
-                      authType == AuthenticatedType.auth) {
-                    try {
-                      await activityOffline.saveSubmissions(
-                          submissions, activityId);
-                    } catch (e) {
-                      debugPrint(
-                          "⚠️ [LOGIN] Error guardando submissions para actividad $activityId: $e");
-                    }
-                  }
-                }),
-              );
-            }
-            await Future.wait(submissionFutures);
-          }).catchError((error) {
-            debugPrint(
-                "🚨 [LOGIN] DioException en carga de actividades para materiaId=$subjectId: $error");
-            // Continuar sin detener el login
-            return null;
-          }),
-        );
+        allSubjects.add(subj as Subject);
       }
     }
+    allSubjects.addAll(lsSubjectsWithoutGroup);
 
-    //& set para activity state materias sin grupo (paralelizado)
-    for (var subject in lsSubjectsWithoutGroup) {
-      final subjectId = subject.materiaId;
+    //& Procesar materias en lotes para evitar saturar la app
+    const int batchSize = 5; // Límite de materias por lote
+    for (int i = 0; i < allSubjects.length; i += batchSize) {
+      final batch = allSubjects.sublist(i, i + batchSize > allSubjects.length ? allSubjects.length : i + batchSize);
+      List<Future<void>> batchFutures = [];
 
-      allFutures.add(
-        Future(() async {
-          try {
-            await getAllActivitiesCallback(subjectId);
+      for (var subject in batch) {
+        final subjectId = subject.materiaId;
+        batchFutures.add(
+          getAllActivitiesCallback(subjectId).then((_) async {
+            //& Cargar entregables en lotes para limitar concurrencia
             List<Future<void>> submissionFutures = [];
             for (var act in subject.actividades ?? []) {
               final activity = act as Activity;
@@ -827,20 +790,30 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
                           "⚠️ [LOGIN] Error guardando submissions para actividad $activityId: $e");
                     }
                   }
+                }).catchError((error) {
+                  debugPrint(
+                      "⚠️ [LOGIN] Error cargando submissions para actividad $activityId: $error");
+                  return null;
                 }),
               );
             }
-            await Future.wait(submissionFutures);
-          } catch (error) {
+            //& Procesar submissions en lotes de 10 para limitar concurrencia
+            const int submissionBatchSize = 10;
+            for (int j = 0; j < submissionFutures.length; j += submissionBatchSize) {
+              final subBatch = submissionFutures.sublist(j, j + submissionBatchSize > submissionFutures.length ? submissionFutures.length : j + submissionBatchSize);
+              await Future.wait(subBatch);
+            }
+          }).catchError((error) {
             debugPrint(
-                "⚠️ [LOGIN] Error cargando actividades para materia $subjectId: $error");
+                "🚨 [LOGIN] DioException en carga de actividades para materiaId=$subjectId: $error");
             // Continuar sin detener el login
-          }
-        }),
-      );
-    }
+            return null;
+          }),
+        );
+      }
 
-    //& Ejecutar todas las operaciones en paralelo
-    await Future.wait(allFutures);
+      //& Ejecutar el lote de materias en paralelo
+      await Future.wait(batchFutures);
+    }
   }
 }

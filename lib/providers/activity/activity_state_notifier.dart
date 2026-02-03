@@ -3,6 +3,7 @@ import 'package:aprende_mas/models/models.dart';
 import 'package:aprende_mas/providers/activity/activity_state.dart';
 import 'package:aprende_mas/repositories/Interface_repos/activity/activity_repository.dart';
 import 'package:aprende_mas/repositories/Interface_repos/activity/activity_offline_repository.dart';
+import 'package:file_picker/file_picker.dart';
 
 class ActivityNotifier extends StateNotifier<ActivityState> {
   final ActivityRepository activityRepository;
@@ -193,10 +194,10 @@ Future<void> updateActivity(
     }
   }
 
-  Future<bool> sendSubmission(int activityId, String answer) async {
+  Future<bool> sendSubmission(int activityId, String answer, {List<String> links = const []}) async {
     try {
       final submissionSent =
-          await activityRepository.sendSubmission(activityId, answer);
+          await activityRepository.sendSubmission(activityId, answer, links: links);
       if (submissionSent.isNotEmpty) {
         _setLsSubmissions(submissionSent);
         return true;
@@ -204,6 +205,44 @@ Future<void> updateActivity(
       return false;
     } catch (e) {
       return false;
+    }
+  }
+
+  Future<bool> sendSubmissionWithLinks(int activityId, String answer, List<String> links) async {
+    try {
+      final submissionSent =
+          await activityRepository.sendSubmission(activityId, answer, links: links);
+      if (submissionSent.isNotEmpty) {
+        _setLsSubmissions(submissionSent);
+        return true;
+      }
+      return false;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<bool> sendSubmissionWithFiles(int activityId, String answer, List<String> fileUrls) async {
+    try {
+      final submissionSent =
+          await activityRepository.sendSubmission(activityId, answer, files: fileUrls);
+      if (submissionSent.isNotEmpty) {
+        _setLsSubmissions(submissionSent);
+        return true;
+      }
+      return false;
+    } catch (e) {
+      debugPrint("Error en sendSubmissionWithFiles: $e");
+      return false;
+    }
+  }
+
+  Future<String> uploadFile(PlatformFile file) async {
+    try {
+      return await activityRepository.uploadFile(file);
+    } catch (e) {
+      debugPrint("Error en uploadFile: $e");
+      rethrow;
     }
   }
 

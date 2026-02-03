@@ -13,8 +13,11 @@ final activityFormProvider =
     // Extraemos las funciones necesarias
     final createActivity = activityNotifier.createdActivity;
     final sendActivity = activityNotifier.sendSubmission;
+    final sendActivityWithLinks = activityNotifier.sendSubmissionWithLinks;
+    final sendActivityWithFiles = activityNotifier.sendSubmissionWithFiles; // Nuevo
     final sendActivityOffline = activityNotifier.sendSubmissionOffline;
     final submissionGrading = activityNotifier.submissionGrading;
+    final uploadFile = activityNotifier.uploadFile; // Nuevo
     
     // 1. NUEVO: Extraemos la función updateActivity que acabamos de crear
     final updateActivity = activityNotifier.updateActivity; 
@@ -27,6 +30,10 @@ final activityFormProvider =
         updateActivityCallback: updateActivity, 
         
         sendSubmissionCallback: sendActivity,
-        sendSubmissionOfflineCallback: sendActivityOffline);
+        sendSubmissionWithLinksCallback: sendActivityWithLinks,
+        sendSubmissionWithFilesCallback: sendActivityWithFiles, // Nuevo
+        sendSubmissionOfflineCallback: sendActivityOffline,
+        uploadFileCallback: uploadFile, // Nuevo
+    );
   },
 );

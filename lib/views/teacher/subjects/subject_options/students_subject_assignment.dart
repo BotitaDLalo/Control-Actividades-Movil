@@ -47,6 +47,8 @@ class _StudentsSubjectAssignmentState
    final lsEmails = ref.watch(studentsSubjectProvider).lsEmails;
    final canSubmit = lsEmails.isNotEmpty && !formSubjects.isPosting;
    final subjectColor = getSubjectColor(widget.subjectId);
+   final isGroup = widget.groupId != null;
+   final displayColor = isGroup ? Colors.blue : subjectColor;
 
   void clear() {
     controller.clear();
@@ -110,28 +112,27 @@ class _StudentsSubjectAssignmentState
                     isNotEmpty
                         ? SizedBox(
                             width: 300,
-                            child: Container(
-                              color: Colors.grey.shade200,
-                              child: ListTile(
-                                onTap: () async {
-                                  if (formSubjects.isPosting) return;
-                                  await ref
-                                      .read(formSubjectsProvider.notifier)
-                                      .onVerifyEmailSubmit(content);
-                                },
-                                title: const Text(
-                                  'Agregar',
-                                  style: TextStyle(fontSize: 16.5),
-                                ),
-                                subtitle: Text(
-                                  content,
-                                  style: const TextStyle(fontSize: 16.5),
-                                ),
-                                trailing: IconButton(
-                                  icon: const Icon(Icons.person_add),
-                                  iconSize: 30,
-                                  onPressed: () {},
-                                ),
+                            child: ElementTile(
+                              iconWidget: SvgPicture.asset(
+                                'assets/icons/user2.svg',
+                                width: 32,
+                                height: 32,
+                                colorFilter: ColorFilter.mode(displayColor, BlendMode.srcIn),
+                              ),
+                              iconColor: Colors.white,
+                              iconSize: 32,
+                              title: 'Agregar',
+                              subtitle: content,
+                              onTapFunction: () async {
+                                if (formSubjects.isPosting) return;
+                                await ref
+                                    .read(formSubjectsProvider.notifier)
+                                    .onVerifyEmailSubmit(content);
+                              },
+                              trailingWidget: IconButton(
+                                icon: Icon(Icons.person_add, color: displayColor),
+                                iconSize: 30,
+                                onPressed: () {},
                               ),
                             ),
                           )
@@ -165,7 +166,7 @@ class _StudentsSubjectAssignmentState
                                   'assets/icons/user2.svg',
                                   width: 32,
                                   height: 32,
-                                  colorFilter: const ColorFilter.mode(Colors.black, BlendMode.srcIn),
+                                  colorFilter: ColorFilter.mode(displayColor, BlendMode.srcIn),
                                 ),
                                 iconColor: Colors.white,
                                 iconSize: 32,
@@ -180,7 +181,7 @@ class _StudentsSubjectAssignmentState
                                   icon: Container(
                                     width: 40,
                                     height: 40,
-                                    decoration: BoxDecoration(
+                                    decoration: const BoxDecoration(
                                       color: Colors.red,
                                       shape: BoxShape.circle,
                                     ),
@@ -218,7 +219,7 @@ class _StudentsSubjectAssignmentState
               width: 150,
               child: CustomRoundedButton(
                 text: "Agregar",
-                backgroundColor: subjectColor,
+                backgroundColor: displayColor,
                 onPressed: canSubmit
                     ? () async {
                         print('--- INICIANDO ENVÍO DE ${lsEmails.length} ALUMNOS ---');

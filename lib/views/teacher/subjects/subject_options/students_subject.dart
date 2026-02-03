@@ -53,7 +53,6 @@ class _StudentsSubjectState extends ConsumerState<StudentsSubject> {
 
     void showStudentOptions({
       required int studentId,
-      //required int studentId,
       required String username,
       required String name,
       required String lastName,
@@ -71,12 +70,12 @@ class _StudentsSubjectState extends ConsumerState<StudentsSubject> {
             if (!context.mounted) return;
 
             // Usar el notifier ya leído
-            final success = await subjectNotifier.removeStudentFromSubject(
+            final result = await subjectNotifier.removeStudentFromSubject(
               subjectId: widget.id,
               studentId: studentId,
             );
 
-            if (success) {
+            if (result['success']) {
               // Mostrar mensaje de éxito
               SuccessDialog.show(
                 context,
@@ -89,7 +88,7 @@ class _StudentsSubjectState extends ConsumerState<StudentsSubject> {
               // Mostrar mensaje de error
               ErrorDialog.show(
                 context,
-                message: 'No se pudo eliminar al alumno de la materia. Por favor, intente de nuevo.',
+                message: result['message'],
               );
             }
           } catch (e) {
@@ -108,67 +107,68 @@ class _StudentsSubjectState extends ConsumerState<StudentsSubject> {
       );
     }
 
-    if (lsStudents.isEmpty && _searchTerm.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            SvgPicture.asset(
-              'assets/icons/studentcap1.svg',
-              height: 200,
-              width: 200,
-              colorFilter: ColorFilter.mode(subjectColor, BlendMode.srcIn),
-            ),
-            const SizedBox(height: 16),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 40),
-              child: Text(
-                "Aquí se mostrarán los estudiantes que agregues a la materia.",
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.black,
+    return Column(
+      children: [
+        // Mostrar barra de búsqueda solo si hay estudiantes
+        if (lsStudents.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 8.0),
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                labelText: '  Buscar estudiantes por nombre o usuario',
+                prefixIconConstraints: BoxConstraints(maxWidth: 40, maxHeight: 40),
+                prefixIcon: Padding(padding: EdgeInsets.only(left: 8, right: 8), child: SvgPicture.asset('assets/icons/buscar.svg', width: 24, height: 24, colorFilter: ColorFilter.mode(subjectColor, BlendMode.srcIn))),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(25.0)),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: subjectColor, width: 2.0),
+                  borderRadius: BorderRadius.all(Radius.circular(25.0)),
                 ),
               ),
             ),
-          ],
-        ),
-      );
-    } else if (lsStudents.isNotEmpty && filteredStudents.isEmpty) {
-      return const Center(
-        child: Text(
-          'No se encontraron estudiantes con esa búsqueda.',
-          textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 16),
-        ),
-      );
-    }
-
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 8.0),
-          child: TextField(
-            controller: _searchController,
-            decoration: InputDecoration(
-              labelText: '  Buscar estudiantes por nombre o usuario',
-              prefixIconConstraints: BoxConstraints(maxWidth: 40, maxHeight: 40),
-              prefixIcon: Padding(padding: EdgeInsets.only(left: 8, right: 8), child: SvgPicture.asset('assets/icons/buscar.svg', width: 24, height: 24, colorFilter: ColorFilter.mode(subjectColor, BlendMode.srcIn))),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.all(Radius.circular(25.0)),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: subjectColor, width: 2.0),
-                borderRadius: BorderRadius.all(Radius.circular(25.0)),
-              ),
-            ),
           ),
-        ),
         Expanded(
-          child: StudentsGroupsSubjects(
-            lsStudents: filteredStudents,
-            studentOptionsFunction: showStudentOptions,
-          ),
+          child: lsStudents.isEmpty && _searchTerm.isEmpty
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SvgPicture.asset(
+                        'assets/icons/studentcap1.svg',
+                        height: 200,
+                        width: 200,
+                        colorFilter: ColorFilter.mode(subjectColor, BlendMode.srcIn),
+                      ),
+                      const SizedBox(height: 16),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 40),
+                        child: Text(
+                          "Aquí se mostrarán los estudiantes que agregues a la materia.",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              : lsStudents.isNotEmpty && filteredStudents.isEmpty
+                  ? const Center(
+                      child: Text(
+                        'No se encontraron estudiantes con esa búsqueda.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontSize: 16),
+                      ),
+                    )
+                  : StudentsGroupsSubjects(
+                      lsStudents: filteredStudents,
+                      studentOptionsFunction: showStudentOptions,
+                      displayColor: subjectColor,
+                    ),
         ),
       ],
     );

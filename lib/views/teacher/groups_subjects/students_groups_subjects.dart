@@ -1,12 +1,11 @@
 import 'package:aprende_mas/config/utils/packages.dart';
 import 'package:aprende_mas/models/models.dart';
-import 'package:aprende_mas/providers/subjects/students_subject_provider.dart';
 import 'package:aprende_mas/views/widgets/widgets.dart';
-import 'package:aprende_mas/providers/providers.dart';
 
 class StudentsGroupsSubjects extends ConsumerStatefulWidget {
   final List<StudentGroupSubject> lsStudents;
   final VoidCallback? voidCallback;
+  final Color? displayColor;
 
   final void Function({
     // required int alumnoMateriaId,
@@ -18,12 +17,12 @@ class StudentsGroupsSubjects extends ConsumerStatefulWidget {
   })? studentOptionsFunction;
 
 
-
   const StudentsGroupsSubjects(
       {super.key,
       required this.lsStudents,
       this.voidCallback,
-      this.studentOptionsFunction});
+      this.studentOptionsFunction,
+      this.displayColor});
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() =>
@@ -35,31 +34,6 @@ class _StudentsGroupsSubjectsState
   @override
   Widget build(BuildContext context) {
     final lsStudents = widget.lsStudents;
-
-    // return SingleChildScrollView(
-    //   child: Column(
-    //     children: [
-    //       SizedBox(
-    //         height: MediaQuery.of(context).size.height,
-    //         width: 360,
-    //         child: ListView.builder(
-    //           itemCount: lsStudents.length,
-    //           itemBuilder: (context, index) {
-    //             return ElementTile(
-    //                 icon: Icons.person,
-    //                 iconColor: Colors.white,
-    //                 iconSize: 28,
-    //                 title: lsStudents[index].username,
-    //                 subtitle:
-    //                     "${lsStudents[index].lastName} ${lsStudents[index].lastName2} ${lsStudents[index].name}",
-    //                 onTapFunction: () {},
-    //                 trailing: '');
-    //           },
-    //         ),
-    //       )
-    //     ],
-    //   ),
-    // );
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
@@ -73,8 +47,7 @@ class _StudentsGroupsSubjectsState
               child: ListView.builder(
                 itemCount: lsStudents.length,
                 itemBuilder: (context, index) {
-                  //final studentId = lsStudents[index].alumnoId;
-                  final studentId = lsStudents[index].alumnoMateriaId;
+                  final studentId = lsStudents[index].alumnoId;
                   final username = lsStudents[index].username;
                   final lastname = lsStudents[index].lastName;
                   final lastname2 = lsStudents[index].lastName2;
@@ -86,12 +59,12 @@ class _StudentsGroupsSubjectsState
                       width: 32,
                       height: 32,
                       colorFilter:
-                          const ColorFilter.mode(Colors.black, BlendMode.srcIn),
+                          ColorFilter.mode(widget.displayColor ?? Colors.blue, BlendMode.srcIn),
                     ),
                     iconColor: Colors.white,
                     iconSize: 32,
-                    title: username,
-                    subtitle: "$lastname $lastname2 $name",
+                    title: "$name $lastname $lastname2",
+                    subtitle: username,
                     trailingWidget: IconButton(
                       onPressed: () {
                         widget.studentOptionsFunction!(
@@ -105,7 +78,7 @@ class _StudentsGroupsSubjectsState
                       icon: Container(
                         width: 40,
                         height: 40,
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                           color: Colors.red,
                           shape: BoxShape.circle,
                         ),
