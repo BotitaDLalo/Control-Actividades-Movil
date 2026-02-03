@@ -73,7 +73,7 @@ class _ActividadesScreenState
           optionId: 3,
           isVisible: true,
           optionText: 'Alumnos asignados',
-          widgetOption: StudentsSubject(id: widget.subjectId)),
+          widgetOption: StudentsSubject(id: widget.subjectId, groupId: widget.groupId,)),
       GroupSubjectWidgetOption(
           optionId: 4,
           isVisible: widget.groupId == null ? true : false,

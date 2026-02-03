@@ -11,7 +11,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 class StudentsSubject extends ConsumerStatefulWidget {
   final int id;
-  const StudentsSubject({super.key, required this.id});
+  final int? groupId;
+  const StudentsSubject({super.key, required this.id, this.groupId});
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() =>
@@ -73,6 +74,7 @@ class _StudentsSubjectState extends ConsumerState<StudentsSubject> {
             final result = await subjectNotifier.removeStudentFromSubject(
               subjectId: widget.id,
               studentId: studentId,
+              groupId: widget.groupId ?? 0
             );
 
             if (result['success']) {

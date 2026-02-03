@@ -86,7 +86,8 @@ Future<bool> addStudentsSubject(int subjectId) async {
 
  Future<Map<String, dynamic>> removeStudentFromSubject({
    required int studentId,
-   required int subjectId
+   required int subjectId,
+   int groupId = 0
  }) async {
  try {
    final result = await subjectsRepository.removeStudentFromSubject(
