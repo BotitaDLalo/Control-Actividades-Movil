@@ -78,6 +78,7 @@ class _TeacherStudentSubmissionGradingState
       ),
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
+        padding: const EdgeInsets.only(bottom: 100),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
