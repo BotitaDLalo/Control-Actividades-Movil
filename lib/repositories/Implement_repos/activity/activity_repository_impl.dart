@@ -48,8 +48,8 @@ class ActivityRepositoryImpl implements ActivityRepository {
   }
 
   @override
-  Future<String> uploadFile(PlatformFile file) async {
-    return await activityDataSource.uploadFile(file);
+  Future<String> uploadFile(PlatformFile file, int activityId, int studentId) async {
+    return await activityDataSource.uploadFile(file, activityId, studentId);
   }
 
   @override

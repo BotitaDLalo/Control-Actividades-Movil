@@ -10,14 +10,15 @@ final activityFormProvider =
     // Obtenemos el notificador principal
     final activityNotifier = ref.read(activityProvider.notifier);
 
-    // Extraemos las funciones necesarias
+     // Extraemos las funciones necesarias
     final createActivity = activityNotifier.createdActivity;
     final sendActivity = activityNotifier.sendSubmission;
     final sendActivityWithLinks = activityNotifier.sendSubmissionWithLinks;
-    final sendActivityWithFiles = activityNotifier.sendSubmissionWithFiles; // Nuevo
+    final sendActivityWithFiles = activityNotifier.sendSubmissionWithFiles;
+    final sendActivityWithFilesAndLinks = activityNotifier.sendSubmissionWithFilesAndLinks;
     final sendActivityOffline = activityNotifier.sendSubmissionOffline;
     final submissionGrading = activityNotifier.submissionGrading;
-    final uploadFile = activityNotifier.uploadFile; // Nuevo
+    final uploadFile = activityNotifier.uploadFile;
     
     // 1. NUEVO: Extraemos la función updateActivity que acabamos de crear
     final updateActivity = activityNotifier.updateActivity; 
@@ -31,9 +32,10 @@ final activityFormProvider =
         
         sendSubmissionCallback: sendActivity,
         sendSubmissionWithLinksCallback: sendActivityWithLinks,
-        sendSubmissionWithFilesCallback: sendActivityWithFiles, // Nuevo
+        sendSubmissionWithFilesCallback: sendActivityWithFiles,
+        sendSubmissionWithFilesAndLinksCallback: sendActivityWithFilesAndLinks,
         sendSubmissionOfflineCallback: sendActivityOffline,
-        uploadFileCallback: uploadFile, // Nuevo
+        uploadFileCallback: uploadFile,
     );
   },
 );

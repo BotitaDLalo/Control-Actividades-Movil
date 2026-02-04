@@ -3,6 +3,7 @@ import 'package:aprende_mas/config/utils/packages.dart';
 import 'package:aprende_mas/models/models.dart';
 import 'package:aprende_mas/providers/activity/activity_form_state.dart';
 import 'package:aprende_mas/views/widgets/inputs/generic_input.dart';
+import 'package:aprende_mas/config/data/data.dart';
 import 'package:file_picker/file_picker.dart';
 
 class ActivityFormNotifier extends StateNotifier<ActivityFormState> {
@@ -19,11 +20,12 @@ class ActivityFormNotifier extends StateNotifier<ActivityFormState> {
   
   final Function(int, String) sendSubmissionCallback;
   final Function(int, String, List<String>)? sendSubmissionWithLinksCallback;
-  final Function(int, String, List<String>)? sendSubmissionWithFilesCallback; // Nuevo: incluye URLs de archivos
+  final Function(int, String, List<String>, List<String>)? sendSubmissionWithFilesAndLinksCallback;
+  final Function(int, String, List<String>)? sendSubmissionWithFilesCallback;
   final Function(int, String) sendSubmissionOfflineCallback;
   final Function({required int submissionId, required int grade})
       submissionGradingCallback;
-  final Future<String> Function(PlatformFile file)? uploadFileCallback; // Nuevo: para subir archivos
+  final Future<String> Function(PlatformFile file, int activityId, int studentId)? uploadFileCallback; // Nuevo: para subir archivos
   
   final TextEditingController nombreController;
   final TextEditingController descripcionController;
@@ -40,6 +42,7 @@ class ActivityFormNotifier extends StateNotifier<ActivityFormState> {
        this.updateActivityCallback,
        this.sendSubmissionWithLinksCallback,
        this.sendSubmissionWithFilesCallback,
+       this.sendSubmissionWithFilesAndLinksCallback,
        this.uploadFileCallback,
        })
        : fechaController = TextEditingController(),
@@ -340,39 +343,42 @@ class ActivityFormNotifier extends StateNotifier<ActivityFormState> {
      state = state.copyWith(existsAnswer: _hasContent());
    }
 
-   onSendSubmission(int activityId) async {
-     bool submissionSent = false;
-     
-     // Si hay archivos, primero los subimos y obtenemos URLs
-     List<String> fileUrls = [];
-     if (state.files.isNotEmpty && uploadFileCallback != null) {
-       for (var file in state.files) {
-         try {
-           final url = await uploadFileCallback!(file);
-           fileUrls.add(url);
-           debugPrint("✅ Archivo subido: $url");
-         } catch (e) {
-           debugPrint("❌ Error subiendo archivo ${file.name}: $e");
-         }
-       }
-     }
-     
-     // Determinar qué callback usar
-     if (sendSubmissionWithFilesCallback != null && fileUrls.isNotEmpty) {
-       // Usar callback con archivos
-       submissionSent = await sendSubmissionWithFilesCallback!(activityId, state.answer, fileUrls);
-     } else if (sendSubmissionWithLinksCallback != null) {
-       // Usar callback con enlaces (archivos vacíos)
-       submissionSent = await sendSubmissionWithLinksCallback!(activityId, state.answer, state.links);
-     } else {
-       // Fallback al callback básico
-       submissionSent = await sendSubmissionCallback(activityId, state.answer);
-     }
-     
-     if (submissionSent) {
-       dropAnswer();
-     }
-   }
+    onSendSubmission(int activityId) async {
+      bool submissionSent = false;
+      
+      // Obtener studentId del storage
+      final storageService = KeyValueStorageServiceImpl();
+      final studentId = await storageService.getId();
+      
+      // Si hay archivos, primero los subimos y obtenemos URLs
+      List<String> fileUrls = [];
+      if (state.files.isNotEmpty && uploadFileCallback != null) {
+        for (var file in state.files) {
+          try {
+            final url = await uploadFileCallback!(file, activityId, studentId);
+            fileUrls.add(url);
+            debugPrint("✅ Archivo subido: $url");
+          } catch (e) {
+            debugPrint("❌ Error subiendo archivo ${file.name}: $e");
+          }
+        }
+      }
+      
+      // Determinar qué callback usar
+      if (fileUrls.isNotEmpty && sendSubmissionWithFilesAndLinksCallback != null) {
+        submissionSent = await sendSubmissionWithFilesAndLinksCallback!(activityId, state.answer, fileUrls, state.links);
+      } else if (fileUrls.isNotEmpty && sendSubmissionWithFilesCallback != null) {
+        submissionSent = await sendSubmissionWithFilesCallback!(activityId, state.answer, fileUrls);
+      } else if (sendSubmissionWithLinksCallback != null) {
+        submissionSent = await sendSubmissionWithLinksCallback!(activityId, state.answer, state.links);
+      } else {
+        submissionSent = await sendSubmissionCallback(activityId, state.answer);
+      }
+      
+      if (submissionSent) {
+        dropAnswer();
+      }
+    }
 
    onSendSubmissionOffline(int activityId) async {
      bool submissionSent =

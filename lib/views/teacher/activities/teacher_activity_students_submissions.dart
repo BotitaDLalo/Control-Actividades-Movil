@@ -130,8 +130,8 @@ class _TeacherActivityStudentsSubmissionsState
                                       userName: e.userName,
                                       fullName: fullName,
                                       answer: e.answer,
-                                      links: e.links ?? [],
-                                      files: e.files ?? [],);
+                                      links: e.links,
+                                      files: e.files.map((f) => FileInfo(nombre: f.nombre, ruta: f.ruta)).toList(),);
 
                                   context.push(
                                       '/teacher-student-submission-grading',

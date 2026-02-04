@@ -13,7 +13,7 @@ abstract class ActivityDataSource {
 
   Future<List<Submission>> sendSubmission(int activityId, String answer, {List<String> links = const [], List<String> files = const []});
 
-  Future<String> uploadFile(PlatformFile file);
+  Future<String> uploadFile(PlatformFile file, int activityId, int studentId);
 
   Future<List<Submission>> getSubmissions(int activityId);
 

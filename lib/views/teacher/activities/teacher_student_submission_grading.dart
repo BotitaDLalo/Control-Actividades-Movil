@@ -199,25 +199,61 @@ class _TeacherStudentSubmissionGradingState
                           )
                         : Column(
                             children: files.map<Widget>((archivo) {
+                              String url = archivo.ruta.isNotEmpty ? archivo.ruta : '';
+                              String nombreMostrar = archivo.nombre.isNotEmpty ? archivo.nombre : '';
+                              
+                              if (url.isEmpty && nombreMostrar.isNotEmpty && nombreMostrar.startsWith('/')) {
+                                url = nombreMostrar;
+                              }
+                              
+                              if (url.isNotEmpty) {
+                                if (!url.startsWith('http')) {
+                                  url = 'http://192.168.0.9:5000$url';
+                                }
+                                if (nombreMostrar.isEmpty) {
+                                  nombreMostrar = url.split('/').last;
+                                }
+                              }
+                              
                               return Padding(
                                 padding: const EdgeInsets.symmetric(vertical: 4.0),
-                                child: Row(
-                                  children: [
-                                    SvgPicture.asset(
-                                      'assets/icons/documento.svg',
-                                      width: 40,
-                                      height: 40,
-                                      colorFilter: const ColorFilter.mode(Colors.black, BlendMode.srcIn),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: Text(
-                                        archivo,
-                                        style: const TextStyle(fontSize: 14),
-                                        maxLines: null,
+                                child: GestureDetector(
+                                  onTap: () async {
+                                    if (url.isNotEmpty) {
+                                      final uri = Uri.parse(url);
+                                      if (await canLaunchUrl(uri)) {
+                                        await launchUrl(uri, mode: LaunchMode.externalApplication);
+                                      } else {
+                                        if (mounted) {
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            const SnackBar(content: Text('No se pudo abrir el archivo')),
+                                          );
+                                        }
+                                      }
+                                    }
+                                  },
+                                  child: Row(
+                                    children: [
+                                      SvgPicture.asset(
+                                        'assets/icons/documento.svg',
+                                        width: 40,
+                                        height: 40,
+                                        colorFilter: const ColorFilter.mode(Colors.black, BlendMode.srcIn),
                                       ),
-                                    ),
-                                  ],
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Text(
+                                          nombreMostrar,
+                                          style: const TextStyle(
+                                            fontSize: 14,
+                                            color: Colors.blue,
+                                            decoration: TextDecoration.underline,
+                                          ),
+                                          maxLines: null,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               );
                             }).toList(),

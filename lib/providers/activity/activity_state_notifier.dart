@@ -237,9 +237,24 @@ Future<void> updateActivity(
     }
   }
 
-  Future<String> uploadFile(PlatformFile file) async {
+  Future<bool> sendSubmissionWithFilesAndLinks(int activityId, String answer, List<String> fileUrls, List<String> links) async {
     try {
-      return await activityRepository.uploadFile(file);
+      final submissionSent =
+          await activityRepository.sendSubmission(activityId, answer, links: links, files: fileUrls);
+      if (submissionSent.isNotEmpty) {
+        _setLsSubmissions(submissionSent);
+        return true;
+      }
+      return false;
+    } catch (e) {
+      debugPrint("Error en sendSubmissionWithFilesAndLinks: $e");
+      return false;
+    }
+  }
+
+  Future<String> uploadFile(PlatformFile file, int activityId, int studentId) async {
+    try {
+      return await activityRepository.uploadFile(file, activityId, studentId);
     } catch (e) {
       debugPrint("Error en uploadFile: $e");
       rethrow;

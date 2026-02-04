@@ -58,31 +58,77 @@ class Submission {
         try {
           final innerJson = jsonDecode(respuestaContent);
           textoFinal = innerJson['texto'] ?? innerJson['Respuesta'] ?? '';
-          enlacesFinal = (innerJson['enlaces'] as List?)?.map((e) => e.toString()).toList() ?? [];
-          archivosFinal = (innerJson['archivos'] as List?)?.map((e) => e.toString()).toList() ?? [];
+          enlacesFinal = (innerJson['enlaces'] as List?)
+              ?.map((e) => e.toString())
+              .where((e) => e.isNotEmpty)
+              .toList() ?? [];
+          archivosFinal = (innerJson['archivos'] as List?)
+              ?.map((e) {
+                if (e is Map<String, dynamic>) {
+                  final nombre = e['nombre']?.toString() ?? '';
+                  final url = e['url']?.toString() ?? '';
+                  return url.isNotEmpty ? url : nombre;
+                }
+                return e.toString();
+              })
+              .where((nombre) => nombre.isNotEmpty)
+              .toList() ?? [];
         } catch (e) {
-          // Si falla, usar el string directamente
           textoFinal = respuestaContent;
         }
       } else if (respuestaContent is String) {
         textoFinal = respuestaContent;
       } else if (respuestaContent is Map<String, dynamic>) {
-        // Ya viene como Map, no como string JSON
         textoFinal = respuestaContent['texto'] ?? respuestaContent['Respuesta'] ?? '';
-        enlacesFinal = (respuestaContent['enlaces'] as List?)?.map((e) => e.toString()).toList() ?? [];
-        archivosFinal = (respuestaContent['archivos'] as List?)?.map((e) => e.toString()).toList() ?? [];
+        enlacesFinal = (respuestaContent['enlaces'] as List?)
+            ?.map((e) => e.toString())
+            .where((e) => e.isNotEmpty)
+            .toList() ?? [];
+        archivosFinal = (respuestaContent['archivos'] as List?)
+            ?.map((e) {
+              if (e is Map<String, dynamic>) {
+                final nombre = e['nombre']?.toString() ?? '';
+                final url = e['url']?.toString() ?? '';
+                return url.isNotEmpty ? url : nombre;
+              }
+              return e.toString();
+            })
+            .where((nombre) => nombre.isNotEmpty)
+            .toList() ?? [];
       }
       
       // Los archivos también pueden venir en el JSON exterior
       if (archivosFinal.isEmpty) {
-        archivosFinal = (json['Archivos'] as List?)?.map((e) => e.toString()).toList() ?? 
-                        (json['archivos'] as List?)?.map((e) => e.toString()).toList() ?? [];
+        archivosFinal = (json['Archivos'] as List?)
+            ?.map((e) {
+              if (e is Map<String, dynamic>) {
+                return e['nombre']?.toString() ?? e['url']?.toString() ?? '';
+              }
+              return e.toString();
+            })
+            .where((nombre) => nombre.isNotEmpty)
+            .toList() ?? 
+            (json['archivos'] as List?)
+            ?.map((e) {
+              if (e is Map<String, dynamic>) {
+                return e['nombre']?.toString() ?? e['url']?.toString() ?? '';
+              }
+              return e.toString();
+            })
+            .where((nombre) => nombre.isNotEmpty)
+            .toList() ?? [];
       }
       
       // Los enlaces también pueden venir en el JSON exterior
       if (enlacesFinal.isEmpty) {
-        enlacesFinal = (json['Enlaces'] as List?)?.map((e) => e.toString()).toList() ?? 
-                       (json['enlaces'] as List?)?.map((e) => e.toString()).toList() ?? [];
+        enlacesFinal = (json['Enlaces'] as List?)
+            ?.map((e) => e.toString())
+            .where((e) => e.isNotEmpty)
+            .toList() ?? 
+            (json['enlaces'] as List?)
+            ?.map((e) => e.toString())
+            .where((e) => e.isNotEmpty)
+            .toList() ?? [];
       }
       
       return SubmissionResponse(
@@ -91,7 +137,6 @@ class Submission {
         archivos: archivosFinal,
       );
     } catch (e) {
-      // Si no es JSON válido, retornar como texto plano
       return SubmissionResponse(texto: respuestaJson, enlaces: [], archivos: []);
     }
   }
