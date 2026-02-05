@@ -14,6 +14,7 @@ class TeacherStudentSubmissionGradingModel {
   final List<FileInfo> files;
   final int grade;
   final int score;
+  final String submissionDate;
 
   TeacherStudentSubmissionGradingModel({
     required this.submissionId,
@@ -24,5 +25,6 @@ class TeacherStudentSubmissionGradingModel {
     this.files = const [],
     required this.grade,
     required this.score,
+    required this.submissionDate,
   });
 }

@@ -131,7 +131,8 @@ class _TeacherActivityStudentsSubmissionsState
                                       fullName: fullName,
                                       answer: e.answer,
                                       links: e.links,
-                                      files: e.files.map((f) => FileInfo(nombre: f.nombre, ruta: f.ruta)).toList(),);
+                                      files: e.files.map((f) => FileInfo(nombre: f.nombre, ruta: f.ruta)).toList(),
+                                      submissionDate: e.submissionDate,);
 
                                   context.push(
                                       '/teacher-student-submission-grading',

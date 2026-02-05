@@ -1,6 +1,7 @@
 import 'package:aprende_mas/config/utils/general_utils.dart';
 import 'package:aprende_mas/config/utils/packages.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:intl/intl.dart';
 import 'package:aprende_mas/models/models.dart';
 import 'package:aprende_mas/views/views.dart';
 import 'package:aprende_mas/providers/providers.dart';
@@ -343,6 +344,52 @@ class _ActivitySectionSubmissionState
       return summary;
     }
 
+    Widget _buildEstatusWidget() {
+      final lsSub = ref.watch(activityProvider).lsSubmissions;
+      final lsSubmissions = Submission.activitiesBySubject(lsSub, widget.activity.activityId!);
+      final fechaLimite = widget.activity.fechaLimite;
+      DateTime? fechaLimiteDate;
+
+      try {
+        fechaLimiteDate = DateFormat('dd-MM-yyyy HH:mm:ss').parse(fechaLimite);
+      } catch (e) {
+        try {
+          fechaLimiteDate = DateFormat('yyyy-MM-ddTHH:mm:ss').parse(fechaLimite);
+        } catch (e) {
+          fechaLimiteDate = null;
+        }
+      }
+
+      if (lsSubmissions.isNotEmpty) {
+        return const Text(
+          'Estatus: Entregado',
+          style: TextStyle(
+            color: Colors.green,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        );
+      } else if (fechaLimiteDate != null && DateTime.now().isAfter(fechaLimiteDate)) {
+        return const Text(
+          'Estatus: Retrasado',
+          style: TextStyle(
+            color: Colors.red,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        );
+      } else {
+        return const Text(
+          'Estatus: Pendiente',
+          style: TextStyle(
+            color: Colors.orange,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        );
+      }
+    }
+
     DateTime dateNow = DateTime.now();
 
     return WillPopScope(
@@ -368,7 +415,7 @@ class _ActivitySectionSubmissionState
                           )
                         : SvgPicture.asset(
                             'assets/icons/agregar.svg',
-                            color: Colors.black,
+                            color: Colors.white,
                             width: 40,
                             height: 40,
                           ))
@@ -412,6 +459,8 @@ class _ActivitySectionSubmissionState
                       fontSize: 18,
                     ),
                   ),
+                  const SizedBox(height: 8),
+                  _buildEstatusWidget(),
                   const SizedBox(height: 8),
                   Text(
                     widget.activity.puntaje.toString(),
