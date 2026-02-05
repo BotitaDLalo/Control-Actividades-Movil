@@ -11,7 +11,7 @@ abstract class ActivityRepository {
   Future<Activity> updateActivity(int activityId, String nombreActividad,
       String descripcion, DateTime fechaLimite, int puntaje, int materiaId);
 
-  Future<List<Submission>> sendSubmission(int activityId, String answer, {List<String> links = const [], List<String> files = const []});
+  Future<bool> sendSubmission(int activityId, String answer, {List<String> links = const [], List<String> files = const []});
 
   Future<String> uploadFile(PlatformFile file, int activityId, int studentId);
 

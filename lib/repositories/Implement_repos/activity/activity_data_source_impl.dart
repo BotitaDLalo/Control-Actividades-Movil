@@ -65,8 +65,6 @@ class ActivityDataSourceImpl implements ActivityDataSource {
     }
   }
 
-// En activity_data_source_impl.dart
-
   @override
   Future<Activity> updateActivity(
     int activityId,
@@ -121,9 +119,8 @@ class ActivityDataSourceImpl implements ActivityDataSource {
   }
 
   @override
-  Future<List<Submission>> sendSubmission(int activityId, String answer, {List<String> links = const [], List<String> files = const []}) async {
+  Future<bool> sendSubmission(int activityId, String answer, {List<String> links = const [], List<String> files = const []}) async {
     try {
-      //const uri = "/Alumnos/RegistrarEnvioActividadAlumno";
       const uri = "/Alumnos/RegistrarEnvioActividadAlumnoConEnlaces";
       DateTime dateNow = DateTime.now();
       final id = await storageService.getId();
@@ -151,17 +148,13 @@ class ActivityDataSourceImpl implements ActivityDataSource {
       final res = await dio.post(uri, data: formData);
 
       if (res.statusCode == 200) {
-        final resList = List<Map<String, dynamic>>.from(res.data['Datos'] ?? []);
-
-        final list = Submission.lsSubmissionJsonToLsEntity(resList, activityId);
-
-        return list;
+        return true;
       }
 
-      return [];
+      return false;
     } catch (e) {
       debugPrint(e.toString());
-      return [];
+      return false;
     }
   }
 

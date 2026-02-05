@@ -18,7 +18,7 @@ class ActivityRepositoryImpl implements ActivityRepository {
     return activities;
   }
 
- @override
+  @override
   Future<Activity> updateActivity(
       int activityId, 
       String nombreActividad,
@@ -43,7 +43,7 @@ class ActivityRepositoryImpl implements ActivityRepository {
   }
 
   @override
-  Future<List<Submission>> sendSubmission(int activityId, String answer, {List<String> links = const [], List<String> files = const []}) {
+  Future<bool> sendSubmission(int activityId, String answer, {List<String> links = const [], List<String> files = const []}) {
     return activityDataSource.sendSubmission(activityId, answer, links: links, files: files);
   }
 
@@ -79,9 +79,9 @@ class ActivityRepositoryImpl implements ActivityRepository {
   }
   
   @override
- Future<List<Activity>> getActivitiesBySubject(int materiaId) async {
-   final activities = await activityDataSource.getAllActivities(materiaId);
-   return activities;
- }
+  Future<List<Activity>> getActivitiesBySubject(int materiaId) async {
+    final activities = await activityDataSource.getAllActivities(materiaId);
+    return activities;
+  }
 
 }

@@ -6,6 +6,8 @@ import 'package:aprende_mas/views/views.dart';
 import 'package:aprende_mas/providers/providers.dart';
 import 'package:aprende_mas/providers/activity/activity_form_state.dart';
 import 'package:aprende_mas/config/utils/utils.dart';
+import 'package:aprende_mas/views/widgets/alerts/success_dialog.dart';
+import 'package:aprende_mas/views/widgets/alerts/error_dialog.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:file_picker/file_picker.dart';
@@ -27,6 +29,8 @@ class ActivitySectionSubmissions extends ConsumerStatefulWidget {
 class _ActivitySectionSubmissionState
     extends ConsumerState<ActivitySectionSubmissions> {
   late final String _draftKey;
+  BuildContext? _safeContext;
+  final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
@@ -189,22 +193,6 @@ class _ActivitySectionSubmissionState
                     showModalTextField(context);
                   },
                 ),
-                // ListTile(
-                //   leading: const Icon(Icons.description),
-                //   title: const Text('Agregar Archivo'),
-                //   onTap: () {
-                //     Navigator.pop(context);
-                //     // context.push('/create-group');
-                //   },
-                // ),
-                // ListTile(
-                //   leading: const Icon(Icons.link),
-                //   title: const Text('Agregar Enlace'),
-                //   onTap: () {
-                //     Navigator.pop(context);
-                //     // context.push('/create-subject');
-                //   },
-                // ),
               ],
             ),
           );
@@ -213,20 +201,19 @@ class _ActivitySectionSubmissionState
 
   @override
   Widget build(BuildContext context) {
+    _safeContext = context;
     final authConectionType = ref.read(authProvider).authConectionType;
     final activityId = widget.activity.activityId;
     final activitiesForm = ref.watch(activityFormProvider);
     final lsSub = ref.watch(activityProvider).lsSubmissions;
     final lsSubmissions = Submission.activitiesBySubject(lsSub, activityId!);
 
-    // final lsSubmissions = ref
-    //     .read(activityProvider.notifier)
-    //     .getSubmissionsByActivity(activityId);
-
     void showSendConfirmation() {
+      if (_safeContext == null) return;
+      
       showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
+        context: _safeContext!,
+        builder: (dialogContext) => AlertDialog(
           title: const Text(
             'Enviar',
             style: TextStyle(fontWeight: FontWeight.w500, color: Colors.black),
@@ -235,18 +222,42 @@ class _ActivitySectionSubmissionState
           contentPadding: const EdgeInsets.all(10),
           actions: [
             TextButton(
-                onPressed: () {
-                  print('Intentando enviar respuesta: ${activitiesForm.answer}');
-                  if (authConectionType == AuthConnectionType.online) {
-                    ref
-                        .read(activityFormProvider.notifier)
-                        .onSendSubmission(activityId);
-                  } else if (authConectionType == AuthConnectionType.offline) {
-                    ref
-                        .read(activityFormProvider.notifier)
-                        .onSendSubmissionOffline(activityId);
+                onPressed: () async {
+                  Navigator.pop(dialogContext);
+                  
+                  bool success = false;
+                  try {
+                    if (authConectionType == AuthConnectionType.online) {
+                      success = await ref
+                          .read(activityFormProvider.notifier)
+                          .onSendSubmission(activityId);
+                    } else if (authConectionType == AuthConnectionType.offline) {
+                      success = await ref
+                          .read(activityFormProvider.notifier)
+                          .onSendSubmissionOffline(activityId);
+                    }
+                    
+                    if (mounted) {
+                      if (success) {
+                        SuccessDialog.show(
+                          _safeContext!,
+                          message: 'Entrega realizada correctamente',
+                        );
+                      } else {
+                        ErrorDialog.show(
+                          _safeContext!,
+                          message: 'Error al realizar la entrega',
+                        );
+                      }
+                    }
+                  } catch (e) {
+                    if (mounted) {
+                      ErrorDialog.show(
+                        _safeContext!,
+                        message: 'Error de conexión',
+                      );
+                    }
                   }
-                  Navigator.pop(context);
                 },
                 child: const Text('Enviar'))
           ],
@@ -337,6 +348,7 @@ class _ActivitySectionSubmissionState
     return WillPopScope(
       onWillPop: _saveBeforeExit,
       child: Scaffold(
+        key: scaffoldKey,
         floatingActionButton:
             dateNow.isBefore(parseCustomDate(widget.activity.fechaLimite))
                 ? FloatingActionButton(
@@ -346,11 +358,13 @@ class _ActivitySectionSubmissionState
                           : showModalActivityType(context);
                     },
                     shape: AppTheme.shapeFloatingActionButton(),
-                    backgroundColor: Colors.white,
+                    backgroundColor: Colors.blue, // Círculo azul
                     child: activitiesForm.existsAnswer
-                        ? Icon(
-                            Icons.send,
-                            color: Colors.grey.withOpacity(0.8),
+                        ? SvgPicture.asset(
+                            'assets/icons/send1.svg',
+                            color: Colors.white, // Icono en blanco
+                            width: 28,
+                            height: 28,
                           )
                         : SvgPicture.asset(
                             'assets/icons/agregar.svg',
@@ -462,7 +476,6 @@ class _ActivitySectionSubmissionState
                                               ? (submission.answer!.length > 50 ? '${submission.answer!.substring(0, 50)}...' : submission.answer!)
                                               : "Sin texto",
                                           onTapFunction: () {
-                                            //TODO: Respuesta content
                                             showDialog(
                                               context: context,
                                               builder: (context) => AlertDialog(
@@ -477,13 +490,11 @@ class _ActivitySectionSubmissionState
                                                     crossAxisAlignment: CrossAxisAlignment.start,
                                                     mainAxisSize: MainAxisSize.min,
                                                     children: [
-                                                      // Mostrar texto
                                                       if (submission.answer != null && submission.answer!.isNotEmpty)
                                                         Text(
                                                           submission.answer!,
                                                           style: const TextStyle(fontSize: 16),
                                                         ),
-                                                      // Mostrar enlaces como links clicables
                                                       if (submission.links != null && submission.links!.isNotEmpty) ...[
                                                         const SizedBox(height: 16),
                                                         const Text(
@@ -516,7 +527,6 @@ class _ActivitySectionSubmissionState
                                                           ),
                                                         )),
                                                       ],
-                                                      // Mostrar archivos
                                                       if (submission.files != null && submission.files!.isNotEmpty) ...[
                                                         const SizedBox(height: 16),
                                                         const Text(
@@ -576,7 +586,7 @@ class _ActivitySectionSubmissionState
                                 showModalBottomDropAnswer(context);
                               },
                               child: SizedBox(
-                                height: 180, // Altura mucho mayor con footer
+                                height: 180,
                                 child: Container(
                                   margin: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 8.0),
                                   decoration: BoxDecoration(
@@ -612,7 +622,7 @@ class _ActivitySectionSubmissionState
                                         trailing: IconButton(
                                           onPressed: () {
                                             ref.read(activityFormProvider.notifier).dropAnswer();
-                                            _deleteDraft(); // Eliminar del borrador también
+                                            _deleteDraft();
                                           },
                                           icon: SvgPicture.asset(
                                             'assets/icons/eliminar4.svg',
@@ -663,4 +673,3 @@ class _ActivitySectionSubmissionState
     );
   }
 }
-

@@ -196,13 +196,8 @@ Future<void> updateActivity(
 
   Future<bool> sendSubmission(int activityId, String answer, {List<String> links = const []}) async {
     try {
-      final submissionSent =
-          await activityRepository.sendSubmission(activityId, answer, links: links);
-      if (submissionSent.isNotEmpty) {
-        _setLsSubmissions(submissionSent);
-        return true;
-      }
-      return false;
+      final success = await activityRepository.sendSubmission(activityId, answer, links: links);
+      return success;
     } catch (e) {
       return false;
     }
@@ -210,27 +205,18 @@ Future<void> updateActivity(
 
   Future<bool> sendSubmissionWithLinks(int activityId, String answer, List<String> links) async {
     try {
-      final submissionSent =
-          await activityRepository.sendSubmission(activityId, answer, links: links);
-      if (submissionSent.isNotEmpty) {
-        _setLsSubmissions(submissionSent);
-        return true;
-      }
-      return false;
+      final result = await activityRepository.sendSubmission(activityId, answer, links: links);
+      return result == true;
     } catch (e) {
+      debugPrint("Error en sendSubmissionWithLinks: $e");
       return false;
     }
   }
 
   Future<bool> sendSubmissionWithFiles(int activityId, String answer, List<String> fileUrls) async {
     try {
-      final submissionSent =
-          await activityRepository.sendSubmission(activityId, answer, files: fileUrls);
-      if (submissionSent.isNotEmpty) {
-        _setLsSubmissions(submissionSent);
-        return true;
-      }
-      return false;
+      final success = await activityRepository.sendSubmission(activityId, answer, files: fileUrls);
+      return success;
     } catch (e) {
       debugPrint("Error en sendSubmissionWithFiles: $e");
       return false;
@@ -239,13 +225,8 @@ Future<void> updateActivity(
 
   Future<bool> sendSubmissionWithFilesAndLinks(int activityId, String answer, List<String> fileUrls, List<String> links) async {
     try {
-      final submissionSent =
-          await activityRepository.sendSubmission(activityId, answer, links: links, files: fileUrls);
-      if (submissionSent.isNotEmpty) {
-        _setLsSubmissions(submissionSent);
-        return true;
-      }
-      return false;
+      final success = await activityRepository.sendSubmission(activityId, answer, links: links, files: fileUrls);
+      return success;
     } catch (e) {
       debugPrint("Error en sendSubmissionWithFilesAndLinks: $e");
       return false;
