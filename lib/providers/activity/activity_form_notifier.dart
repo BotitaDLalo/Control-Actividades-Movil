@@ -23,28 +23,28 @@ class ActivityFormNotifier extends StateNotifier<ActivityFormState> {
   final Function(int, String, List<String>, List<String>)? sendSubmissionWithFilesAndLinksCallback;
   final Function(int, String, List<String>)? sendSubmissionWithFilesCallback;
   final Function(int, String) sendSubmissionOfflineCallback;
-  final Function({required int submissionId, required int grade})
+   final Function({required int submissionId, required int grade})
       submissionGradingCallback;
-  final Future<String> Function(PlatformFile file, int activityId, int studentId)? uploadFileCallback; // Nuevo: para subir archivos
-  
-  final TextEditingController nombreController;
+  final Future<String> Function(PlatformFile file, int activityId, int studentId)? uploadFileCallback;
+
+   final TextEditingController nombreController;
   final TextEditingController descripcionController;
   final TextEditingController fechaController;
   final TextEditingController horaController;
   final TextEditingController answerController;
   final TextEditingController puntajeController;
 
-  ActivityFormNotifier(
-       {required this.activityCallback,
-       required this.sendSubmissionCallback,
-       required this.sendSubmissionOfflineCallback,
-       required this.submissionGradingCallback,
-       this.updateActivityCallback,
-       this.sendSubmissionWithLinksCallback,
-       this.sendSubmissionWithFilesCallback,
-       this.sendSubmissionWithFilesAndLinksCallback,
-       this.uploadFileCallback,
-       })
+   ActivityFormNotifier(
+        {required this.activityCallback,
+        required this.sendSubmissionCallback,
+        required this.sendSubmissionOfflineCallback,
+        required this.submissionGradingCallback,
+        this.updateActivityCallback,
+        this.sendSubmissionWithLinksCallback,
+        this.sendSubmissionWithFilesCallback,
+        this.sendSubmissionWithFilesAndLinksCallback,
+        this.uploadFileCallback,
+        })
        : fechaController = TextEditingController(),
          horaController = TextEditingController(),
          nombreController = TextEditingController(),

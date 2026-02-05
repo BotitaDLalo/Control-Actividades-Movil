@@ -244,6 +244,7 @@ class _ActivitySectionSubmissionState
                           _safeContext!,
                           message: 'Entrega realizada correctamente',
                         );
+                        ref.read(activityProvider.notifier).getSubmissions(activityId);
                       } else {
                         ErrorDialog.show(
                           _safeContext!,

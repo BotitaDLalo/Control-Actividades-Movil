@@ -25,6 +25,16 @@ class _TeacherStudentSubmissionGradingState
     super.dispose();
   }
 
+  String _formatDateTime(String dateTimeStr) {
+    try {
+      // El formato del backend es: 2026-02-04T17:42:56.17
+      final dateTime = DateTime.parse(dateTimeStr);
+      return '${dateTime.year}-${dateTime.month.toString().padLeft(2, '0')}-${dateTime.day.toString().padLeft(2, '0')} ${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
+    } catch (e) {
+      return dateTimeStr; // Si hay error, retornar el original
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final data = widget.data;
@@ -35,6 +45,7 @@ class _TeacherStudentSubmissionGradingState
     final answer = data.answer;
     final links = data.links;
     final files = data.files;
+    final submissionDate = data.submissionDate;
 
     final activity = ref.watch(activityProvider);
     final activityNotifier = ref.read(activityProvider.notifier);
@@ -116,7 +127,7 @@ class _TeacherStudentSubmissionGradingState
                   subtitle: Text(
                     userName,
                     style: const TextStyle(
-                      fontSize: 16,
+                      fontSize: 18,
                       color: Colors.grey,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -141,9 +152,19 @@ class _TeacherStudentSubmissionGradingState
                   children: [
                     const Text(
                       'Respuesta',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 28),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 6),
+                    
+                    // Fecha de envío
+                    Text(
+                      'Enviado: ${_formatDateTime(data.submissionDate)}',
+                      style: const TextStyle(
+                        color: Colors.black,
+                        fontSize: 18,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
                     
                     // Calificación y Fecha de entrega
                     Column(
@@ -153,13 +174,13 @@ class _TeacherStudentSubmissionGradingState
                           activity.grade == -1 ? 'Sin calificar' : "Calificación: ${activity.grade}/$score",
                           style: const TextStyle(
                             color: Colors.black,
-                            fontSize: 14,
+                            fontSize: 18,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 18),
                     
                     // Campo de texto con la respuesta
                     Container(
@@ -177,25 +198,25 @@ class _TeacherStudentSubmissionGradingState
                           hintText: 'Sin respuesta',
                         ),
                         style: const TextStyle(
-                          fontSize: 16,
+                          fontSize: 18,
                           color: Colors.black,
                         ),
                       ),
                     ),
                     
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 24),
                     
                     // Sección de archivos adjuntos
                     const Text(
                       'Archivos adjuntos:',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 12),
                     files.isEmpty
                         ? const Center(
                             child: Text(
                               'No hay archivos adjuntos',
-                              style: TextStyle(color: Colors.grey, fontSize: 14),
+                              style: TextStyle(color: Colors.grey, fontSize: 18),
                             ),
                           )
                         : Column(
@@ -217,7 +238,7 @@ class _TeacherStudentSubmissionGradingState
                               }
                               
                               return Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 4.0),
+                                padding: const EdgeInsets.symmetric(vertical: 6.0),
                                 child: GestureDetector(
                                   onTap: () async {
                                     if (url.isNotEmpty) {
@@ -246,7 +267,7 @@ class _TeacherStudentSubmissionGradingState
                                         child: Text(
                                           nombreMostrar,
                                           style: const TextStyle(
-                                            fontSize: 14,
+                                            fontSize: 18,
                                             color: Colors.blue,
                                             decoration: TextDecoration.underline,
                                           ),
@@ -260,25 +281,25 @@ class _TeacherStudentSubmissionGradingState
                             }).toList(),
                           ),
                     
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 24),
                     
                     // Sección de enlaces
                     const Text(
                       'Enlaces:',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 12),
                     links.isEmpty
                         ? const Center(
                             child: Text(
                               'No hay enlaces',
-                              style: TextStyle(color: Colors.grey, fontSize: 14),
+                              style: TextStyle(color: Colors.grey, fontSize: 18),
                             ),
                           )
                         : Column(
                             children: links.map<Widget>((enlace) {
                               return Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 4.0),
+                                padding: const EdgeInsets.symmetric(vertical: 6.0),
                                 child: Row(
                                   children: [
                                     SvgPicture.asset(
@@ -301,7 +322,7 @@ class _TeacherStudentSubmissionGradingState
                                         child: Text(
                                           enlace,
                                           style: const TextStyle(
-                                            fontSize: 14,
+                                            fontSize: 18,
                                             color: Colors.blue,
                                             decoration: TextDecoration.underline,
                                           ),
@@ -324,7 +345,7 @@ class _TeacherStudentSubmissionGradingState
               const Text(
                 'Asignar Calificación',
                 style: TextStyle(
-                  fontSize: 20,
+                  fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: Colors.black,
                 ),
@@ -356,7 +377,7 @@ class _TeacherStudentSubmissionGradingState
                   Text(
                     '/ $score',
                     style: const TextStyle(
-                      fontSize: 20,
+                      fontSize: 18,
                       fontWeight: FontWeight.bold,
                       color: Colors.black,
                     ),
@@ -403,7 +424,7 @@ class _TeacherStudentSubmissionGradingState
               child: Text(
                 'Asignar Calificación',
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: 18,
                   fontWeight: FontWeight.w500,
                 ),
               ),
