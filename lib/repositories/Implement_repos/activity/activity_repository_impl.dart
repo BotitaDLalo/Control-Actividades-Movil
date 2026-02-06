@@ -58,7 +58,7 @@ class ActivityRepositoryImpl implements ActivityRepository {
   }
 
   @override
-  Future<List<Submission>> cancelSubmission(
+  Future<bool> cancelSubmission(
       int studentActivityId, int activityId) {
     return activityDataSource.cancelSubmission(studentActivityId, activityId);
   }

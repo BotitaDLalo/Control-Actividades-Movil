@@ -17,7 +17,7 @@ abstract class ActivityRepository {
 
   Future<List<Submission>> getSubmissions(int activityId);
 
-  Future<List<Submission>> cancelSubmission(
+  Future<bool> cancelSubmission(
       int studentActivityId, int activityId);
 
   Future<ActivityStudentSubmissionsData> getStudentSubmissions(int activityId);

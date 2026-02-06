@@ -242,18 +242,23 @@ Future<void> updateActivity(
     }
   }
 
-  Future<void> cancelSubmission(int studentActivityId, int activityId) async {
+  Future<bool> cancelSubmission(int studentActivityId, int activityId) async {
     try {
-      List<Submission> lsSubmissionsState = List.from(state.lsSubmissions);
-
-      await activityRepository.cancelSubmission(studentActivityId, activityId);
-
-      List<Submission> lsSubmissions = lsSubmissionsState
-          .where((element) => element.submissionActivityStudentId != studentActivityId)
-          .toList();
-      _updateLsSubmissions(lsSubmissions);
+      final success = await activityRepository.cancelSubmission(studentActivityId, activityId);
+      
+      if (success) {
+        // Actualizar lista local - remover el submission cancelado
+        List<Submission> lsSubmissionsState = List.from(state.lsSubmissions);
+        List<Submission> lsSubmissions = lsSubmissionsState
+            .where((element) => element.submissionActivityStudentId != studentActivityId)
+            .toList();
+        _updateLsSubmissions(lsSubmissions);
+      }
+      
+      return success;
     } catch (e) {
-      throw Exception(e);
+      debugPrint('Error en cancelSubmission: $e');
+      return false;
     }
   }
 

@@ -232,7 +232,7 @@ class ActivityDataSourceImpl implements ActivityDataSource {
   }
 
   @override
-  Future<List<Submission>> cancelSubmission(
+  Future<bool> cancelSubmission(
       int studentActivityId, int activityId) async {
     try {
       const uri = "/Alumnos/CancelarEnvioActividadAlumno";
@@ -245,18 +245,13 @@ class ActivityDataSourceImpl implements ActivityDataSource {
       });
 
       if (res.statusCode == 200) {
-        // final resList = Map<String, dynamic>.from(res.data);
-        final resList = List<Map<String, dynamic>>.from(res.data);
-
-        final list = Submission.lsSubmissionJsonToLsEntity(resList, activityId);
-
-        return list;
+        return true;
       }
 
-      return [];
+      return false;
     } catch (e) {
       print(e);
-      return [];
+      return false;
     }
   }
 

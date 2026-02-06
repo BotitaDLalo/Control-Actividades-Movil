@@ -9,6 +9,7 @@ import 'package:aprende_mas/providers/activity/activity_form_state.dart';
 import 'package:aprende_mas/config/utils/utils.dart';
 import 'package:aprende_mas/views/widgets/alerts/success_dialog.dart';
 import 'package:aprende_mas/views/widgets/alerts/error_dialog.dart';
+import 'package:aprende_mas/views/widgets/alerts/warning_confirmation_dialog.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:file_picker/file_picker.dart';
@@ -292,40 +293,6 @@ class _ActivitySectionSubmissionState
       );
     }
 
-    void showModalBottomCancelSubmit(int studentActivityId) {
-      showModalBottomSheet(
-        context: context,
-        builder: (context) {
-          return Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                ListTile(
-                  leading: SvgPicture.asset('assets/icons/eliminar1.svg', width: 24, height: 24),
-                  title: const Text('Cancelar Entregable'),
-                  onTap: () {
-                    if (authConectionType == AuthConnectionType.online) {
-                      ref.read(activityProvider.notifier).cancelSubmission(
-                          studentActivityId, widget.activity.activityId!);
-                    } else if (authConectionType ==
-                        AuthConnectionType.offline) {}
-
-                    Navigator.pop(context);
-                  },
-                ),
-              ],
-            ),
-          );
-        },
-      );
-    }
-
-    void showErrorMessage(String message) {
-      errorMessage(context, message);
-    }
-
     String _buildSubmissionSummary(ActivityFormState form) {
       String summary = '';
       if (form.answer.isNotEmpty) {
@@ -491,16 +458,17 @@ class _ActivitySectionSubmissionState
                   const SizedBox(
                     height: 15,
                   ),
-                  //TODO: AQUI VAN A ESTAR LAS TAREAS ENTREGADAS
+                  //ENTREGABLES ENVIADOS
                   lsSubmissions.isNotEmpty
                       ? SizedBox(
                           height: MediaQuery.of(context).size.height * 0.25,
                           child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               const Text(
                                 'Entregables enviados',
                                 style: TextStyle(
-                                  fontSize: 25.0,
+                                  fontSize: 20.0,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -510,108 +478,140 @@ class _ActivitySectionSubmissionState
                                   itemBuilder: (context, index) {
                                     final submission = lsSubmissions[index];
 
-                                    return GestureDetector(
-                                      onLongPress: () {
-                                        if (submission.status!) {
-                                          showModalBottomCancelSubmit(
-                                              submission.submissionActivityStudentId);
-                                        }
-                                      },
-                                      child: ElementTile(
-                                          iconWidget: SvgPicture.asset('assets/icons/activities20.svg', width: 28, height: 28),
-                                          iconColor: Colors.white,
-                                          iconSize: 28,
-                                          title: "Respuesta",
-                                          subtitle: submission.answer != null && submission.answer!.isNotEmpty
-                                              ? (submission.answer!.length > 50 ? '${submission.answer!.substring(0, 50)}...' : submission.answer!)
-                                              : "Sin texto",
-                                          onTapFunction: () {
-                                            showDialog(
-                                              context: context,
-                                              builder: (context) => AlertDialog(
-                                                title: const Text(
-                                                  'Respuesta',
-                                                  style: TextStyle(
-                                                      fontWeight:
-                                                          FontWeight.w500),
-                                                ),
-                                                content: SingleChildScrollView(
-                                                  child: Column(
-                                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                                    mainAxisSize: MainAxisSize.min,
-                                                    children: [
-                                                      if (submission.answer != null && submission.answer!.isNotEmpty)
-                                                        Text(
-                                                          submission.answer!,
-                                                          style: const TextStyle(fontSize: 16),
-                                                        ),
-                                                      if (submission.links != null && submission.links!.isNotEmpty) ...[
-                                                        const SizedBox(height: 16),
-                                                        const Text(
-                                                          'Enlaces:',
-                                                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                                                        ),
-                                                        ...submission.links!.map((link) => Padding(
-                                                          padding: const EdgeInsets.only(top: 8.0),
-                                                          child: InkWell(
-                                                            onTap: () async {
-                                                              final uri = Uri.parse(link);
-                                                              if (await canLaunchUrl(uri)) {
-                                                                await launchUrl(uri);
-                                                              } else {
-                                                                if (mounted) {
-                                                                  ScaffoldMessenger.of(context).showSnackBar(
-                                                                    const SnackBar(content: Text('No se pudo abrir el enlace')),
-                                                                  );
-                                                                }
-                                                              }
-                                                            },
-                                                            child: Text(
-                                                              link,
-                                                              style: const TextStyle(
-                                                                color: Colors.blue,
-                                                                fontSize: 14,
-                                                                decoration: TextDecoration.underline,
-                                                              ),
-                                                            ),
+                                    return ElementTile(
+                                      iconWidget: SvgPicture.asset('assets/icons/activities20.svg', width: 28, height: 28),
+                                      iconColor: Colors.white,
+                                      iconSize: 28,
+                                      title: "Respuesta",
+                                      subtitle: submission.answer != null && submission.answer!.isNotEmpty
+                                          ? (submission.answer!.length > 50 ? '${submission.answer!.substring(0, 50)}...' : submission.answer!)
+                                          : "Sin texto",
+                                      onTapFunction: () {
+                                        showDialog(
+                                          context: context,
+                                          builder: (context) => AlertDialog(
+                                            title: const Text(
+                                              'Respuesta',
+                                              style: TextStyle(
+                                                  fontWeight:
+                                                      FontWeight.w500),
+                                            ),
+                                            content: SingleChildScrollView(
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  if (submission.answer != null && submission.answer!.isNotEmpty)
+                                                    Text(
+                                                      submission.answer!,
+                                                      style: const TextStyle(fontSize: 16),
+                                                    ),
+                                                  if (submission.links != null && submission.links!.isNotEmpty) ...[
+                                                    const SizedBox(height: 16),
+                                                    const Text(
+                                                      'Enlaces:',
+                                                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                                    ),
+                                                    ...submission.links!.map((link) => Padding(
+                                                      padding: const EdgeInsets.only(top: 8.0),
+                                                      child: InkWell(
+                                                        onTap: () async {
+                                                          final uri = Uri.parse(link);
+                                                          if (await canLaunchUrl(uri)) {
+                                                            await launchUrl(uri);
+                                                          } else {
+                                                            if (mounted) {
+                                                              ScaffoldMessenger.of(context).showSnackBar(
+                                                                const SnackBar(content: Text('No se pudo abrir el enlace')),
+                                                              );
+                                                            }
+                                                          }
+                                                        },
+                                                        child: Text(
+                                                          link,
+                                                          style: const TextStyle(
+                                                            color: Colors.blue,
+                                                            fontSize: 14,
+                                                            decoration: TextDecoration.underline,
                                                           ),
-                                                        )),
-                                                      ],
-                                                      if (submission.files != null && submission.files!.isNotEmpty) ...[
-                                                        const SizedBox(height: 16),
-                                                        const Text(
-                                                          'Archivos:',
-                                                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                                                         ),
-                                                        ...submission.files!.map((file) => Padding(
-                                                          padding: const EdgeInsets.only(top: 8.0),
-                                                          child: Text(
-                                                            file,
-                                                            style: const TextStyle(fontSize: 14),
-                                                          ),
-                                                        )),
-                                                      ],
-                                                    ],
-                                                  ),
-                                                ),
-                                                contentPadding:
-                                                    const EdgeInsets.all(10),
-                                                actions: [
-                                                  TextButton(
-                                                      onPressed: () {
-                                                        Navigator.pop(context);
-                                                      },
-                                                      child:
-                                                          const Text('Cerrar'))
+                                                      ),
+                                                    )),
+                                                  ],
+                                                  if (submission.files != null && submission.files!.isNotEmpty) ...[
+                                                    const SizedBox(height: 16),
+                                                    const Text(
+                                                      'Archivos:',
+                                                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                                    ),
+                                                    ...submission.files!.map((file) => Padding(
+                                                      padding: const EdgeInsets.only(top: 8.0),
+                                                      child: Text(
+                                                        file,
+                                                        style: const TextStyle(fontSize: 14),
+                                                      ),
+                                                    )),
+                                                  ],
                                                 ],
                                               ),
-                                            );
-                                          },
-                                          trailingString: submission.status!
-                                              ? (submission.grade == null
-                                                  ? "Enviado"
-                                                  : "${submission.grade} /${widget.activity.puntaje}")
-                                              : "Pendiente a envió"),
+                                            ),
+                                            contentPadding:
+                                                const EdgeInsets.all(10),
+                                            actions: [
+                                              TextButton(
+                                                  onPressed: () {
+                                                    Navigator.pop(context);
+                                                  },
+                                                  child:
+                                                      const Text('Cerrar'))
+                                            ],
+                                          ),
+                                        );
+                                      },
+                                      trailingWidget: submission.status!
+                                          ? IconButton(
+                                              onPressed: () async {
+                                                if (authConectionType == AuthConnectionType.online) {
+                                                  WarningConfirmationDialog.show(
+                                                    context,
+                                                    message: '¿Estás seguro de que deseas cancelar este entregable?',
+                                                    onConfirmPressed: () async {
+                                                      bool success = await ref
+                                                          .read(activityProvider.notifier)
+                                                          .cancelSubmission(
+                                                              submission.submissionActivityStudentId,
+                                                              widget.activity.activityId!);
+                                                      
+                                                      if (mounted) {
+                                                        if (success) {
+                                                          SuccessDialog.show(
+                                                            context,
+                                                            message: 'Entregable cancelado correctamente',
+                                                          );
+                                                        } else {
+                                                          ErrorDialog.show(
+                                                            context,
+                                                            message: 'Error al cancelar el entregable',
+                                                          );
+                                                        }
+                                                      }
+                                                    },
+                                                  );
+                                                } else if (authConectionType == AuthConnectionType.offline) {
+                                                  ErrorDialog.show(
+                                                    context,
+                                                    message: 'No disponible en modo offline',
+                                                  );
+                                                }
+                                              },
+                                              icon: SvgPicture.asset(
+                                                'assets/icons/eliminar4.svg',
+                                                width: 32,
+                                                height: 32,
+                                                colorFilter: const ColorFilter.mode(Colors.red, BlendMode.srcIn),
+                                              ),
+                                            )
+                                          : null,
                                     );
                                   },
                                 ),
@@ -621,11 +621,25 @@ class _ActivitySectionSubmissionState
                         )
                       : const SizedBox(),
                   activitiesForm.existsAnswer
-                      ? const Text(
-                          'Entregables',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                          ),
+                      ? Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Borrador de entregable',
+                              style: TextStyle(
+                                fontSize: 20.0,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            const Text(
+                              'Si necesitas actualizar tu entrega vuelve a enviar el borrador. Nota: Si esta calificada la entrega entonces no se podra reenviar',
+                              style: TextStyle(
+                                fontSize: 14.0,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          ],
                         )
                       : const SizedBox(),
                   Column(
