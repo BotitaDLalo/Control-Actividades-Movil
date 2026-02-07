@@ -461,7 +461,7 @@ class _ActivitySectionSubmissionState
                   //ENTREGABLES ENVIADOS
                   lsSubmissions.isNotEmpty
                       ? SizedBox(
-                          height: MediaQuery.of(context).size.height * 0.25,
+                          height: 200,
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -479,7 +479,7 @@ class _ActivitySectionSubmissionState
                                     final submission = lsSubmissions[index];
 
                                     return ElementTile(
-                                      iconWidget: SvgPicture.asset('assets/icons/activities20.svg', width: 28, height: 28),
+                                      iconWidget: SvgPicture.asset('assets/icons/activities20.svg', width: 50, height: 50),
                                       iconColor: Colors.white,
                                       iconSize: 28,
                                       title: "Respuesta",
@@ -606,8 +606,8 @@ class _ActivitySectionSubmissionState
                                               },
                                               icon: SvgPicture.asset(
                                                 'assets/icons/eliminar4.svg',
-                                                width: 32,
-                                                height: 32,
+                                                width: 40,
+                                                height: 40,
                                                 colorFilter: const ColorFilter.mode(Colors.red, BlendMode.srcIn),
                                               ),
                                             )
@@ -620,6 +620,7 @@ class _ActivitySectionSubmissionState
                           ),
                         )
                       : const SizedBox(),
+                  const SizedBox(height: 40), // Espacio amplio entre secciones
                   activitiesForm.existsAnswer
                       ? Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
