@@ -10,6 +10,7 @@ import 'package:aprende_mas/config/utils/utils.dart';
 import 'package:aprende_mas/views/widgets/alerts/success_dialog.dart';
 import 'package:aprende_mas/views/widgets/alerts/error_dialog.dart';
 import 'package:aprende_mas/views/widgets/alerts/warning_confirmation_dialog.dart';
+import 'package:aprende_mas/views/widgets/alerts/warning_dialog.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:file_picker/file_picker.dart';
@@ -437,6 +438,47 @@ class _ActivitySectionSubmissionState
                         fontSize: 24,
                         fontWeight: FontWeight.bold),
                   ),
+                  // Mostrar calificación (siempre visible si hay entregas)
+                  if (lsSubmissions.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        const Text(
+                          'Calificación: ',
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        if (lsSubmissions.any((s) => s.grade != null))
+                          Text(
+                            lsSubmissions.where((s) => s.grade != null).first.grade!,
+                            style: const TextStyle(
+                              color: Colors.green,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          )
+                        else
+                          const Text(
+                            'sin calificación',
+                            style: TextStyle(
+                              color: Colors.grey,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        if (lsSubmissions.any((s) => s.grade != null))
+                          SvgPicture.asset(
+                            'assets/icons/palomita2.svg',
+                            width: 20,
+                            height: 20,
+                            colorFilter: const ColorFilter.mode(Colors.green, BlendMode.srcIn),
+                          ),
+                      ],
+                    ),
+                  ],
                   const SizedBox(height: 16),
                   const Divider(
                     color: Colors.black,
@@ -493,14 +535,45 @@ class _ActivitySectionSubmissionState
                                             title: const Text(
                                               'Respuesta',
                                               style: TextStyle(
-                                                  fontWeight:
-                                                      FontWeight.w500),
+                                                fontWeight: FontWeight.w500,
+                                                color: Colors.black,
+                                              ),
                                             ),
                                             content: SingleChildScrollView(
                                               child: Column(
                                                 crossAxisAlignment: CrossAxisAlignment.start,
                                                 mainAxisSize: MainAxisSize.min,
                                                 children: [
+                                                  // Mostrar calificación si existe
+                                                  if (submission.grade != null) ...[
+                                                    Row(
+                                                      children: [
+                                                        const Text(
+                                                          'Calificación: ',
+                                                          style: TextStyle(
+                                                            fontSize: 16,
+                                                            fontWeight: FontWeight.bold,
+                                                          ),
+                                                        ),
+                                                        Text(
+                                                          submission.grade!,
+                                                          style: const TextStyle(
+                                                            fontSize: 16,
+                                                            fontWeight: FontWeight.bold,
+                                                            color: Colors.green,
+                                                          ),
+                                                        ),
+                                                        const SizedBox(width: 4),
+                                                        SvgPicture.asset(
+                                                          'assets/icons/palomita2.svg',
+                                                          width: 16,
+                                                          height: 16,
+                                                          colorFilter: const ColorFilter.mode(Colors.green, BlendMode.srcIn),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    const SizedBox(height: 16),
+                                                  ],
                                                   if (submission.answer != null && submission.answer!.isNotEmpty)
                                                     Text(
                                                       submission.answer!,
@@ -546,9 +619,27 @@ class _ActivitySectionSubmissionState
                                                     ),
                                                     ...submission.files!.map((file) => Padding(
                                                       padding: const EdgeInsets.only(top: 8.0),
-                                                      child: Text(
-                                                        file,
-                                                        style: const TextStyle(fontSize: 14),
+                                                      child: InkWell(
+                                                        onTap: () async {
+                                                          final uri = Uri.parse(file);
+                                                          if (await canLaunchUrl(uri)) {
+                                                            await launchUrl(uri, mode: LaunchMode.externalApplication);
+                                                          } else {
+                                                            if (mounted) {
+                                                              ScaffoldMessenger.of(context).showSnackBar(
+                                                                const SnackBar(content: Text('No se pudo abrir el archivo')),
+                                                              );
+                                                            }
+                                                          }
+                                                        },
+                                                        child: Text(
+                                                          file,
+                                                          style: const TextStyle(
+                                                            color: Colors.blue,
+                                                            fontSize: 14,
+                                                            decoration: TextDecoration.underline,
+                                                          ),
+                                                        ),
                                                       ),
                                                     )),
                                                   ],
@@ -568,50 +659,63 @@ class _ActivitySectionSubmissionState
                                           ),
                                         );
                                       },
-                                      trailingWidget: submission.status!
-                                          ? IconButton(
-                                              onPressed: () async {
-                                                if (authConectionType == AuthConnectionType.online) {
-                                                  WarningConfirmationDialog.show(
-                                                    context,
-                                                    message: '¿Estás seguro de que deseas cancelar este entregable?',
-                                                    onConfirmPressed: () async {
-                                                      bool success = await ref
-                                                          .read(activityProvider.notifier)
-                                                          .cancelSubmission(
-                                                              submission.submissionActivityStudentId,
-                                                              widget.activity.activityId!);
-                                                      
-                                                      if (mounted) {
-                                                        if (success) {
-                                                          SuccessDialog.show(
-                                                            context,
-                                                            message: 'Entregable cancelado correctamente',
-                                                          );
-                                                        } else {
-                                                          ErrorDialog.show(
-                                                            context,
-                                                            message: 'Error al cancelar el entregable',
-                                                          );
-                                                        }
-                                                      }
-                                                    },
-                                                  );
-                                                } else if (authConectionType == AuthConnectionType.offline) {
-                                                  ErrorDialog.show(
-                                                    context,
-                                                    message: 'No disponible en modo offline',
-                                                  );
-                                                }
-                                              },
-                                              icon: SvgPicture.asset(
-                                                'assets/icons/eliminar4.svg',
-                                                width: 40,
-                                                height: 40,
-                                                colorFilter: const ColorFilter.mode(Colors.red, BlendMode.srcIn),
-                                              ),
-                                            )
-                                          : null,
+                                       trailingWidget: submission.status!
+                                           ? IconButton(
+                                               onPressed: () async {
+                                                 if (submission.grade != null && submission.grade!.isNotEmpty) {
+                                                   WarningDialog.show(
+                                                     context,
+                                                     message: 'No puedes cancelar esta entrega pues ya esta calificada',
+                                                   );
+                                                   return;
+                                                 }
+                                                 
+                                                 if (authConectionType == AuthConnectionType.online) {
+                                                   WarningConfirmationDialog.show(
+                                                     context,
+                                                     message: '¿Estás seguro de que deseas cancelar este entregable?',
+                                                     onConfirmPressed: () async {
+                                                       bool success = await ref
+                                                           .read(activityProvider.notifier)
+                                                           .cancelSubmission(
+                                                               submission.submissionActivityStudentId,
+                                                               widget.activity.activityId!);
+                                                       
+                                                       if (mounted) {
+                                                         if (success) {
+                                                           SuccessDialog.show(
+                                                             context,
+                                                             message: 'Entregable cancelado correctamente',
+                                                           );
+                                                         } else {
+                                                           ErrorDialog.show(
+                                                             context,
+                                                             message: 'Error al cancelar el entregable',
+                                                           );
+                                                         }
+                                                       }
+                                                     },
+                                                   );
+                                                 } else if (authConectionType == AuthConnectionType.offline) {
+                                                   ErrorDialog.show(
+                                                     context,
+                                                     message: 'No disponible en modo offline',
+                                                   );
+                                                 }
+                                               },
+                                               icon: SvgPicture.asset(
+                                                 'assets/icons/eliminar4.svg',
+                                                 width: 40,
+                                                 height: 40,
+                                                 colorFilter: ColorFilter.mode(
+                                                   submission.grade != null && submission.grade!.isNotEmpty
+                                                       ? Colors.grey.shade300
+                                                       : Colors.red,
+                                                   BlendMode.srcIn,
+                                                 ),
+                                               ),
+                                             )
+                                           : null,
                                     );
                                   },
                                 ),

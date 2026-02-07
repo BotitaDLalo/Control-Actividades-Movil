@@ -15,6 +15,8 @@ class ElementTile extends ConsumerWidget {
   final GestureTapCallback? onTapFunction;
   final VoidCallback? trailingVoidCallback;
   final Widget? trailingWidget;
+  final String? bottomText; // Nuevo: texto en la parte inferior
+  final Color? bottomTextColor; // Nuevo: color del texto inferior
 
   const ElementTile({
     super.key,
@@ -30,6 +32,8 @@ class ElementTile extends ConsumerWidget {
     this.trailingVoidCallback,
     this.trailingWidget,
     this.trailingIcon,
+    this.bottomText,
+    this.bottomTextColor,
   });
 
   @override
@@ -84,13 +88,30 @@ class ElementTile extends ConsumerWidget {
           ),
           
           // --- Subtitle (Fecha/Descripción) ---
-          subtitle: Text(
-            subtitle,
-            maxLines: 3, // Mostrar hasta 3 líneas de texto
-            style: const TextStyle(
-                fontSize: 16, // Mismo tamaño que el borrador
-                color: Colors.grey,
-                overflow: TextOverflow.ellipsis),
+          subtitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                subtitle,
+                maxLines: 3,
+                style: const TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey,
+                    overflow: TextOverflow.ellipsis),
+              ),
+              if (bottomText != null) ...[
+                const SizedBox(height: 4),
+                Text(
+                  bottomText!,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: bottomTextColor ?? Colors.green,
+                  ),
+                ),
+              ],
+            ],
           ),
           onTap: onTapFunction,
         ),

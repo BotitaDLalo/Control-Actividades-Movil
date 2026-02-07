@@ -149,6 +149,8 @@ class _TeacherActivityStudentsSubmissionsState
                                 iconSize: 32,
                                 title: fullName,
                                 subtitle: e.userName,
+                                bottomText: e.grade > 0 ? 'Calificado' : null,
+                                bottomTextColor: Colors.green,
                                 trailingWidget: Container(
                                   width: 40,
                                   height: 40,
