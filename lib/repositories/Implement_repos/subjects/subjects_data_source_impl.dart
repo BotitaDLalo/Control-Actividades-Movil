@@ -176,54 +176,54 @@ class SubjectsDataSourceImpl implements SubjectsDataSource {
   }
 
 
-@override
-Future<List<StudentGroupSubject>> addStudentsSubject(
-    int subjectId, List<String> emails) async {
-  
-// 1. Obtener el docenteId desde el almacenamiento
-final docenteId = await storageService.getId();
+      @override
+      Future<List<StudentGroupSubject>> addStudentsSubject(
+          int subjectId, List<String> emails) async {
+        
+      // 1. Obtener el docenteId desde el almacenamiento
+      final docenteId = await storageService.getId();
 
-// 2. Manejo de null: Si es null, lanzamos una excepción limpia.
-if (docenteId == null) {
-    throw Exception("Docente ID not found in storage."); 
-}
-// Si llega aquí, docenteId es un int no nulo.
+      // 2. Manejo de null: Si es null, lanzamos una excepción limpia.
+      if (docenteId == null) {
+          throw Exception("Docente ID not found in storage."); 
+      }
+      // Si llega aquí, docenteId es un int no nulo.
 
-const uri = "/Alumnos/RegistrarAlumnoGMDocente";
+      const uri = "/Alumnos/RegistrarAlumnoGMDocente";
 
-try {
-  final res = await dio.post(
-    uri, 
-    data: {
-      "Emails": emails, 
-      "MateriaId": subjectId,
-      "DocenteId": docenteId 
-    }
-    
-  );
+      try {
+        final res = await dio.post(
+          uri, 
+          data: {
+            "Emails": emails, 
+            "MateriaId": subjectId,
+            "DocenteId": docenteId 
+          }
+          
+        );
 
-    // Si la solicitud es exitosa (código 200), devuelve la lista
-    final resList = List<Map<String, dynamic>>.from(res.data);
-    return StudentGroupSubject.studentGroupSubjectJsonToEntity(resList); 
+          // Si la solicitud es exitosa (código 200), devuelve la lista
+          final resList = List<Map<String, dynamic>>.from(res.data);
+          return StudentGroupSubject.studentGroupSubjectJsonToEntity(resList); 
 
-  } on DioException catch (e) {
-    // Si la API devuelve un error 4xx o 5xx
-    final statusCode = e.response?.statusCode;
-    
-    // 1. Manejo del 400 (Error de Negocio)
-    if (statusCode == 400) {
-      final errorData = e.response?.data;
-      final serverMessage = errorData?['mensaje'] ?? 'Error desconocido del servidor.';
-      throw Exception(serverMessage);
-    }
-    
-    debugPrint('Error general de la API al asignar alumnos: $statusCode');
-    throw Exception('Error en la conexión o servidor.');
-    
-  } catch (e) {
-    throw Exception(e); 
-  }
-}
+        } on DioException catch (e) {
+          // Si la API devuelve un error 4xx o 5xx
+          final statusCode = e.response?.statusCode;
+          
+          // 1. Manejo del 400 (Error de Negocio)
+          if (statusCode == 400) {
+            final errorData = e.response?.data;
+            final serverMessage = errorData?['mensaje'] ?? 'Error desconocido del servidor.';
+            throw Exception(serverMessage);
+          }
+          
+          debugPrint('Error general de la API al asignar alumnos: $statusCode');
+          throw Exception('Error en la conexión o servidor.');
+          
+        } catch (e) {
+          throw Exception(e); 
+        }
+      }
 
 
 
