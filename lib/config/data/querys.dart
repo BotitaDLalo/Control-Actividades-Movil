@@ -62,13 +62,12 @@ class Querys {
         """
         CREATE TABLE tbAvisos (
           AvisoId INTEGER PRIMARY KEY,
-          UsuarioId INTEGER NOT NULL,
           Titulo TEXT NOT NULL,
           Descripcion TEXT NOT NULL,
           GrupoId INTEGER,
           MateriaId INTEGER,
           FechaCreacion TEXT NOT NULL,
-          FOREIGN KEY (UsuarioId) REFERENCES tbUsuarioActivo(UsuarioId)
+          DocenteNombre TEXT
         );
         """,
         """
