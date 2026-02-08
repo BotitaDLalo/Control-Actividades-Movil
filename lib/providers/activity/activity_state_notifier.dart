@@ -3,6 +3,7 @@ import 'package:aprende_mas/models/models.dart';
 import 'package:aprende_mas/providers/activity/activity_state.dart';
 import 'package:aprende_mas/repositories/Interface_repos/activity/activity_repository.dart';
 import 'package:aprende_mas/repositories/Interface_repos/activity/activity_offline_repository.dart';
+import 'package:aprende_mas/models/activities/activity/activity.dart';
 
 class ActivityNotifier extends StateNotifier<ActivityState> {
   final ActivityRepository activityRepository;
@@ -54,6 +55,37 @@ class ActivityNotifier extends StateNotifier<ActivityState> {
       // Re-throw para que auth_state_notifier pueda capturar el error
       rethrow;
     } finally {
+      state = state.copyWith(isLoading: false);
+    }
+  }
+
+    Future<void> loadActivities(int subjectId) async {
+    try {
+      state = state.copyWith(isLoading: true);
+      
+      // 1. Intenta obtener las actividades frescas desde el repositorio online
+      final activities = await activityRepository.getAllActivities(subjectId);
+      
+      // Si tiene éxito, actualiza el estado y guarda los datos en la BD local
+      _setActivities(activities);
+      // TODO: La lógica para guardar/actualizar actividades en la BD local debe ser implementada aquí
+      // para que los datos estén disponibles en modo offline la próxima vez.
+      
+
+    } catch (e) {
+      // 2. Si la carga online falla, intenta cargar desde la base de datos local
+      debugPrint("Fallo en carga online de actividades, usando fallback offline. Error: $e");
+      try {
+        final offlineActivities = await activityOfflineRepository.getAllActivitiesOffline(subjectId);
+        debugPrint("Cargando desde offline: ${offlineActivities.map((a) => {'id': a.activityId, 'nombre': a.nombreActividad}).toList()}");
+        _setActivities(offlineActivities);
+      } catch (e2) {
+        // 3. Si la carga offline también falla, se informa el error original.
+        debugPrint("Error en carga offline de actividades: $e2");
+        state = state.copyWith(errorMessage: e.toString());
+      }
+    } finally {
+      // 4. Se asegura de que el indicador de carga siempre se desactive.
       state = state.copyWith(isLoading: false);
     }
   }

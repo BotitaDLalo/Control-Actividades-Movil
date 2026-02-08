@@ -27,10 +27,21 @@ final activityProvider =
 });
 final activitiesBySubjectProvider =
     FutureProvider.family<List<Activity>, int>((ref, subjectId) async {
+  // Se obtienen ambos repositorios
   final activityRepository = ref.watch(activityRepositoryProvider);
+  final activityOfflineRepository = ref.watch(activityOfflineRepositoryProvider);
 
-  // 🎯 Llama al nuevo método:
-  return activityRepository.getActivitiesBySubject(subjectId);
+  try {
+    // Se intenta obtener los datos de la fuente online primero
+    final onlineActivities =
+        await activityRepository.getActivitiesBySubject(subjectId);
+    return onlineActivities;
+  } catch (e) {
+    // Si la carga online falla, se recurre a la fuente de datos offline
+    print(
+        "Fallo al cargar actividades online, usando caché offline. Error: $e");
+    return activityOfflineRepository.getAllActivitiesOffline(subjectId);
+  }
 });
 
 // Provider que contiene el término de búsqueda actual (ej: "Tarea")

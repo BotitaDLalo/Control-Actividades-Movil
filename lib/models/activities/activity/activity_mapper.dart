@@ -24,7 +24,7 @@ class ActivityMapper {
       'actividadId': activity.activityId,
       'nombreActividad': activity.nombreActividad,
       'descripcionActividad': activity.descripcion,
-      'tipoActividadId': activity.tipoActividadId,
+      //'tipoActividadId': activity.tipoActividadId,
       'fechaCreacionActividad': formatDate(activity.fechaCreacion!),
       'fechaLimiteActividad': formatDate(activity.fechaLimite),
       'materiaId': activity.materiaId,

@@ -13,7 +13,7 @@ class ActivityOfflineDatasourceImpl implements ActivityOfflineDatasource {
   Future<List<Activity>> getAllActivitiesOffline(int subjectId) async {
     try {
       final db = await DbLocal.database;
-      final querylsActivitiesId = await db.query('tbMateriasActividades',
+      final querylsActivitiesId = await db.query('tbActividades',
           columns: ['ActividadId'],
           where: '"MateriaId" = ?',
           whereArgs: [subjectId]);
@@ -39,6 +39,26 @@ class ActivityOfflineDatasourceImpl implements ActivityOfflineDatasource {
       return [];
     }
   }
+
+//Nuevo metdodo para llamar actividades offline por materia
+/*@override
+Future<List<Activity>> getAllActivitiesOffline(int subjectId) async {
+  try {
+    final db = await DbLocal.database;
+
+    final querylsActivities = await db.query(
+      'tbActividades',
+      where: 'MateriaId = ?',
+      whereArgs: [subjectId],
+    );
+
+    return Activity.queryToEntityActivity(querylsActivities);
+  } catch (e) {
+    debugPrint('Error en getAllActivitiesOffline: $e');
+    return [];
+  }
+}*/
+
 
   @override
   Future<void> saveSubmissions(
