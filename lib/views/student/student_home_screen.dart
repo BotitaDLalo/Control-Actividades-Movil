@@ -2,6 +2,10 @@ import 'package:aprende_mas/config/utils/packages.dart';
 import 'package:aprende_mas/views/student/student.dart';
 import 'package:aprende_mas/views/views.dart';
 import 'package:aprende_mas/models/models.dart';
+import 'package:flutter/material.dart';
+import 'package:aprende_mas/providers/authentication/auth_provider.dart';
+import 'package:aprende_mas/views/widgets/snackbars/no_internet_snackbar.dart';
+
 
 class StudentHomeScreen extends ConsumerStatefulWidget {
   const StudentHomeScreen({super.key});
