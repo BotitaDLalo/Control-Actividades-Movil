@@ -5,4 +5,10 @@ abstract class NoticesRepository {
   Future<List<NoticeModel>> getlsNotices(NoticeModel notice);
   Future<bool> deleteNotice(int notice);
   Future<List<NoticeModel>> updateNotice(NoticeModel notice);
+  // Agregar esta definición:
+  Future<List<NoticeModel>> getNotices({
+    int? subjectId,
+    int? groupId,
+  });
+
 }

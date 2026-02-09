@@ -3,8 +3,7 @@ import 'package:aprende_mas/config/utils/packages.dart';
 import 'package:aprende_mas/models/models.dart';
 import 'package:aprende_mas/views/widgets/activities_body/notice/notice_body/notice_body.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-
-import '../../../providers/notices/future_notices_provider.dart';
+import 'package:aprende_mas/providers/notices/notices_provider.dart';
 
 class StudentNoticeOptionsScreen extends ConsumerStatefulWidget {
   final int groupId;
@@ -35,6 +34,13 @@ class _StudentNoticeOptionsScreenState
         _searchTerm = _searchController.text;
       });
     });
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(noticesProvider.notifier).loadNotices(
+            subjectId: widget.subjectId != 0 ? widget.subjectId : null,
+            groupId: widget.groupId != 0 ? widget.groupId : null,
+          );
+    });
     super.initState();
   }
 
@@ -47,16 +53,14 @@ class _StudentNoticeOptionsScreenState
   @override
   Widget build(BuildContext context) {
     final subjectColor = getSubjectColor(widget.subjectId);
-
-    final futureNoticesls = ref.watch(futureNoticesProvider(notice));
-
-    void requestAgain() {
-      void _ = ref.refresh(futureNoticesProvider(notice));
-    }
+    final noticesState = ref.watch(noticesProvider);
+    final allNotices = noticesState.lsNotices;
+    final isLoading = noticesState.isLoading;
 
     return Scaffold(
-      body: futureNoticesls.when(
-        data: (allNotices) {
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : Builder(builder: (context) {
           // Filtrado local
           final filteredNotices = allNotices.where((element) {
             final titleLower = element.title.toLowerCase();
@@ -152,12 +156,7 @@ class _StudentNoticeOptionsScreenState
               ],
             ),
           );
-        },
-        error: (error, stackTrace) => Text(error.toString()),
-        loading: () => const Center(
-          child: CircularProgressIndicator(),
-        ),
-      ),
+        }),
     );
   }
 }

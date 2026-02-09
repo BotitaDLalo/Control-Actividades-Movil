@@ -28,4 +28,18 @@ class NoticesRepositoryImpl implements NoticesRepository {
   Future<List<NoticeModel>> updateNotice(NoticeModel notice) {
     return noticesDataSource.updateNotice(notice);
   }
+
+  @override
+Future<List<NoticeModel>> getNotices({int? subjectId, int? groupId}) async {
+  // Aquí va tu lógica para llamar a la API
+  // Ejemplo:
+  // final response = await api.get('/notices', queryParameters: {
+  //   'subjectId': subjectId,
+  //   'groupId': groupId
+  // });
+  // return (response.data as List).map((e) => NoticeModel.fromJson(e)).toList();
+  // ⚠️ Lanzamos error intencional para activar el fallback a la base de datos local (Offline)
+  throw Exception('API Online no implementada. Intentando cargar datos offline...');
+}
+
 }
