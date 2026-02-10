@@ -1,4 +1,3 @@
-// import 'package:aprende_mas/config/utils/app_theme.dart';
 import 'package:aprende_mas/config/utils/packages.dart';
 import 'package:aprende_mas/providers/agenda/form_event_provider.dart';
 import 'package:aprende_mas/views/teacher/agenda/button_event_form.dart';
@@ -17,39 +16,10 @@ class FormEvents extends ConsumerStatefulWidget {
 }
 
 class _FormEventsState extends ConsumerState<FormEvents> {
-
-  // @override
-  //   void initState() {
-  //     super.initState();
-  //     final refreshKey = StateProvider<bool>((ref) => false);
-  //     // Escuchar el estado del formulario para actualizar la lista y navegar
-  //     ref.listen(formEventProvider, (previous, next) {
-  //       if (next.isFormPosted) {
-  //         ref.read(refreshKey.notifier).state = true; // Actualiza el estado
-  //       }
-  //     });
-  //   }
-    
   @override
   Widget build(BuildContext context) {
     final formCreateEvent = ref.watch(formEventProvider);
     final formCreatedEventNotifier = ref.read(formEventProvider.notifier);
-
-    @override
-    void initState() {
-      super.initState();
-      final refreshKey = StateProvider<bool>((ref) => false);
-      // Escuchar el estado del formulario para actualizar la lista y navegar
-      ref.listen(formEventProvider, (previous, next) {
-        if (next.isFormPosted) {
-          ref.read(refreshKey.notifier).state = true; // Actualiza el estado
-        }
-      });
-    }
-
-    void goRouterPop() {
-      context.pop();
-    }
 
     return Form(
       child: Padding(
@@ -66,7 +36,7 @@ class _FormEventsState extends ConsumerState<FormEvents> {
           ),
           CustomTextFormField(
             capitalizeFirstLetter: true,
-            label: 'Descripción',
+            label: 'Descripcion',
             onChanged: formCreatedEventNotifier.onDescriptionChanged,
           ),
           const SizedBox(
@@ -141,50 +111,45 @@ class _FormEventsState extends ConsumerState<FormEvents> {
           ButtonEventForm(
             buttonName: 'Crear evento',
             onPressed: () async {
-              // Verifica si no está enviando ya el formulario
-              if (!ref.read(formEventProvider).isPosting) {
-                // Mostrar diálogo de confirmación antes de crear
-                WarningConfirmationDialog.show(
-                  context,
-                  message: '¿Está seguro de que desea crear este evento?',
-                  onConfirmPressed: () async {
-                    try {
-                      print("Formulario enviado");
-                      await formCreatedEventNotifier.onFormSubmit();
+              final currentState = ref.read(formEventProvider);
+              if (currentState.isPosting || currentState.isFormPosted) {
+                return;
+              }
+              WarningConfirmationDialog.show(
+                context,
+                message: 'Esta seguro de que desea crear este evento?',
+                onConfirmPressed: () async {
+                  try {
+                    print("Formulario enviado");
+                    await formCreatedEventNotifier.onFormSubmit();
 
-                      if (formCreateEvent.isFormPosted) {
-                        print("Formulario posteado exitosamente");
-                        // Mostrar mensaje de éxito
-                        SuccessDialog.show(
-                          context,
-                          message: 'Evento creado exitosamente',
-                          onOkPressed: () {
-                            goRouterPop(); // Regresar después de éxito
-                          },
-                        );
-                      } else {
-                        print("El formulario no fue posteado");
-                        // Mostrar mensaje de error
-                        ErrorDialog.show(
-                          context,
-                          message: 'No se pudo crear el evento. Por favor, intente de nuevo.',
-                        );
-                      }
-                    } catch (e) {
-                      // Captura cualquier error en la creación del evento
-                      print("Error al crear el evento: $e");
-                      // Mostrar mensaje de error
+                    final isPosted = ref.read(formEventProvider).isFormPosted;
+                    if (isPosted) {
+                      print("Formulario posteado exitosamente");
+                      SuccessDialog.show(
+                        context,
+                        message: 'Evento creado exitosamente',
+                        onOkPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                      );
+                    } else {
+                      print("El formulario no fue posteado");
                       ErrorDialog.show(
                         context,
-                        message: 'Error al crear el evento: $e',
+                        message: 'No se pudo crear el evento. Por favor, intente de nuevo.',
                       );
                     }
-                  },
-                  onCancelPressed: () {
-                    // No hacer nada, solo cerrar el diálogo
-                  },
-                );
-              }
+                  } catch (e) {
+                    print("Error al crear el evento: $e");
+                    ErrorDialog.show(
+                      context,
+                      message: 'Error al crear el evento: $e',
+                    );
+                  }
+                },
+                onCancelPressed: () {},
+              );
             },
           )
         ]),
