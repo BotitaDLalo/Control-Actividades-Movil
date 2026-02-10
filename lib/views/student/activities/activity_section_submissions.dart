@@ -365,30 +365,84 @@ class _ActivitySectionSubmissionState
       onWillPop: _saveBeforeExit,
       child: Scaffold(
         key: scaffoldKey,
-        floatingActionButton:
-            dateNow.isBefore(parseCustomDate(widget.activity.fechaLimite))
-                ? FloatingActionButton(
-                    onPressed: () {
-                      activitiesForm.existsAnswer
-                          ? showSendConfirmation()
-                          : showModalActivityType(context);
-                    },
-                    shape: AppTheme.shapeFloatingActionButton(),
-                    backgroundColor: Colors.blue, // Círculo azul
-                    child: activitiesForm.existsAnswer
-                        ? SvgPicture.asset(
-                            'assets/icons/send1.svg',
-                            color: Colors.white, // Icono en blanco
-                            width: 28,
-                            height: 28,
-                          )
-                        : SvgPicture.asset(
-                            'assets/icons/agregar.svg',
-                            color: Colors.white,
-                            width: 40,
-                            height: 40,
-                          ))
-                : const SizedBox(),
+        floatingActionButton: Builder(
+          builder: (context) {
+            final bool isGraded = lsSubmissions.any((s) => s.grade != null);
+            DateTime? fechaLimiteDate;
+            try {
+              fechaLimiteDate = DateFormat('yyyy-MM-ddTHH:mm:ss').parse(widget.activity.fechaLimite);
+            } catch (e) {
+              try {
+                fechaLimiteDate = DateFormat('dd-MM-yyyy HH:mm:ss').parse(widget.activity.fechaLimite);
+              } catch (e) {
+                fechaLimiteDate = null;
+              }
+            }
+            final bool isOverdue = fechaLimiteDate != null && DateTime.now().isAfter(fechaLimiteDate);
+            final bool canSend = !isGraded && !isOverdue && activitiesForm.existsAnswer;
+
+            if (!canSend && !isGraded && isOverdue) {
+              return FloatingActionButton(
+                onPressed: () {
+                  WarningDialog.show(
+                    context,
+                    message: 'No puedes enviar: La actividad está vencida',
+                  );
+                },
+                backgroundColor: Colors.grey.shade300,
+                shape: AppTheme.shapeFloatingActionButton(),
+                child: SvgPicture.asset(
+                  'assets/icons/agregar.svg',
+                  color: Colors.grey.shade600,
+                  width: 40,
+                  height: 40,
+                ),
+              );
+            }
+
+            if (isGraded) {
+              return FloatingActionButton(
+                onPressed: () {
+                  WarningDialog.show(
+                    context,
+                    message: 'No puedes enviar: Tu entrega ya fue calificada',
+                  );
+                },
+                backgroundColor: Colors.grey.shade300,
+                shape: AppTheme.shapeFloatingActionButton(),
+                child: SvgPicture.asset(
+                  'assets/icons/agregar.svg',
+                  color: Colors.grey.shade600,
+                  width: 40,
+                  height: 40,
+                ),
+              );
+            }
+
+            return FloatingActionButton(
+              onPressed: () {
+                activitiesForm.existsAnswer
+                    ? showSendConfirmation()
+                    : showModalActivityType(context);
+              },
+              shape: AppTheme.shapeFloatingActionButton(),
+              backgroundColor: Colors.blue,
+              child: activitiesForm.existsAnswer
+                  ? SvgPicture.asset(
+                      'assets/icons/send1.svg',
+                      color: Colors.white,
+                      width: 28,
+                      height: 28,
+                    )
+                  : SvgPicture.asset(
+                      'assets/icons/agregar.svg',
+                      color: Colors.white,
+                      width: 40,
+                      height: 40,
+                    ),
+            );
+          },
+        ),
         appBar: AppBar(
           backgroundColor: Colors.white,
           elevation: 0,
@@ -597,27 +651,41 @@ class _ActivitySectionSubmissionState
                                                     ),
                                                     ...submission.links!.map((link) => Padding(
                                                       padding: const EdgeInsets.only(top: 8.0),
-                                                      child: InkWell(
-                                                        onTap: () async {
-                                                          final uri = Uri.parse(link);
-                                                          if (await canLaunchUrl(uri)) {
-                                                            await launchUrl(uri);
-                                                          } else {
-                                                            if (mounted) {
-                                                              ScaffoldMessenger.of(context).showSnackBar(
-                                                                const SnackBar(content: Text('No se pudo abrir el enlace')),
-                                                              );
-                                                            }
-                                                          }
-                                                        },
-                                                        child: Text(
-                                                          link,
-                                                          style: const TextStyle(
-                                                            color: Colors.blue,
-                                                            fontSize: 14,
-                                                            decoration: TextDecoration.underline,
+                                                      child: Row(
+                                                        mainAxisSize: MainAxisSize.min,
+                                                        children: [
+                                                          SvgPicture.asset(
+                                                            'assets/icons/link.svg',
+                                                            width: 40,
+                                                            height: 40,
+                                                            colorFilter: const ColorFilter.mode(Colors.blue, BlendMode.srcIn),
                                                           ),
-                                                        ),
+                                                          const SizedBox(width: 12),
+                                                          Expanded(
+                                                            child: InkWell(
+                                                              onTap: () async {
+                                                                final uri = Uri.parse(link);
+                                                                if (await canLaunchUrl(uri)) {
+                                                                  await launchUrl(uri);
+                                                                } else {
+                                                                  if (mounted) {
+                                                                    ScaffoldMessenger.of(context).showSnackBar(
+                                                                      const SnackBar(content: Text('No se pudo abrir el enlace')),
+                                                                    );
+                                                                  }
+                                                                }
+                                                              },
+                                                              child: Text(
+                                                                link,
+                                                                style: const TextStyle(
+                                                                  color: Colors.blue,
+                                                                  fontSize: 14,
+                                                                  decoration: TextDecoration.underline,
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ],
                                                       ),
                                                     )),
                                                   ],
@@ -627,31 +695,56 @@ class _ActivitySectionSubmissionState
                                                       'Archivos:',
                                                       style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                                                     ),
-                                                    ...submission.files!.map((file) => Padding(
-                                                      padding: const EdgeInsets.only(top: 8.0),
-                                                      child: InkWell(
-                                                        onTap: () async {
-                                                          final uri = Uri.parse(file);
-                                                          if (await canLaunchUrl(uri)) {
-                                                            await launchUrl(uri, mode: LaunchMode.externalApplication);
-                                                          } else {
-                                                            if (mounted) {
-                                                              ScaffoldMessenger.of(context).showSnackBar(
-                                                                const SnackBar(content: Text('No se pudo abrir el archivo')),
-                                                              );
+                                                    ...submission.files!.map((fileUrl) {
+                                                      // Procesar la URL igual que en la vista del docente
+                                                      String url = fileUrl;
+                                                      String nombreMostrar = fileUrl.split('/').last;
+                                                      
+                                                      // Si la URL no empieza con http, agregar la URL base
+                                                      if (!url.startsWith('http')) {
+                                                        url = 'http://192.168.0.9:5000$url';
+                                                      }
+                                                      
+                                                      return Padding(
+                                                        padding: const EdgeInsets.only(top: 8.0),
+                                                        child: InkWell(
+                                                          onTap: () async {
+                                                            final uri = Uri.parse(url);
+                                                            if (await canLaunchUrl(uri)) {
+                                                              await launchUrl(uri, mode: LaunchMode.externalApplication);
+                                                            } else {
+                                                              if (mounted) {
+                                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                                  const SnackBar(content: Text('No se pudo abrir el archivo')),
+                                                                );
+                                                              }
                                                             }
-                                                          }
-                                                        },
-                                                        child: Text(
-                                                          file,
-                                                          style: const TextStyle(
-                                                            color: Colors.blue,
-                                                            fontSize: 14,
-                                                            decoration: TextDecoration.underline,
+                                                          },
+                                                          child: Row(
+                                                            mainAxisSize: MainAxisSize.min,
+                                                            children: [
+                                                              SvgPicture.asset(
+                                                                'assets/icons/documento.svg',
+                                                                width: 40,
+                                                                height: 40,
+                                                                colorFilter: const ColorFilter.mode(Colors.blue, BlendMode.srcIn),
+                                                              ),
+                                                              const SizedBox(width: 12),
+                                                              Expanded(
+                                                                child: Text(
+                                                                  nombreMostrar,
+                                                                  style: const TextStyle(
+                                                                    color: Colors.blue,
+                                                                    fontSize: 14,
+                                                                    decoration: TextDecoration.underline,
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                            ],
                                                           ),
                                                         ),
-                                                      ),
-                                                    )),
+                                                      );
+                                                    }).toList(),
                                                   ],
                                                 ],
                                               ),

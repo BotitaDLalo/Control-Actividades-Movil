@@ -165,10 +165,29 @@ class _DialogTextFieldState extends ConsumerState<DialogTextField> {
                         SvgPicture.asset('assets/icons/documento.svg', width: 50, height: 50, colorFilter: const ColorFilter.mode(Colors.blue, BlendMode.srcIn)),
                         const SizedBox(width: 12),
                         Expanded(
-                          child: Text(
-                            file.name ?? 'Archivo desconocido',
-                            style: const TextStyle(fontSize: 14),
-                            maxLines: null,
+                          child: GestureDetector(
+                            onTap: () async {
+                              // Para archivos locales, intentamos abrirlos
+                              if (file.path != null && file.path!.isNotEmpty) {
+                                final uri = Uri.parse('file://${file.path}');
+                                if (await canLaunchUrl(uri)) {
+                                  await launchUrl(uri, mode: LaunchMode.externalApplication);
+                                } else {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('No se pudo abrir el archivo')),
+                                  );
+                                }
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('Archivo: ${file.name}')),
+                                );
+                              }
+                            },
+                            child: Text(
+                              file.name ?? 'Archivo desconocido',
+                              style: const TextStyle(fontSize: 14, color: Colors.blue, decoration: TextDecoration.underline),
+                              maxLines: null,
+                            ),
                           ),
                         ),
                         IconButton(

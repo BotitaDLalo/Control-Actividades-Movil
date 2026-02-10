@@ -381,19 +381,13 @@ class ActivityFormNotifier extends StateNotifier<ActivityFormState> {
         
         debugPrint("📤 Resultado de envío: submissionSent = $submissionSent");
         
-        if (submissionSent) {
-          dropAnswer();
-        }
-        
         return submissionSent;
       }
 
     onSendSubmissionOffline(int activityId) async {
        bool submissionSent =
            await sendSubmissionOfflineCallback(activityId, state.answer);
-       if (submissionSent) {
-         dropAnswer();
-       }
+       return submissionSent;
     }
 
     dropAnswer() {
