@@ -1,4 +1,5 @@
 import 'package:aprende_mas/config/utils/packages.dart';
+import 'package:aprende_mas/config/environment/environment.dart';
 import 'package:aprende_mas/models/models.dart';
 import 'package:flutter/services.dart';
 import 'package:aprende_mas/providers/providers.dart';
@@ -229,10 +230,11 @@ class _TeacherStudentSubmissionGradingState
                                 url = nombreMostrar;
                               }
                               
-                              if (url.isNotEmpty) {
-                                if (!url.startsWith('http')) {
-                                  url = 'http://192.168.0.9:5000$url';
-                                }
+                               if (url.isNotEmpty) {
+                                 String baseUrl = Environment.apiUrl.replaceAll(RegExp(r'/?api/?$'), '');
+                                 if (!url.startsWith('http')) {
+                                   url = '$baseUrl$url';
+                                 }
                                 if (nombreMostrar.isEmpty) {
                                   nombreMostrar = url.split('/').last;
                                 }

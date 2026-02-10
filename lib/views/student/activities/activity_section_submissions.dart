@@ -7,6 +7,7 @@ import 'package:aprende_mas/views/views.dart';
 import 'package:aprende_mas/providers/providers.dart';
 import 'package:aprende_mas/providers/activity/activity_form_state.dart';
 import 'package:aprende_mas/config/utils/utils.dart';
+import 'package:aprende_mas/config/environment/environment.dart';
 import 'package:aprende_mas/views/widgets/alerts/success_dialog.dart';
 import 'package:aprende_mas/views/widgets/alerts/error_dialog.dart';
 import 'package:aprende_mas/views/widgets/alerts/warning_confirmation_dialog.dart';
@@ -700,10 +701,11 @@ class _ActivitySectionSubmissionState
                                                       String url = fileUrl;
                                                       String nombreMostrar = fileUrl.split('/').last;
                                                       
-                                                      // Si la URL no empieza con http, agregar la URL base
-                                                      if (!url.startsWith('http')) {
-                                                        url = 'http://192.168.0.9:5000$url';
-                                                      }
+                                                       // Si la URL no empieza con http, agregar la URL base
+                                                       String baseUrl = Environment.apiUrl.replaceAll(RegExp(r'/?api/?$'), '');
+                                                       if (!url.startsWith('http')) {
+                                                         url = '$baseUrl$url';
+                                                       }
                                                       
                                                       return Padding(
                                                         padding: const EdgeInsets.only(top: 8.0),
