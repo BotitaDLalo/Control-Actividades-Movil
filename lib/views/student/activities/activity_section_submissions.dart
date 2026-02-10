@@ -432,7 +432,7 @@ class _ActivitySectionSubmissionState
                   _buildEstatusWidget(),
                   const SizedBox(height: 8),
                   Text(
-                    widget.activity.puntaje.toString(),
+                    'Puntuaje Total: ${widget.activity.puntaje}',
                     style: const TextStyle(
                         color: Colors.black,
                         fontSize: 24,
@@ -478,6 +478,16 @@ class _ActivitySectionSubmissionState
                           ),
                       ],
                     ),
+                    if (lsSubmissions.any((s) => s.gradedDate != null)) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        'Fecha que se calificó: ${lsSubmissions.where((s) => s.gradedDate != null).first.gradedDate}',
+                        style: TextStyle(
+                          color: Colors.grey[600],
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
                   ],
                   const SizedBox(height: 16),
                   const Divider(
