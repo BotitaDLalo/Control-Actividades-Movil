@@ -3,6 +3,8 @@ import 'package:aprende_mas/config/utils/app_theme.dart';
 import 'package:aprende_mas/providers/providers.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:open_file/open_file.dart';
+import 'dart:io';
 
 final dialogHeightProvider = StateProvider<double>(
   (ref) => 150.0,
@@ -158,49 +160,67 @@ class _DialogTextFieldState extends ConsumerState<DialogTextField> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text('Archivos adjuntos:', style: TextStyle(fontWeight: FontWeight.bold)),
-                  ...ref.watch(activityFormProvider).files.map((file) => Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 4.0),
-                    child: Row(
-                      children: [
-                        SvgPicture.asset('assets/icons/documento.svg', width: 50, height: 50, colorFilter: const ColorFilter.mode(Colors.blue, BlendMode.srcIn)),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: GestureDetector(
-                            onTap: () async {
-                              // Para archivos locales, intentamos abrirlos
-                              if (file.path != null && file.path!.isNotEmpty) {
-                                final uri = Uri.parse('file://${file.path}');
-                                if (await canLaunchUrl(uri)) {
-                                  await launchUrl(uri, mode: LaunchMode.externalApplication);
+                  ...ref.watch(activityFormProvider).files.map((file) {
+                    final isImage = ['jpg', 'jpeg', 'png', 'gif'].any(
+                      (ext) => (file.name ?? '').toLowerCase().endsWith('.$ext'),
+                    );
+                    
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4.0),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (isImage && file.path != null && file.path!.isNotEmpty)
+                            Container(
+                              width: 50,
+                              height: 50,
+                              margin: const EdgeInsets.only(right: 12),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: Colors.blue.shade200),
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child: Image.file(
+                                  File(file.path!),
+                                  width: 50,
+                                  height: 50,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                            )
+                          else
+                            SvgPicture.asset('assets/icons/documento.svg', width: 50, height: 50, colorFilter: const ColorFilter.mode(Colors.blue, BlendMode.srcIn)),
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () async {
+                                if (file.path != null && file.path!.isNotEmpty) {
+                                  OpenFile.open(file.path!);
                                 } else {
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text('No se pudo abrir el archivo')),
+                                    SnackBar(content: Text('Archivo: ${file.name}')),
                                   );
                                 }
-                              } else {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('Archivo: ${file.name}')),
-                                );
-                              }
-                            },
-                            child: Text(
-                              file.name ?? 'Archivo desconocido',
-                              style: const TextStyle(fontSize: 14, color: Colors.blue, decoration: TextDecoration.underline),
-                              maxLines: null,
+                              },
+                              child: Text(
+                                file.name ?? 'Archivo desconocido',
+                                style: const TextStyle(fontSize: 14, color: Colors.blue, decoration: TextDecoration.underline),
+                                maxLines: null,
+                              ),
                             ),
                           ),
-                        ),
-                        IconButton(
-                          icon: SvgPicture.asset('assets/icons/eliminar4.svg', width: 35, height: 35, colorFilter: const ColorFilter.mode(Colors.red, BlendMode.srcIn)),
-                          onPressed: () {
-                            List<PlatformFile> updatedFiles = List.from(ref.read(activityFormProvider).files);
-                            updatedFiles.remove(file);
-                            ref.read(activityFormProvider.notifier).onFilesChanged(updatedFiles);
-                          },
-                        ),
-                      ],
-                    ),
-                  )),
+                          IconButton(
+                            icon: SvgPicture.asset('assets/icons/eliminar4.svg', width: 35, height: 35, colorFilter: const ColorFilter.mode(Colors.red, BlendMode.srcIn)),
+                            onPressed: () {
+                              List<PlatformFile> updatedFiles = List.from(ref.read(activityFormProvider).files);
+                              updatedFiles.remove(file);
+                              ref.read(activityFormProvider.notifier).onFilesChanged(updatedFiles);
+                            },
+                          ),
+                        ],
+                      ),
+                    );
+                  }),
                 ],
               ),
             ),
