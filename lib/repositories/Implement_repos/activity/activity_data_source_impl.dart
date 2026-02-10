@@ -295,6 +295,17 @@ class ActivityDataSourceImpl implements ActivityDataSource {
   }
 
   @override
+  Future<bool> removeGrade(int submissionId) async {
+    try {
+      const uri = "/Actividades/QuitarCalificacion";
+      final res = await dio.post(uri, data: {"EntregableId": submissionId});
+      return res.statusCode == 200;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  @override
   Future<void> deleteActivity(int activityId) async {
     try {
       const uri = "/Actividades/EliminarActividad?id=";

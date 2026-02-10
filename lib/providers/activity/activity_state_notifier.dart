@@ -313,6 +313,18 @@ Future<void> updateActivity(
     }
   }
 
+  Future<bool> removeGrade(int submissionId) async {
+    try {
+      final res = await activityRepository.removeGrade(submissionId);
+      if (res) {
+        state = state.copyWith(grade: 0);
+      }
+      return res;
+    } catch (e) {
+      return false;
+    }
+  }
+
   void clearActivityState() {
     state = ActivityState();
   }

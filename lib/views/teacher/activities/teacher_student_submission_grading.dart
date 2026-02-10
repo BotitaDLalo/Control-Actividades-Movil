@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:aprende_mas/providers/providers.dart';
 import 'package:aprende_mas/views/widgets/alerts/success_dialog.dart';
 import 'package:aprende_mas/views/widgets/alerts/error_dialog.dart';
+import 'package:aprende_mas/views/widgets/alerts/warning_confirmation_dialog.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class TeacherStudentSubmissionGrading extends ConsumerStatefulWidget {
@@ -338,9 +339,9 @@ class _TeacherStudentSubmissionGradingState
                   ],
                 ),
               ),
-              
+               
               const SizedBox(height: 24),
-              
+               
               // Sección de nueva calificación
               const Text(
                 'Asignar Calificación',
@@ -384,6 +385,54 @@ class _TeacherStudentSubmissionGradingState
                   ),
                 ],
               ),
+              if (activity.grade != null && activity.grade > 0) ...[
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: activityForm.isPosting
+                        ? null
+                        : () {
+                            WarningConfirmationDialog.show(
+                              context,
+                              message: '¿Estás seguro de quitar la calificación a este alumno?',
+                              onConfirmPressed: () async {
+                                bool success = await activityNotifier.removeGrade(submissionId);
+                                if (mounted) {
+                                  if (success) {
+                                    SuccessDialog.show(
+                                      context,
+                                      message: 'Calificación quitada correctamente',
+                                    );
+                                    gradeController.clear();
+                                  } else {
+                                    ErrorDialog.show(
+                                      context,
+                                      message: 'Error al quitar calificación',
+                                    );
+                                  }
+                                }
+                              },
+                            );
+                          },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    child: const Text(
+                      'Quitar Calificación',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ],
           ),
         ),

@@ -74,6 +74,11 @@ class ActivityRepositoryImpl implements ActivityRepository {
   }
 
   @override
+  Future<bool> removeGrade(int submissionId) {
+    return activityDataSource.removeGrade(submissionId);
+  }
+
+  @override
   Future<void> deleteActivity(int activityId) {
     return activityDataSource.deleteActivity(activityId);
   }

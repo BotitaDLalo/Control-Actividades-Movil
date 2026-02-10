@@ -23,4 +23,6 @@ abstract class ActivityDataSource {
   Future<ActivityStudentSubmissionsData> getStudentSubmissions(int activityId);
 
   Future<bool> submissionGrading(int submissionId, int grade);
+
+  Future<bool> removeGrade(int submissionId);
 }
