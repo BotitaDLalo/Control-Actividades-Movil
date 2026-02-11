@@ -15,6 +15,9 @@ class FirebaseCM {
         title: message.notification!.title ?? '',
         body: message.notification!.body ?? '',
         sentDate: message.sentTime.toString(),
+        notificationTypeId: int.tryParse(message.data['TipoNotificacionId'].toString()) ?? 0,
+        subjectId: int.tryParse(message.data['MateriaId'].toString()),
+        groupId: int.tryParse(message.data['GrupoId'].toString()),
         data: "",
         imageUrl: Platform.isAndroid
             ? message.notification!.android?.imageUrl ?? ""

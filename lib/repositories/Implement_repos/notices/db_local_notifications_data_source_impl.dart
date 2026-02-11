@@ -9,15 +9,22 @@ class DbLocalNotificationsDataSourceImpl implements DbLocalNotificationsDataSour
     try {
       bool inserted = false;
       final db = await DbLocal.database;
+
+      // Verificar si ya existe la notificación para no duplicarla
+      final exists = await db.query('tbNotificaciones', where: 'MessageId = ?', whereArgs: [notice.messageId]);
+      if (exists.isNotEmpty) return false;
+
       final query = Querys.querytbNotificacionesInsert();
       await db.transaction((txn) async {
         int idRow = await txn.rawInsert(query, [
+          1, // UsuarioId (Fijo en 1 según la restricción de tbUsuarioActivo)
           notice.messageId,
           notice.title,
           notice.body,
           notice.sentDate.toString(),
-          "",
-          ""
+          notice.notificationTypeId,
+          notice.subjectId,
+          notice.groupId
         ]);
 
         if (idRow > 0) {
@@ -37,7 +44,7 @@ class DbLocalNotificationsDataSourceImpl implements DbLocalNotificationsDataSour
   Future<List<NotificationModel>> getLsNotifications() async {
     try {
       final db = await DbLocal.database;
-      final ls = await db.query('tbNotificaciones', orderBy: 'FechaEnvio DESC');
+      final ls = await db.query('tbNotificaciones', orderBy: 'FechaRecibido DESC');
 
       final lsNotice = NotificationModel.noticeJsonToEntity(ls);
 

@@ -15,7 +15,11 @@ class NotificationsStateNotifier extends StateNotifier<List<NotificationModel>> 
   /// Cargar notificaciones desde el backend remoto
   Future<void> getRemoteNotices(String userId) async {
     final remoteNotices = await remoteRepository.fetchNotificationsFromBackend(userId);
-    _setLsNotices(remoteNotices);
+    
+    for (var notice in remoteNotices) {
+      await dbLocalNoticesRepository.storeNotification(notice);
+    }
+    await getLsNotices();
   }
 
   onNewNotice(NotificationModel notice) async {

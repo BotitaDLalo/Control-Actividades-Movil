@@ -39,6 +39,9 @@ class NotificationsDataSourceImpl implements NotificationsDataSource {
 					title: e['Title'] ?? '',
 					body: e['Body'] ?? '',
 					sentDate: e['FechaRecibido'] ?? '',
+					notificationTypeId: e['TipoNotificacionId'] ?? 0,
+					subjectId: e['MateriaId'],
+					groupId: e['GrupoId'],
 					data: e['Data']?.toString(),
 					imageUrl: e['ImageUrl']?.toString(),
 				)).toList();

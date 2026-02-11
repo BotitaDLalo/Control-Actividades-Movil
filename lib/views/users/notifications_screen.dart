@@ -93,7 +93,12 @@ String formatDateFriendly(String dateString) {
                             messageId: notification.messageId,
                             title: notification.title,
                             body: notification.body,
-                            sentDate: notification.sentDate);
+                            sentDate: notification.sentDate,
+                            notificationTypeId: notification.notificationTypeId,
+                            subjectId: notification.subjectId,
+                            groupId: notification.groupId,
+                            data: notification.data,
+                            imageUrl: notification.imageUrl);
                         context.push('/notification-content', extra: notice);
                       },
                     ));

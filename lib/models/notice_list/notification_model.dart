@@ -5,6 +5,9 @@ class NotificationModel {
   final String body;
   final String sentDate;
   // final Map<String, dynamic>? data;
+  final int notificationTypeId;
+  final int? subjectId;
+  final int? groupId;
   final String? data;
   final String? imageUrl;
 
@@ -14,6 +17,9 @@ class NotificationModel {
       required this.title,
       required this.body,
       required this.sentDate,
+      required this.notificationTypeId,
+      this.subjectId,
+      this.groupId,
       this.data,
       this.imageUrl});
 
@@ -21,13 +27,15 @@ class NotificationModel {
     List<NotificationModel> ls = lsNotices.map(
       (e) {
         return NotificationModel(
-            messageId: e['MensajeId'] as String,
+            messageId: e['MessageId'] as String,
             title: e['Titulo'] as String,
-            body: e['Descripcion'] as String,
-            //sentDate: formatDate(e['FechaEnvio'] as String),
-            sentDate: e['FechaEnvio'] as String,
-            data: e['Data'] as String,
-            imageUrl: e['ImagenURL'] as String);
+            body: e['Cuerpo'] as String,
+            sentDate: e['FechaRecibido'] as String,
+            notificationTypeId: e['TipoNotificacionId'] as int,
+            subjectId: e['MateriaId'] as int?,
+            groupId: e['GrupoId'] as int?,
+            data: null,
+            imageUrl: null);
       },
     ).toList();
 
@@ -40,6 +48,9 @@ class NotificationModel {
       title: "",
       body: "",
       sentDate: "",
+      notificationTypeId: 0,
+      subjectId: null,
+      groupId: null,
       data: "",
       imageUrl: ""
     );
@@ -52,6 +63,9 @@ class NotificationModel {
       title: $title
       body: $body
       sentDate: $sentDate
+      notificationTypeId: $notificationTypeId
+      subjectId: $subjectId
+      groupId: $groupId
       data: $data
       imageUrl: $imageUrl
     ''';
