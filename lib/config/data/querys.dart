@@ -90,10 +90,11 @@ class Querys {
           Contenido TEXT,
           Calificacion INTEGER,
           FechaCalificado TEXT,
+          Comentario TEXT,
           FOREIGN KEY (EntregaActividadAlumnoId)
-            REFERENCES tbEntregableActividadAlumno(EntregaActividadAlumnoId),
+          REFERENCES tbEntregableActividadAlumno(EntregaActividadAlumnoId),
           FOREIGN KEY (TipoEntregaId)
-            REFERENCES cTipoEntregas(TipoActividadId)
+          REFERENCES cTipoEntregas(TipoActividadId)
         );
         """
         ,
