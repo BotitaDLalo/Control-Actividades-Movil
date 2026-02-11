@@ -69,6 +69,8 @@ class DbLocal {
           onUpgrade: _onUpgrade,
         );
 
+        // ✅ Verificamos datos iniciales cada vez que se abre la BD, por si la tabla está vacía
+        //await _seedData(db);
         debugPrint("✅ BD ABIERTA: $_databaseName");
         return db;
       }
@@ -85,13 +87,16 @@ class DbLocal {
         await db.execute(query);
       }
       debugPrint("✅ Tablas creadas exitosamente");
+      await _seedData(db);
+      await _seedDatacTipoEntregas(db);
+      await _seedDatacEstadoEntregas(db);
     } catch (e) {
       debugPrint('❌ Error creando tablas: $e');
       throw Exception('Error creando tablas: $e');
     }
   }
 
-  static Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+  /*static Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
     debugPrint("🔄 Migrando BD de v$oldVersion a v$newVersion");
 
     if (oldVersion < 2) {
@@ -133,9 +138,29 @@ class DbLocal {
         await _recreateTableAlumnosActividades(db);
       }
     }
-  }
+  }*/
+        static Future<void> _onUpgrade(
+        Database db,
+        int oldVersion,
+        int newVersion,
+      ) async {
+        debugPrint("🔄 Migrando BD de v$oldVersion a v$newVersion");
 
-  static Future<void> _recreateTableAlumnosActividades(Database db) async {
+        // 👉 Por ahora no hay migraciones
+        /*if (oldVersion < 2) {
+          await db.execute("""
+            CREATE TABLE IF NOT EXISTS cTipoNotificacion (
+              TipoNotificacionId INTEGER PRIMARY KEY,
+              Nombre TEXT NOT NULL
+            );
+          """);
+        }*/
+        await _seedData(db);
+        await _seedDatacTipoEntregas(db);
+        await _seedDatacEstadoEntregas(db);
+      }
+
+  /*static Future<void> _recreateTableAlumnosActividades(Database db) async {
     try {
       // Eliminar tabla si existe
       await db.execute('DROP TABLE IF EXISTS tbAlumnosActividades;');
@@ -157,7 +182,70 @@ class DbLocal {
       debugPrint('❌ Error recreando tabla tbAlumnosActividades: $e');
       rethrow;
     }
+  }*/
+
+  static Future<void> _seedData(Database db) async {
+    try {
+      final result = await db.rawQuery('SELECT COUNT(*) FROM cTipoNotificacion');
+      final count = result.isNotEmpty ? (result.first.values.first as int) : 0;
+
+      if (count == 0) {
+        debugPrint("📥 Insertando datos iniciales en cTipoNotificacion...");
+        await db.transaction((txn) async {
+          await txn.rawInsert('INSERT INTO cTipoNotificacion (TipoNotificacionId, Nombre) VALUES (1, "ActividadCalificada")');
+          await txn.rawInsert('INSERT INTO cTipoNotificacion (TipoNotificacionId, Nombre) VALUES (2, "ActividadCreada")');
+          await txn.rawInsert('INSERT INTO cTipoNotificacion (TipoNotificacionId, Nombre) VALUES (3, "ActividadEntregada")');
+          await txn.rawInsert('INSERT INTO cTipoNotificacion (TipoNotificacionId, Nombre) VALUES (4, "Aviso")');
+          await txn.rawInsert('INSERT INTO cTipoNotificacion (TipoNotificacionId, Nombre) VALUES (5, "Evento")');
+          await txn.rawInsert('INSERT INTO cTipoNotificacion (TipoNotificacionId, Nombre) VALUES (6, "GrupoAsignado")');
+          await txn.rawInsert('INSERT INTO cTipoNotificacion (TipoNotificacionId, Nombre) VALUES (7, "MateriaAsignada")');
+        });
+        debugPrint("✅ Datos insertados en cTipoNotificacion");
+      }
+    } catch (e) {
+      debugPrint('❌ Error insertando datos iniciales: $e');
+    }
   }
+
+    static Future<void> _seedDatacTipoEntregas(Database db) async {
+    try {
+      final result = await db.rawQuery('SELECT COUNT(*) FROM cTipoEntregas');
+      final count = result.isNotEmpty ? (result.first.values.first as int) : 0;
+
+      if (count == 0) {
+        debugPrint("📥 Insertando datos iniciales en cTipoEntregas...");
+        await db.transaction((txn) async {
+          await txn.rawInsert('INSERT INTO cTipoEntregas (TipoActividadId, Nombre) VALUES (1, "Texto")');
+          await txn.rawInsert('INSERT INTO cTipoEntregas (TipoActividadId, Nombre) VALUES (2, "Enlace")');
+          await txn.rawInsert('INSERT INTO cTipoEntregas (TipoActividadId, Nombre) VALUES (3, "Archivo")');
+          await txn.rawInsert('INSERT INTO cTipoEntregas (TipoActividadId, Nombre) VALUES (4, "Mixto")');
+        });
+        debugPrint("✅ Datos insertados en cTipoEntregas");
+      }
+    } catch (e) {
+      debugPrint('❌ Error insertando datos iniciales: $e');
+    }
+  }
+    static Future<void> _seedDatacEstadoEntregas(Database db) async {
+    try {
+      final result = await db.rawQuery('SELECT COUNT(*) FROM cEstadoEntregas');
+      final count = result.isNotEmpty ? (result.first.values.first as int) : 0;
+
+      if (count == 0) {
+        debugPrint("📥 Insertando datos iniciales en cEstadoEntregas...");
+        await db.transaction((txn) async {
+          await txn.rawInsert('INSERT INTO cEstadoEntregas (EstadoEntregaId, Nombre) VALUES (1, "Enviado")');
+          await txn.rawInsert('INSERT INTO cEstadoEntregas (EstadoEntregaId, Nombre) VALUES (2, "Borrador")');
+          await txn.rawInsert('INSERT INTO cEstadoEntregas (EstadoEntregaId, Nombre) VALUES (3, "Calificado")');
+        });
+        debugPrint("✅ Datos insertados en cEstadoEntregas");
+      }
+    } catch (e) {
+      debugPrint('❌ Error insertando datos iniciales: $e');
+    }
+  }
+ 
+  
 
   // Método legacy para compatibilidad (deprecated)
   @deprecated
@@ -185,4 +273,4 @@ class DbLocal {
       debugPrint('❌ Error eliminando la base de datos: $e');
     }
   }*/
-}
+} 
