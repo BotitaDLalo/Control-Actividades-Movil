@@ -10,6 +10,7 @@ class Group {
   final String? codigoAcceso;
   // final String codigoColor;
   final List<Subject>? materias;
+  final List<NoticeModel>? avisos;
 
   Group({
     this.grupoId,
@@ -18,6 +19,7 @@ class Group {
     this.codigoAcceso,
     // required this.codigoColor,
     this.materias,
+    this.avisos,
   });
 
   static Group empty() => Group(
@@ -25,7 +27,7 @@ class Group {
         descripcion: '',
         nombreGrupo: '',
         codigoAcceso: '',
-        // codigoColor: ''
+        avisos: [],
       );
 
   static List<Group> groupsJsonToEntityList(

@@ -4,87 +4,102 @@ import 'package:aprende_mas/config/data/db_local.dart';
 import 'package:aprende_mas/config/utils/general_utils.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:flutter/foundation.dart';
+import 'package:aprende_mas/models/notice_list/notice_model.dart';
 
 class GroupsOfflineDataSourceImpl implements GroupsOfflineDataSource {
-  @override
-  Future<List<Group>> getGroupsSubjects() async {
-    try {
-      final db = await DbLocal.database;
-      final querylsGroups = await db.rawQuery('SELECT * FROM tbGrupos');
+@override
+Future<List<Group>> getGroupsSubjects() async {
+  try {
+    final db = await DbLocal.database;
+    final querylsGroups = await db.rawQuery('SELECT * FROM tbGrupos');
 
-      if (querylsGroups.isNotEmpty) {
-        List<Group> lsGroups = [];
+    if (querylsGroups.isEmpty) return [];
 
-        for (var groupRow in querylsGroups) {
-          int groupId = groupRow['GrupoId'] as int;
+    List<Group> lsGroups = [];
 
-          final querylsGroupsSubjectsId = await db.rawQuery(
-              "SELECT MateriaId FROM tbGruposMaterias WHERE GrupoId = ?",
-              [groupId]);
+    for (var groupRow in querylsGroups) {
+      final int groupId = groupRow['GrupoId'] as int;
 
-          List<Subject> materias = [];
+      // 🔹 MATERIAS DEL GRUPO
+      final querylsGroupsSubjectsId = await db.rawQuery(
+        "SELECT MateriaId FROM tbGruposMaterias WHERE GrupoId = ?",
+        [groupId],
+      );
 
-          for (var subjectRow in querylsGroupsSubjectsId) {
-            int subjectId = subjectRow['MateriaId'] as int;
+      List<Subject> materias = [];
 
-            final querySubject = await db.rawQuery(
-                "SELECT * FROM tbMaterias WHERE MateriaId = ?", [subjectId]);
+      for (var subjectRow in querylsGroupsSubjectsId) {
+        final int subjectId = subjectRow['MateriaId'] as int;
 
-            final querylsActivitiesId = await db.rawQuery(
-                "SELECT ActividadId FROM tbMateriasActividades WHERE MateriaId = ?",
-                [subjectId]);
+        final querySubject = await db.rawQuery(
+          "SELECT * FROM tbMaterias WHERE MateriaId = ?",
+          [subjectId],
+        );
 
-            List<Activity> actividades = [];
+        final queryActivities = await db.query(
+          'tbActividades',
+          where: 'MateriaId = ?',
+          whereArgs: [subjectId],
+        );
 
-            for (var activityRow in querylsActivitiesId) {
-              int activityId = activityRow['ActividadId'] as int;
+        final actividades = queryActivities.map((row) {
+          return Activity(
+            activityId: row['ActividadId'] as int,
+            nombreActividad: row['NombreActividad'] as String,
+            descripcion: row['Descripcion'] as String,
+            fechaCreacion: formatDate(row['FechaCreacion'] as String),
+            fechaLimite: formatDate(row['FechaLimite'] as String),
+            materiaId: row['MateriaId'] as int,
+            puntaje: row['Puntaje'] as int,
+          );
+        }).toList();
 
-              final queryActivitie = await db.rawQuery(
-                  "SELECT * FROM tbActividades WHERE ActividadId = ?",
-                  [activityId]);
-
-              actividades.add(Activity(
-                  activityId: queryActivitie[0]['ActividadId'] as int,
-                  nombreActividad:
-                      queryActivitie[0]['NombreActividad'] as String,
-                  descripcion: queryActivitie[0]['Descripcion'] as String,
-                  tipoActividadId:
-                      queryActivitie[0]['TipoActividadId'] as int,
-                  fechaCreacion: formatDate(
-                      queryActivitie[0]['FechaCreacion'] as String),
-                  fechaLimite:
-                      formatDate(queryActivitie[0]['FechaLimite'] as String),
-                  materiaId: queryActivitie[0]['MateriaId'] as int,
-                  puntaje: queryActivitie[0]['Puntaje'] as int));
-            }
-
-            materias.add(Subject(
-              materiaId: subjectId,
-              nombreMateria: querySubject[0]['NombreMateria'] as String,
-              descripcion: querySubject[0]['Descripcion'] as String,
-              codigoAcceso: querySubject[0]['CodigoAcceso'] as String,
-              actividades: actividades,
-            ));
-          }
-
-          lsGroups.add(Group(
-            grupoId: groupRow['GrupoId'] as int,
-            nombreGrupo: groupRow['NombreGrupo'] as String,
-            descripcion: groupRow['Descripcion'] as String,
-            codigoAcceso: groupRow['CodigoAcceso'] as String,
-            materias: materias,
-          ));
-        }
-
-        return lsGroups;
+        materias.add(Subject(
+          materiaId: subjectId,
+          nombreMateria: querySubject[0]['NombreMateria'] as String,
+          descripcion: querySubject[0]['Descripcion'] as String,
+          codigoAcceso: querySubject[0]['CodigoAcceso'] as String,
+          actividades: actividades,
+        ));
       }
 
-      return [];
-    } catch (e) {
-      debugPrint('Error en getGroupsSubjects: $e');
-      return [];
+      // 🔹 AVISOS DEL GRUPO
+      final queryNotices = await db.query(
+        'tbAvisos',
+        where: 'GrupoId = ?',
+        whereArgs: [groupId],
+      );
+
+      final avisos = queryNotices.map((row) {
+        return NoticeModel(
+          noticeId: row['AvisoId'] as int,
+          title: row['Titulo'] as String,
+          description: row['Descripcion'] as String,
+          createdDate: formatDate(row['FechaCreacion'] as String),
+          teacherFullName: row['DocenteNombre'] as String?,
+          groupId: row['GrupoId'] as int? ?? 0,
+          subjectId: row['MateriaId'] as int? ?? 0
+        );
+      }).toList();
+
+      // 🔹 CONSTRUIR GRUPO (UNA SOLA VEZ)
+      lsGroups.add(Group(
+        grupoId: groupId,
+        nombreGrupo: groupRow['NombreGrupo'] as String,
+        descripcion: groupRow['Descripcion'] as String,
+        codigoAcceso: groupRow['CodigoAcceso'] as String,
+        materias: materias,
+        avisos: avisos,
+      ));
     }
+
+    return lsGroups;
+  } catch (e) {
+    debugPrint('Error en getGroupsSubjects: $e');
+    return [];
   }
+}
+
 
   @override
   Future<void> saveGroupSubjects(List<Group> lsGroups) async {
@@ -124,20 +139,36 @@ class GroupsOfflineDataSourceImpl implements GroupsOfflineDataSource {
                 await db.insert('tbActividades', {
                   'ActividadId': activity.activityId,
                   'NombreActividad': activity.nombreActividad,
-                  'TipoActividadId': activity.tipoActividadId,
                   'Descripcion': activity.descripcion,
                   'FechaCreacion': activity.fechaCreacion.toString(),
                   'FechaLimite': activity.fechaLimite.toString(),
-                  'MateriaId': subjectId,
-                  'Puntaje': activity.puntaje
+                  'Puntaje': activity.puntaje,
+                  'MateriaId': subjectId
+                  
                 }, conflictAlgorithm: ConflictAlgorithm.replace);
 
-                await db.insert('tbMateriasActividades', {
-                  'MateriaId': subjectId,
-                  'ActividadId': activity.activityId
-                }, conflictAlgorithm: ConflictAlgorithm.ignore);
               }
             }
+            if (group.avisos != null) {
+              for (final notice in group.avisos!) {
+                print('📝 Intentando guardar aviso:');
+                await db.insert(
+                  'tbAvisos',
+                  {
+                  'AvisoId': notice.noticeId,
+                  'Titulo': notice.title,
+                  'Descripcion': notice.description,
+                  'FechaCreacion': notice.createdDate.toString(),
+                  'GrupoId': groupId,
+                  'MateriaId': notice.subjectId != 0 ? notice.subjectId : null,
+                  'DocenteNombre': notice.teacherFullName,
+                  },
+                  conflictAlgorithm: ConflictAlgorithm.replace,
+                );
+                print('✅ Aviso insertado');
+              }
+            }
+
           }
         }
       }
