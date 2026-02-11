@@ -68,19 +68,53 @@ Future<List<Activity>> getAllActivitiesOffline(int subjectId) async {
       final id = await storageService.getId();
 
       for (var sub in lsSubmissions) {
-        int tbId = await db.transaction(
+        await db.transaction(
           (txn) async {
-            return await txn.insert('tbAlumnosActividades', {
-              'ActividadId': activityId,
-              'AlumnoId': id,
-              'FechaEntrega': sub.submissionDate,
-              'EstatusEntrega': sub.status! ? 1 : 0  // ✅ Convertir bool a int
+            // 1. Verificar si ya existe el registro padre (tbEntregableActividadAlumno)
+            final existing = await txn.query(
+              'tbEntregableActividadAlumno',
+              columns: ['EntregaActividadAlumnoId'],
+              where: 'ActividadId = ? AND UsuarioId = ?',
+              whereArgs: [activityId, id],
+            );
+
+            int entregaActividadAlumnoId;
+
+            if (existing.isEmpty) {
+              // Insertar nuevo
+              entregaActividadAlumnoId = await txn.insert('tbEntregableActividadAlumno', {
+                'ActividadId': activityId,
+                'UsuarioId': id,
+                'FechaEntrega': sub.submissionDate,
+                'EstadoEntregaId': sub.status! ? 1 : 0 // 1: Enviado, 0: Pendiente
+              });
+            } else {
+              // Actualizar existente
+              entregaActividadAlumnoId = existing.first['EntregaActividadAlumnoId'] as int;
+              await txn.update(
+                'tbEntregableActividadAlumno',
+                {
+                  'FechaEntrega': sub.submissionDate,
+                  'EstadoEntregaId': sub.status! ? 1 : 0
+                },
+                where: 'EntregaActividadAlumnoId = ?',
+                whereArgs: [entregaActividadAlumnoId],
+              );
+            }
+
+            // 2. Insertar el entregable (tbEntregables)
+            // Primero limpiamos entregables previos de esta entrega para evitar duplicados al sincronizar
+            await txn.delete('tbEntregables', 
+                where: 'EntregaActividadAlumnoId = ?', 
+                whereArgs: [entregaActividadAlumnoId]);
+
+            await txn.insert('tbEntregables', {
+              'EntregaActividadAlumnoId': entregaActividadAlumnoId,
+              'TipoEntregaId': 1, // 1 = Texto (según cTipoEntregas)
+              'Contenido': sub.answer
             });
           },
         );
-
-        await db.insert('tbEntregableActividades',
-            {'AlumnoActividadId': tbId, 'Respuesta': sub.answer});
       }
     } catch (e) {
       debugPrint('Error en saveSubmissions: $e');
@@ -92,37 +126,39 @@ Future<List<Activity>> getAllActivitiesOffline(int subjectId) async {
   Future<List<Submission>> getSubmissionsOffline(int activityId) async {
     try {
       final db = await DbLocal.database;
+      final id = await storageService.getId();
       List<Submission> lsSubmisions = [];
-      final querylsStudentActivities = await db.query('tbAlumnosActividades',
-          columns: ['AlumnoActividadId', 'FechaEntrega', 'EstatusEntrega'],
-          where: '"ActividadId" = ?',
-          whereArgs: [activityId]);
+      
+      // Consultamos la tabla nueva tbEntregableActividadAlumno
+      final querylsStudentActivities = await db.query('tbEntregableActividadAlumno',
+          columns: ['EntregaActividadAlumnoId', 'FechaEntrega', 'EstadoEntregaId'],
+          where: 'ActividadId = ? AND UsuarioId = ?',
+          whereArgs: [activityId, id]);
 
       for (var sa in querylsStudentActivities) {
-        int studentActivityId = sa['AlumnoActividadId'] as int;
+        int studentActivityId = sa['EntregaActividadAlumnoId'] as int;
         String submissionDate = sa['FechaEntrega'] as String;
-        bool status = (sa['EstatusEntrega'] as int) == 1;  // ✅ Convertir int a bool
+        bool status = (sa['EstadoEntregaId'] as int) == 1;
 
-        final querylsSubmissions = await db.query('tbEntregableActividades',
-            columns: ['EntregaId', 'Respuesta'],
-            where: '"AlumnoActividadId" = ?',
+        // Consultamos la tabla nueva tbEntregables
+        final querylsSubmissions = await db.query('tbEntregables',
+            columns: ['EntregableId', 'Contenido'],
+            where: 'EntregaActividadAlumnoId = ?',
             whereArgs: [studentActivityId]);
 
         for (var sub in querylsSubmissions) {
           Submission submission = Submission(
-              submissionId: sub['EntregaId'] as int,
+              submissionId: sub['EntregableId'] as int,
               submissionActivityStudentId: studentActivityId,
               status: status,
               submissionDate: submissionDate);
-          if (sub['Respuesta'] != null) {
-            submission.answer = sub['Respuesta'] as String;
+          
+          if (sub['Contenido'] != null) {
+            submission.answer = sub['Contenido'] as String;
           }
-          if (sub['Enlace'] != null) {
-            submission.answer = sub['Enlace'] as String;
-          }
-          if (sub['Archivo'] != null) {
-            submission.answer = sub['Archivo'] as String;
-          }
+          // Nota: Enlace y Archivo no están explícitos en el nuevo esquema tbEntregables (solo Contenido),
+          // pero si se agregan columnas o se usa Contenido para todo, ajusta aquí.
+          
           submission.activityId = activityId;
           lsSubmisions.add(submission);
         }
@@ -142,52 +178,67 @@ Future<List<Activity>> getAllActivitiesOffline(int subjectId) async {
       final db = await DbLocal.database;
       DateTime dateNow = DateTime.now();
       final id = await storageService.getId();
+      
       await db.transaction(
         (txn) async {
-          int tbId = await txn.insert('tbAlumnosActividades', {
-            'ActividadId': activityId,
-            'AlumnoId': id,
-            'FechaEntrega': dateNow.toString(),
-            'EstatusEntrega': 0,  // ✅ false = 0
-          });
+          // Verificar si ya existe una entrega local para actualizarla
+          final existing = await txn.query('tbEntregableActividadAlumno',
+              columns: ['EntregaActividadAlumnoId'],
+              where: 'ActividadId = ? AND UsuarioId = ?',
+              whereArgs: [activityId, id]);
 
-          await txn.insert('tbEntregableActividades', {
-            'AlumnoActividadId': tbId,
-            'Respuesta': answer,
+          int tbId;
+          if (existing.isEmpty) {
+            tbId = await txn.insert('tbEntregableActividadAlumno', {
+              'ActividadId': activityId,
+              'UsuarioId': id,
+              'FechaEntrega': dateNow.toString(),
+              'EstadoEntregaId': 0, // 0 = Pendiente de sincronización
+            });
+          } else {
+            tbId = existing.first['EntregaActividadAlumnoId'] as int;
+            await txn.update('tbEntregableActividadAlumno', {
+              'FechaEntrega': dateNow.toString(),
+              'EstadoEntregaId': 0
+            }, where: 'EntregaActividadAlumnoId = ?', whereArgs: [tbId]);
+          }
+
+          // Reemplazar entregable anterior si existe
+          await txn.delete('tbEntregables', where: 'EntregaActividadAlumnoId = ?', whereArgs: [tbId]);
+          
+          await txn.insert('tbEntregables', {
+            'EntregaActividadAlumnoId': tbId,
+            'TipoEntregaId': 1, // Texto
+            'Contenido': answer,
           });
         },
       );
 
+      // Retornar la lista actualizada de pendientes
       List<Submission> lsSubmisions = [];
-      final querylsStudentActivities = await db.query('tbAlumnosActividades',
-          columns: ['AlumnoActividadId', 'FechaEntrega', 'EstatusEntrega'],
-          where: '"ActividadId" = ? AND "EstatusEntrega"=?',
-          whereArgs: [activityId, 0]);
+      final querylsStudentActivities = await db.query('tbEntregableActividadAlumno',
+          columns: ['EntregaActividadAlumnoId', 'FechaEntrega', 'EstadoEntregaId'],
+          where: 'ActividadId = ? AND EstadoEntregaId = 0 AND UsuarioId = ?',
+          whereArgs: [activityId, id]);
 
       for (var sa in querylsStudentActivities) {
-        int studentActivityId = sa['AlumnoActividadId'] as int;
+        int studentActivityId = sa['EntregaActividadAlumnoId'] as int;
         String submissionDate = sa['FechaEntrega'] as String;
-        bool status = (sa['EstatusEntrega'] as int) == 1;  // ✅ Convertir int a bool
+        bool status = (sa['EstadoEntregaId'] as int) == 1;
 
-        final querylsSubmissions = await db.query('tbEntregableActividades',
-            columns: ['EntregaId', 'Respuesta'],
-            where: '"AlumnoActividadId" = ?',
+        final querylsSubmissions = await db.query('tbEntregables',
+            columns: ['EntregableId', 'Contenido'],
+            where: 'EntregaActividadAlumnoId = ?',
             whereArgs: [studentActivityId]);
 
         for (var sub in querylsSubmissions) {
           Submission submission = Submission(
-              submissionId: sub['EntregaId'] as int,
+              submissionId: sub['EntregableId'] as int,
               submissionActivityStudentId: studentActivityId,
               status: status,
               submissionDate: submissionDate);
-          if (sub['Respuesta'] != null) {
-            submission.answer = sub['Respuesta'] as String;
-          }
-          if (sub['Enlace'] != null) {
-            submission.answer = sub['Enlace'] as String;
-          }
-          if (sub['Archivo'] != null) {
-            submission.answer = sub['Archivo'] as String;
+          if (sub['Contenido'] != null) {
+            submission.answer = sub['Contenido'] as String;
           }
           submission.activityId = activityId;
           lsSubmisions.add(submission);
@@ -205,36 +256,32 @@ Future<List<Activity>> getAllActivitiesOffline(int subjectId) async {
   Future<List<Submission>> getSubmissionsPending(int activityId) async {
     try {
       final db = await DbLocal.database;
+      final id = await storageService.getId();
       List<Submission> lsSubmisions = [];
-      final querylsStudentActivities = await db.query('tbAlumnosActividades',
-          columns: ['AlumnoActividadId', 'FechaEntrega', 'EstatusEntrega'],
-          where: '"ActividadId" = ? AND "EstatusEntrega"=?',
-          whereArgs: [activityId, 0]);
+      
+      final querylsStudentActivities = await db.query('tbEntregableActividadAlumno',
+          columns: ['EntregaActividadAlumnoId', 'FechaEntrega', 'EstadoEntregaId'],
+          where: 'ActividadId = ? AND EstadoEntregaId = 0 AND UsuarioId = ?',
+          whereArgs: [activityId, id]);
 
       for (var sa in querylsStudentActivities) {
-        int studentActivityId = sa['AlumnoActividadId'] as int;
+        int studentActivityId = sa['EntregaActividadAlumnoId'] as int;
         String submissionDate = sa['FechaEntrega'] as String;
-        bool status = (sa['EstatusEntrega'] as int) == 1;  // ✅ Convertir int a bool
+        bool status = (sa['EstadoEntregaId'] as int) == 1;
 
-        final querylsSubmissions = await db.query('tbEntregableActividades',
-            columns: ['EntregaId', 'Respuesta'],
-            where: '"AlumnoActividadId" = ?',
+        final querylsSubmissions = await db.query('tbEntregables',
+            columns: ['EntregableId', 'Contenido'],
+            where: 'EntregaActividadAlumnoId = ?',
             whereArgs: [studentActivityId]);
 
         for (var sub in querylsSubmissions) {
           Submission submission = Submission(
-              submissionId: sub['EntregaId'] as int,
+              submissionId: sub['EntregableId'] as int,
               submissionActivityStudentId: studentActivityId,
               status: status,
               submissionDate: submissionDate);
-          if (sub['Respuesta'] != null) {
-            submission.answer = sub['Respuesta'] as String;
-          }
-          if (sub['Enlace'] != null) {
-            submission.answer = sub['Enlace'] as String;
-          }
-          if (sub['Archivo'] != null) {
-            submission.answer = sub['Archivo'] as String;
+          if (sub['Contenido'] != null) {
+            submission.answer = sub['Contenido'] as String;
           }
           submission.activityId = activityId;
           lsSubmisions.add(submission);
@@ -252,21 +299,26 @@ Future<List<Activity>> getAllActivitiesOffline(int subjectId) async {
   Future<void> deleteSubmissionOfflineSent(int submissionId) async {
     try {
       final db = await DbLocal.database;
-      final querySubmission = await db.query('tbEntregableActividades',
-          columns: ['AlumnoActividadId'],
-          where: ' "EntregaId" = ? ',
+      
+      // Buscar el ID del padre antes de borrar el hijo
+      final querySubmission = await db.query('tbEntregables',
+          columns: ['EntregaActividadAlumnoId'],
+          where: 'EntregableId = ?',
           whereArgs: [submissionId]);
 
-      int studentActivityId = querySubmission.first['AlumnoActividadId'] as int;
+      if (querySubmission.isNotEmpty) {
+        int studentActivityId = querySubmission.first['EntregaActividadAlumnoId'] as int;
 
-      //& Eliminando registros tbEntregableActividades y tbAlumnosActividades
-      await db.rawDelete(
-          'DELETE FROM tbEntregableActividades WHERE EntregaId = ?',
-          [submissionId]);
+        // Eliminar registro de tbEntregables
+        await db.delete('tbEntregables', 
+            where: 'EntregableId = ?', 
+            whereArgs: [submissionId]);
 
-      await db.rawDelete(
-          'DELETE FROM tbAlumnosActividades WHERE AlumnoActividadId = ?',
-          [studentActivityId]);
+        // Eliminar registro padre tbEntregableActividadAlumno
+        await db.delete('tbEntregableActividadAlumno', 
+            where: 'EntregaActividadAlumnoId = ?', 
+            whereArgs: [studentActivityId]);
+      }
     } catch (e) {
       debugPrint('Error en deleteSubmissionOfflineSent: $e');
       rethrow;
