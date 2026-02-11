@@ -50,6 +50,7 @@ class ActivityNotifier extends StateNotifier<ActivityState> {
       final lsActivities =
           await activityOfflineRepository.getAllActivitiesOffline(subjectId);
       _setActivities(lsActivities);
+      debugPrint("Actividades cargadas desde offline: ${lsActivities.map((a) => {'id': a.activityId, 'nombre': a.nombreActividad}).toList()}");
     } catch (e) {
       debugPrint(e.toString());
       // Re-throw para que auth_state_notifier pueda capturar el error
