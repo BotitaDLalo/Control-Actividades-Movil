@@ -378,6 +378,7 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
     if (authType == AuthenticatedType.auth && caller != AuthCallers.checkAuthStatus) {
       debugPrint('Intentando guardar usuario offline: ${user.userId}, ${user.userName}, ${user.email}, ${user.activeDueDate}, ${user.role}');
       try {
+        await authUserOffline.deleteUser();
         await authUserOffline.insertUser(user.userId, user.userName, user.email,
             user.activeDueDate, user.role);
         debugPrint('Usuario offline guardado correctamente.');

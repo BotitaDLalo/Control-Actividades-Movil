@@ -53,7 +53,7 @@ class AuthUserOfflineDataSourceImpl implements AuthUserOfflineDataSource {
       await db.transaction(
         (txn) async {
           int res = await txn.rawInsert(query,
-              [usuarioId, nombreUsuario, correo, fechaLimiteActivo, rol]);
+              [nombreUsuario, correo, fechaLimiteActivo, rol]);
           debugPrint('[insertUser] Resultado de rawInsert: $res');
         },
       );
