@@ -1,10 +1,13 @@
 import 'package:aprende_mas/models/models.dart';
+import 'dart:convert';
+import 'dart:io';
 import 'package:aprende_mas/config/network/dio_client.dart';
 import 'package:aprende_mas/config/utils/packages.dart';
 import 'package:aprende_mas/models/activities/activity/activity_mapper.dart';
 import 'package:aprende_mas/repositories/Interface_repos/activity/activty_datasource.dart';
 import 'package:aprende_mas/config/data/data.dart';
 import 'package:intl/intl.dart';
+import 'package:file_picker/file_picker.dart';
 
 class ActivityDataSourceImpl implements ActivityDataSource {
   final storageService = KeyValueStorageServiceImpl();
@@ -62,8 +65,6 @@ class ActivityDataSourceImpl implements ActivityDataSource {
     }
   }
 
-// En activity_data_source_impl.dart
-
   @override
   Future<Activity> updateActivity(
     int activityId,
@@ -118,33 +119,88 @@ class ActivityDataSourceImpl implements ActivityDataSource {
   }
 
   @override
-  Future<List<Submission>> sendSubmission(int activityId, String answer) async {
+  Future<bool> sendSubmission(int activityId, String answer, {List<String> links = const [], List<String> files = const []}) async {
     try {
-      const uri = "/Alumnos/RegistrarEnvioActividadAlumno";
+      const uri = "/Alumnos/RegistrarEnvioActividadAlumnoConEnlaces";
       DateTime dateNow = DateTime.now();
       final id = await storageService.getId();
 
-      final res = await dio.post(uri, data: {
-        "ActividadId": activityId,
-        "AlumnoId": id,
-        "Respuesta": answer,
-        "FechaEntrega": dateNow.toString(),
-        "TipoEntregaId": 1
-      });
+      // Construir el JSON con la estructura completa (texto, enlaces, archivos)
+      final respuestaJson = {
+        "texto": answer,
+        "enlaces": links,
+        "archivos": files,
+        "fechaEntrega": dateNow.toIso8601String(),
+        "totalArchivos": files.length,
+        "totalEnlaces": links.length,
+      };
+
+      // Usar FormData para multipart/form-data (requerido por el backend)
+      final formData = FormData();
+      formData.fields.addAll([
+        MapEntry('ActividadId', activityId.toString()),
+        MapEntry('AlumnoId', id.toString()),
+        MapEntry('Respuesta', jsonEncode(respuestaJson)),
+        MapEntry('FechaEntrega', dateNow.toString()),
+        MapEntry('TipoEntregaId', '1'),
+      ]);
+
+      final res = await dio.post(uri, data: formData);
 
       if (res.statusCode == 200) {
-        // final resList = Map<String, dynamic>.from(res.data);
-        final resList = List<Map<String, dynamic>>.from(res.data);
-
-        final list = Submission.lsSubmissionJsonToLsEntity(resList, activityId);
-
-        return list;
+        return true;
       }
 
-      return [];
+      return false;
     } catch (e) {
       debugPrint(e.toString());
-      return [];
+      return false;
+    }
+  }
+
+  // Método para subir un archivo y obtener la URL
+  @override
+  Future<String> uploadFile(PlatformFile file, int activityId, int studentId) async {
+    try {
+      const uri = "/Archivos/SubirArchivo";
+      
+      // Crear FormData con el archivo
+      final formData = FormData();
+      
+      // Agregar IDs requeridos por el backend
+      formData.fields.addAll([
+        MapEntry('ActividadId', activityId.toString()),
+        MapEntry('AlumnoId', studentId.toString()),
+      ]);
+      
+      // Leer el archivo como bytes
+      final fileBytes = await File(file.path!).readAsBytes();
+      
+      // Agregar el archivo al FormData
+      formData.files.add(MapEntry(
+        'archivo',
+        MultipartFile.fromBytes(
+          fileBytes,
+          filename: file.name,
+        ),
+      ));
+      
+      final res = await dio.post(uri, data: formData);
+      
+      if (res.statusCode == 200) {
+        final url = res.data['url'] as String? ?? res.data['fileUrl'] as String?;
+        if (url != null) {
+          debugPrint("✅ Archivo subido exitosamente: $url");
+          return url;
+        } else {
+          throw Exception("El servidor no devolvió una URL");
+        }
+      } else {
+        throw Exception("Error al subir archivo: Status ${res.statusCode}");
+      }
+    } catch (e) {
+      debugPrint("❌ Error subiendo archivo: $e");
+      throw Exception("Error al subir archivo: $e");
     }
   }
 
@@ -176,7 +232,7 @@ class ActivityDataSourceImpl implements ActivityDataSource {
   }
 
   @override
-  Future<List<Submission>> cancelSubmission(
+  Future<bool> cancelSubmission(
       int studentActivityId, int activityId) async {
     try {
       const uri = "/Alumnos/CancelarEnvioActividadAlumno";
@@ -189,18 +245,13 @@ class ActivityDataSourceImpl implements ActivityDataSource {
       });
 
       if (res.statusCode == 200) {
-        // final resList = Map<String, dynamic>.from(res.data);
-        final resList = List<Map<String, dynamic>>.from(res.data);
-
-        final list = Submission.lsSubmissionJsonToLsEntity(resList, activityId);
-
-        return list;
+        return true;
       }
 
-      return [];
+      return false;
     } catch (e) {
       print(e);
-      return [];
+      return false;
     }
   }
 
@@ -238,6 +289,17 @@ class ActivityDataSourceImpl implements ActivityDataSource {
       }
 
       return false;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  @override
+  Future<bool> removeGrade(int submissionId) async {
+    try {
+      const uri = "/Actividades/QuitarCalificacion";
+      final res = await dio.post(uri, data: {"EntregableId": submissionId});
+      return res.statusCode == 200;
     } catch (e) {
       return false;
     }

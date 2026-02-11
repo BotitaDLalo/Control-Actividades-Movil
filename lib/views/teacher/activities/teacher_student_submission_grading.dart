@@ -1,12 +1,12 @@
 import 'package:aprende_mas/config/utils/packages.dart';
-import 'package:aprende_mas/views/views.dart';
+import 'package:aprende_mas/config/environment/environment.dart';
 import 'package:aprende_mas/models/models.dart';
-import 'package:aprende_mas/views/widgets/cards/element_card.dart';
 import 'package:flutter/services.dart';
-import 'package:aprende_mas/config/utils/app_theme.dart';
 import 'package:aprende_mas/providers/providers.dart';
 import 'package:aprende_mas/views/widgets/alerts/success_dialog.dart';
 import 'package:aprende_mas/views/widgets/alerts/error_dialog.dart';
+import 'package:aprende_mas/views/widgets/alerts/warning_confirmation_dialog.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class TeacherStudentSubmissionGrading extends ConsumerStatefulWidget {
   final TeacherStudentSubmissionGradingModel data;
@@ -27,14 +27,27 @@ class _TeacherStudentSubmissionGradingState
     super.dispose();
   }
 
+  String _formatDateTime(String dateTimeStr) {
+    try {
+      // El formato del backend es: 2026-02-04T17:42:56.17
+      final dateTime = DateTime.parse(dateTimeStr);
+      return '${dateTime.year}-${dateTime.month.toString().padLeft(2, '0')}-${dateTime.day.toString().padLeft(2, '0')} ${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
+    } catch (e) {
+      return dateTimeStr; // Si hay error, retornar el original
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final data = widget.data;
     final submissionId = data.submissionId;
-    final userName = data.userName;
     final fullName = data.fullName;
-    final answer = data.answer;
+    final userName = data.userName;
     final score = data.score;
+    final answer = data.answer;
+    final links = data.links;
+    final files = data.files;
+    final submissionDate = data.submissionDate;
 
     final activity = ref.watch(activityProvider);
     final activityNotifier = ref.read(activityProvider.notifier);
@@ -57,13 +70,12 @@ class _TeacherStudentSubmissionGradingState
     }
 
     closeKeyboard() {
-      // FocusScope.of(context).unfocus();
       gradeController.clear();
     }
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.yellow,
+        backgroundColor: Colors.white,
         elevation: 0,
         forceMaterialTransparency: true,
         leading: IconButton(
@@ -79,69 +91,398 @@ class _TeacherStudentSubmissionGradingState
       ),
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
-        child: Column(
-          children: [
-            ElementTile(
-                icon: Icons.person,
-                iconColor: Colors.white,
-                iconSize: 36,
-                title: userName,
-                subtitle: fullName),
-            ElementCard(
-              answer: answer,
-              score: score,
-              grade: activity.grade,
-            ),
-          ],
+        padding: const EdgeInsets.only(bottom: 100),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Card de información del alumno
+              Container(
+                margin: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 8.0),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: Colors.grey.shade300, width: 1.0),
+                ),
+                child: ListTile(
+                  leading: CircleAvatar(
+                    backgroundColor: Colors.transparent,
+                    radius: 22,
+                    child: SvgPicture.asset(
+                      'assets/icons/user2.svg',
+                      width: 36,
+                      height: 36,
+                      colorFilter: const ColorFilter.mode(
+                          Colors.black, BlendMode.srcIn),
+                    ),
+                  ),
+                  title: Text(
+                    fullName,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.black,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  subtitle: Text(
+                    userName,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      color: Colors.grey,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ),
+              ),
+              
+              const SizedBox(height: 16),
+              
+              // Card de respuesta del alumno
+              Container(
+                padding: const EdgeInsets.all(16.0),
+                margin: const EdgeInsets.symmetric(horizontal: 8.0),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: Colors.grey.shade300, width: 1.0),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text(
+                      'Respuesta',
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 28),
+                    ),
+                    const SizedBox(height: 6),
+                    
+                    // Fecha de envío
+                    Text(
+                      'Enviado: ${_formatDateTime(data.submissionDate)}',
+                      style: const TextStyle(
+                        color: Colors.black,
+                        fontSize: 18,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    
+                    // Calificación y Fecha de entrega
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          activity.grade == -1 ? 'Sin calificar' : "Calificación: ${activity.grade}/$score",
+                          style: const TextStyle(
+                            color: Colors.black,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 18),
+                    
+                    // Campo de texto con la respuesta
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: const Color.fromARGB(10, 0, 0, 0),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: TextField(
+                        controller: TextEditingController(text: answer),
+                        maxLines: null,
+                        readOnly: true,
+                        decoration: const InputDecoration(
+                          border: InputBorder.none,
+                          hintText: 'Sin respuesta',
+                        ),
+                        style: const TextStyle(
+                          fontSize: 18,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ),
+                    
+                    const SizedBox(height: 24),
+                    
+                    // Sección de archivos adjuntos
+                    const Text(
+                      'Archivos adjuntos:',
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                    ),
+                    const SizedBox(height: 12),
+                    files.isEmpty
+                        ? const Center(
+                            child: Text(
+                              'No hay archivos adjuntos',
+                              style: TextStyle(color: Colors.grey, fontSize: 18),
+                            ),
+                          )
+                        : Column(
+                            children: files.map<Widget>((archivo) {
+                              String url = archivo.ruta.isNotEmpty ? archivo.ruta : '';
+                              String nombreMostrar = archivo.nombre.isNotEmpty ? archivo.nombre : '';
+                              
+                              if (url.isEmpty && nombreMostrar.isNotEmpty && nombreMostrar.startsWith('/')) {
+                                url = nombreMostrar;
+                              }
+                              
+                               if (url.isNotEmpty) {
+                                 String baseUrl = Environment.apiUrl.replaceAll(RegExp(r'/?api/?$'), '');
+                                 if (!url.startsWith('http')) {
+                                   url = '$baseUrl$url';
+                                 }
+                                if (nombreMostrar.isEmpty) {
+                                  nombreMostrar = url.split('/').last;
+                                }
+                              }
+                              
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 6.0),
+                                child: GestureDetector(
+                                  onTap: () async {
+                                    if (url.isNotEmpty) {
+                                      final uri = Uri.parse(url);
+                                      if (await canLaunchUrl(uri)) {
+                                        await launchUrl(uri, mode: LaunchMode.externalApplication);
+                                      } else {
+                                        if (mounted) {
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            const SnackBar(content: Text('No se pudo abrir el archivo')),
+                                          );
+                                        }
+                                      }
+                                    }
+                                  },
+                                  child: Row(
+                                    children: [
+                                      SvgPicture.asset(
+                                        'assets/icons/documento.svg',
+                                        width: 40,
+                                        height: 40,
+                                        colorFilter: const ColorFilter.mode(Colors.black, BlendMode.srcIn),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Text(
+                                          nombreMostrar,
+                                          style: const TextStyle(
+                                            fontSize: 18,
+                                            color: Colors.blue,
+                                            decoration: TextDecoration.underline,
+                                          ),
+                                          maxLines: null,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                    
+                    const SizedBox(height: 24),
+                    
+                    // Sección de enlaces
+                    const Text(
+                      'Enlaces:',
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                    ),
+                    const SizedBox(height: 12),
+                    links.isEmpty
+                        ? const Center(
+                            child: Text(
+                              'No hay enlaces',
+                              style: TextStyle(color: Colors.grey, fontSize: 18),
+                            ),
+                          )
+                        : Column(
+                            children: links.map<Widget>((enlace) {
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 6.0),
+                                child: Row(
+                                  children: [
+                                    SvgPicture.asset(
+                                      'assets/icons/link.svg',
+                                      width: 40,
+                                      height: 40,
+                                      colorFilter: const ColorFilter.mode(Colors.black, BlendMode.srcIn),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: GestureDetector(
+                                        onTap: () async {
+                                          final uri = Uri.parse(
+                                            enlace.startsWith('http') ? enlace : 'https://$enlace'
+                                          );
+                                          if (await canLaunchUrl(uri)) {
+                                            await launchUrl(uri, mode: LaunchMode.externalApplication);
+                                          }
+                                        },
+                                        child: Text(
+                                          enlace,
+                                          style: const TextStyle(
+                                            fontSize: 18,
+                                            color: Colors.blue,
+                                            decoration: TextDecoration.underline,
+                                          ),
+                                          maxLines: null,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                  ],
+                ),
+              ),
+               
+              const SizedBox(height: 24),
+               
+              // Sección de nueva calificación
+              const Text(
+                'Asignar Calificación',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      onChanged: (value) {
+                        activityFormNotifier.onSubmissionGradeChanged(value);
+                      },
+                      keyboardType: TextInputType.number,
+                      controller: gradeController,
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      decoration: InputDecoration(
+                        labelText: 'Ingresa la calificación',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.blue, width: 2.0),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    '/ $score',
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                  ),
+                ],
+              ),
+              if (activity.grade != null && activity.grade > 0) ...[
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: activityForm.isPosting
+                        ? null
+                        : () {
+                            WarningConfirmationDialog.show(
+                              context,
+                              message: '¿Estás seguro de quitar la calificación a este alumno?',
+                              onConfirmPressed: () async {
+                                bool success = await activityNotifier.removeGrade(submissionId);
+                                if (mounted) {
+                                  if (success) {
+                                    SuccessDialog.show(
+                                      context,
+                                      message: 'Calificación quitada correctamente',
+                                    );
+                                    gradeController.clear();
+                                  } else {
+                                    ErrorDialog.show(
+                                      context,
+                                      message: 'Error al quitar calificación',
+                                    );
+                                  }
+                                }
+                              },
+                            );
+                          },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    child: const Text(
+                      'Quitar Calificación',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
         ),
       ),
-      bottomSheet: Padding(
-        padding: const EdgeInsets.only(left: 8,right: 8,bottom: 18, top: 8),
-        child: Row(
-          children: [
-            Expanded(
-                child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: TextField(
-                onChanged: (value) {
-                  activityFormNotifier.onSubmissionGradeChanged(value);
-                },
-                keyboardType: TextInputType.number,
-                controller: gradeController,
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-              ),
-            )),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: ElevatedButton(
-                onPressed: () async {
-                  if (activityForm.isPosting) {
-                    return;
-                  }
-                  final submitedGraded = await ref
-                      .read(activityFormProvider.notifier)
-                      .onSubmitGrade(submissionId);
+      bottomSheet: Container(
+        height: 80,
+        padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16, top: 8),
+        child: SizedBox(
+          width: double.infinity,
+          child: ElevatedButton(
+            onPressed: activityForm.isPosting
+                ? null
+                : () async {
+                    final submitedGraded = await ref
+                        .read(activityFormProvider.notifier)
+                        .onSubmitGrade(submissionId);
 
-                  if (submitedGraded.isValid) {
-                    if (submitedGraded.success) {
-                      showSuccessMessage('Se asignó la calificación.');
-
-                      activityNotifier.setSubmissionGrade(
-                          int.parse(activityForm.newGrade.value));
-                    } else {
-                      showErrorMessage('Ocurrio un error');
+                    if (submitedGraded.isValid) {
+                      if (submitedGraded.success) {
+                        showSuccessMessage('Se asignó la calificación.');
+                        activityNotifier.setSubmissionGrade(
+                            int.parse(activityForm.newGrade.value));
+                      } else {
+                        showErrorMessage('Ocurrio un error');
+                      }
+                      closeKeyboard();
                     }
-                    closeKeyboard();
-                  }
-                },
-                style: AppTheme.buttonSecondary,
-                child: const Text('Asignar'),
+                  },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.blue,
+              foregroundColor: Colors.white,
+              padding: EdgeInsets.zero,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
               ),
-            )
-          ],
+            ),
+            child: const Center(
+              child: Text(
+                'Asignar Calificación',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ),
         ),
       ),
     );
   }
 }
-

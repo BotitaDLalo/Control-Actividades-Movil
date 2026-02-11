@@ -5,6 +5,7 @@ import 'package:aprende_mas/repositories/Implement_repos/activity/activity_offli
 import 'package:aprende_mas/repositories/Interface_repos/groups/groups_repository.dart';
 import 'package:aprende_mas/repositories/Interface_repos/groups/groups_offline_repository.dart';
 import 'package:aprende_mas/config/data/key_value_storage_service_impl.dart';
+import 'package:aprende_mas/providers/subjects/subjects_provider.dart';
 
 class GroupsNotifier extends StateNotifier<GroupsState> {
   final Function(int) getAllActivitiesCallback;
@@ -12,10 +13,12 @@ class GroupsNotifier extends StateNotifier<GroupsState> {
   final GroupsRepository groupsRepository;
   final ActivityOfflineRepositoryImpl activityOffline;
   final GroupsOfflineRepository groupsOfflineRepository;
+  final Ref ref;
   final storageService = KeyValueStorageServiceImpl();
 
   GroupsNotifier(
-      {required this.getAllActivitiesCallback,
+      {required this.ref,
+      required this.getAllActivitiesCallback,
       required this.getSubmissionsCallback,
       required this.groupsRepository,
       required this.activityOffline,
@@ -92,17 +95,17 @@ class GroupsNotifier extends StateNotifier<GroupsState> {
     state = state.copyWith(lsGroups: groups);
   }
 
-  Future<bool> deleteGroup(int groupId) async {
+  Future<Map<String, dynamic>> deleteGroup(int groupId) async {
     try {
-      bool success = await groupsRepository.deleteGroup(groupId);
-      if (success) {
+      final result = await groupsRepository.deleteGroup(groupId);
+      if (result['success']) {
         _deleteGroupFromState(groupId);
-        return true;
+        return result;
       } else {
-        return false;
+        return result;
       }
     } catch (e) {
-      return false;
+      return {'success': false, 'message': 'Error: $e'};
     }
   }
 
@@ -189,5 +192,10 @@ class GroupsNotifier extends StateNotifier<GroupsState> {
 
   void clearGroupsState() {
     state = GroupsState();
+  }
+
+  Future<void> refreshAll() async {
+    await getGroupsSubjects();
+    await ref.read(subjectsProvider.notifier).getSubjects();
   }
 }

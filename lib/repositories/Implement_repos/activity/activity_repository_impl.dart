@@ -4,6 +4,7 @@ import 'package:aprende_mas/repositories/Interface_repos/activity/activity_offli
 import 'package:aprende_mas/repositories/Interface_repos/activity/activity_repository.dart';
 import 'package:aprende_mas/repositories/Interface_repos/activity/activty_datasource.dart';
 import 'package:aprende_mas/models/models.dart';
+import 'package:file_picker/file_picker.dart';
 
 class ActivityRepositoryImpl implements ActivityRepository {
   final ActivityDataSource activityDataSource;
@@ -17,22 +18,22 @@ class ActivityRepositoryImpl implements ActivityRepository {
     return activities;
   }
 
-@override
+  @override
   Future<Activity> updateActivity(
       int activityId, 
       String nombreActividad,
       String descripcion, 
       DateTime fechaLimite, 
-      int puntaje,   // <--- NUEVO
-      int materiaId  // <--- NUEVO
+      int puntaje,
+      int materiaId
   ) {
     return activityDataSource.updateActivity(
         activityId, 
         nombreActividad, 
         descripcion, 
         fechaLimite, 
-        puntaje,    // <--- Pasamos puntaje
-        materiaId   // <--- Pasamos materiaId
+        puntaje,
+        materiaId
     );
   }
 
@@ -42,8 +43,13 @@ class ActivityRepositoryImpl implements ActivityRepository {
   }
 
   @override
-  Future<List<Submission>> sendSubmission(int activityId, String answer) {
-    return activityDataSource.sendSubmission(activityId, answer);
+  Future<bool> sendSubmission(int activityId, String answer, {List<String> links = const [], List<String> files = const []}) {
+    return activityDataSource.sendSubmission(activityId, answer, links: links, files: files);
+  }
+
+  @override
+  Future<String> uploadFile(PlatformFile file, int activityId, int studentId) async {
+    return await activityDataSource.uploadFile(file, activityId, studentId);
   }
 
   @override
@@ -52,7 +58,7 @@ class ActivityRepositoryImpl implements ActivityRepository {
   }
 
   @override
-  Future<List<Submission>> cancelSubmission(
+  Future<bool> cancelSubmission(
       int studentActivityId, int activityId) {
     return activityDataSource.cancelSubmission(studentActivityId, activityId);
   }
@@ -68,16 +74,19 @@ class ActivityRepositoryImpl implements ActivityRepository {
   }
 
   @override
+  Future<bool> removeGrade(int submissionId) {
+    return activityDataSource.removeGrade(submissionId);
+  }
+
+  @override
   Future<void> deleteActivity(int activityId) {
     return activityDataSource.deleteActivity(activityId);
   }
   
   @override
-Future<List<Activity>> getActivitiesBySubject(int materiaId) async {
-  // 🎯 El método getAllActivities que ya tienes parece estar diseñado
-  // para consultar actividades por materiaId. Lo reutilizamos.
-  final activities = await activityDataSource.getAllActivities(materiaId);
-  return activities;
-}
+  Future<List<Activity>> getActivitiesBySubject(int materiaId) async {
+    final activities = await activityDataSource.getAllActivities(materiaId);
+    return activities;
+  }
 
 }

@@ -4,6 +4,8 @@ import 'package:aprende_mas/views/views.dart';
 import 'package:aprende_mas/views/widgets/buttons/button_form.dart';
 import 'package:aprende_mas/providers/providers.dart';
 import 'package:aprende_mas/views/widgets/buttons/button_login.dart';
+import 'package:aprende_mas/views/widgets/alerts/success_dialog.dart';
+import 'package:aprende_mas/views/widgets/alerts/error_dialog.dart';
 
 class FormForgotPassword extends ConsumerWidget {
   const FormForgotPassword({super.key});
@@ -15,7 +17,7 @@ class FormForgotPassword extends ConsumerWidget {
         ref.read(forgotPasswordFormProvider.notifier);
 
     returnLogin() {
-      context.pop();
+      Navigator.of(context).pop();
     }
 
     return Form(
@@ -23,12 +25,6 @@ class FormForgotPassword extends ConsumerWidget {
         padding: const EdgeInsets.all(20.0),
         child: Column(
           children: [
-            /*
-            const Text(
-              '¿Olvidaste tu contraseña?',
-              style: TextStyle(fontSize: 24),
-            ),
-            */
             const SizedBox(height: 20),
             CustomTextFormField(
               icon: SvgPicture.asset(
@@ -49,7 +45,6 @@ class FormForgotPassword extends ConsumerWidget {
               height: 65,
             ),
             SizedBox(
-              //width: double.infinity,
               width: MediaQuery.of(context).size.width * 0.5,
               height: MediaQuery.of(context).size.height * 0.080,
               child: ButtonLogin(
@@ -65,12 +60,21 @@ class FormForgotPassword extends ConsumerWidget {
                   textColor: Colors.white,
                   text: "Enviar",
                   onPressed: () async {
-                    final bool? result =
+                    final result =
                         await forgotPasswordNotifier.onFormSubmit();
                     if (result == true) {
-                      returnLogin();
+                      SuccessDialog.show(
+                        context,
+                        message: 'Se ha enviado un enlace de restablecimiento a su correo',
+                        onOkPressed: () {
+                          returnLogin();
+                        },
+                      );
                     } else {
-                      return;
+                      ErrorDialog.show(
+                        context,
+                        message: 'Error al enviar el correo. Verifique su email e intente nuevamente.',
+                      );
                     }
                   }),
             )

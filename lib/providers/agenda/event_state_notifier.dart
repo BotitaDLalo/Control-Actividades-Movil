@@ -50,7 +50,6 @@ class EventNotifier extends StateNotifier<EventState>{
   }) async {
 
     try {
-      state = state.copyWith(isLoading: true);
       final event = await eventRepository.createEvent(
         title,
         description,
@@ -64,8 +63,6 @@ class EventNotifier extends StateNotifier<EventState>{
     } catch (e) {
      state = state.copyWith(errorMessage: e.toString());
      return []; // Devolver lista vacía en caso de error
-    } finally {
-      state = state.copyWith(isLoading: false);
     }
   }
 
@@ -73,9 +70,9 @@ class EventNotifier extends StateNotifier<EventState>{
     print("🔹 _setCreateEvent llamado con: $event");
     if (event == null) {
       print("❌ Error: event es nulo, usando lista vacía");
-      state = state.copyWith(events: []);
+      state = state.copyWith(events: [], isLoading: false);
     } else {
-      state = state.copyWith(events: event);
+      state = state.copyWith(events: event, isLoading: false);
     }
   }
 

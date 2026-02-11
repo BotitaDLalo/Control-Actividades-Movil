@@ -257,9 +257,11 @@ Future<void> onFormSubmit() async {
     print("❌ Error durante la petición: $e");
     throw Exception("Error durante la petición: $e");
   } finally {
-    // Marcar el fin de la petición y resetear el formulario si fue exitoso
+    // Primero verificar si fue exitoso antes de resetear
+    final wasPosted = state.isFormPosted;
+    // Marcar el fin de la petición
     state = state.copyWith(isPosting: false);
-    if (state.isFormPosted) {
+    if (wasPosted) {
       resetStateForm();
     }
   }

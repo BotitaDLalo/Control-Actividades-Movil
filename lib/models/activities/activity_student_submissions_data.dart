@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'student_submission.dart';
+import 'submission.dart';
 
 class ActivityStudentSubmissionsData {
   final int activityId;
@@ -28,16 +30,25 @@ class ActivityStudentSubmissionsData {
         totalSubmissions: response['TotalEntregados'] as int,
         lsStudentsSubmissions: lsResponse
             .map(
-              (e) => StudentSubmission(
-                  submissionId: e['EntregaId'] as int,
-                  studentId: e['AlumnoId'] as int,
-                  userName: e['NombreUsuario'] as String,
-                  names: e['Nombres'] as String,
-                  lastName: e['ApellidoPaterno'] as String,
-                  lastName2: e['ApellidoMaterno'] as String,
-                  submissionDate: e['FechaEntrega'].toString(),
-                  answer: e['Respuesta'] as String,
-                  grade: e['Calificacion'] as int),
+              (e) {
+                final respuestaJson = e['Respuesta'] as String?;
+                final parsedRespuesta = Submission.parseRespuestaJson(respuestaJson);
+                
+                return StudentSubmission(
+                    submissionId: e['EntregaId'] as int,
+                    studentId: e['AlumnoId'] as int,
+                    userName: e['NombreUsuario'] as String,
+                    names: e['Nombres'] as String,
+                    lastName: e['ApellidoPaterno'] as String,
+                    lastName2: e['ApellidoMaterno'] as String,
+                    submissionDate: e['FechaEntrega'].toString(),
+                    answer: parsedRespuesta.texto,
+                    links: parsedRespuesta.enlaces,
+                    files: parsedRespuesta.archivos.map((nombre) {
+                      return FileSubmission(nombre: nombre, ruta: '');
+                    }).toList(),
+                    grade: e['Calificacion'] as int);
+              },
             )
             .toList());
   }

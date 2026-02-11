@@ -21,7 +21,9 @@ class _CustomExpansionState extends ConsumerState<GroupsSubjectsContainer> {
   @override
   void initState() {
     super.initState();
-    // ref.read(groupsProvider.notifier).getGroupsSubjects();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(groupsProvider.notifier).refreshAll();
+    });
 
     // 2. LISTENER: Actualiza la variable _searchTerm cada vez que escribes
     _searchController.addListener(() {

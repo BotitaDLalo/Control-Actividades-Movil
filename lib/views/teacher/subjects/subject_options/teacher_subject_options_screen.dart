@@ -96,6 +96,9 @@ class _ActividadesScreenState
     return PopScope(
       onPopInvokedWithResult: (didPop, result) {
         clearScreen();
+        if (didPop) {
+          ref.read(groupsProvider.notifier).refreshAll();
+        }
       },
       child: Scaffold(
         body: MediaQuery.removePadding(

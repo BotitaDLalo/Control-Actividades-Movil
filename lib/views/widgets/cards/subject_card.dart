@@ -68,13 +68,13 @@ class SubjectCard extends ConsumerWidget {
       context,
       message: '¿Estás seguro de que deseas eliminar esta materia? Esta acción no se puede deshacer.',
       onConfirmPressed: () async {
-        bool success = await ref.read(subjectsProvider.notifier).deleteSubject(subjectData.materiaId!);
-        if (success) {
-          SuccessDialog.show(context, message: "Materia eliminada exitosamente");
-          await ref.read(groupsProvider.notifier).getGroupsSubjects();
-        } else {
-          ErrorDialog.show(context, message: "Error al eliminar la materia");
-        }
+        final result = await ref.read(subjectsProvider.notifier).deleteSubject(subjectData.materiaId!);
+          if (result['success']) {
+            SuccessDialog.show(context, message: "Materia eliminada exitosamente");
+            await ref.read(groupsProvider.notifier).getGroupsSubjects();
+          } else {
+            ErrorDialog.show(context, message: result['message']);
+          }
       },
     );
   }

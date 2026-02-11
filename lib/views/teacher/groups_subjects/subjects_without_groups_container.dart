@@ -20,9 +20,9 @@ class _SubjectsWithoutGroupsState
   void initState() {
     super.initState();
 
-    // Cargar materias sin grupo
+    // Cargar y refrescar datos
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(subjectsProvider.notifier).getSubjects();
+      ref.read(groupsProvider.notifier).refreshAll();
     });
 
     // 2. LISTENER: Actualiza la variable _searchTerm cada vez que escribes

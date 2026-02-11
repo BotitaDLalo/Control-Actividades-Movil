@@ -94,10 +94,10 @@ class AuthDataSourceImpl implements AuthDataSource {
 
   @override
   Future<bool> resetPasswordRequest(String email) async {
-    const uri = "/CorreoRestablecerPassword/EnvioCodigo";
+    const uri = "/Login/ForgotPassword";
     try {
       final resetPasswordStatus =
-          await dio.post(uri, data: {"Destinatario": email});
+          await dio.post(uri, data: {"Email": email});
 
       if (resetPasswordStatus.statusCode == 200) {
         return true;

@@ -4,6 +4,7 @@ import 'package:aprende_mas/providers/activity/activity_state.dart';
 import 'package:aprende_mas/repositories/Interface_repos/activity/activity_repository.dart';
 import 'package:aprende_mas/repositories/Interface_repos/activity/activity_offline_repository.dart';
 import 'package:aprende_mas/models/activities/activity/activity.dart';
+import 'package:file_picker/file_picker.dart';
 
 class ActivityNotifier extends StateNotifier<ActivityState> {
   final ActivityRepository activityRepository;
@@ -226,32 +227,71 @@ Future<void> updateActivity(
     }
   }
 
-  Future<bool> sendSubmission(int activityId, String answer) async {
+  Future<bool> sendSubmission(int activityId, String answer, {List<String> links = const []}) async {
     try {
-      final submissionSent =
-          await activityRepository.sendSubmission(activityId, answer);
-      if (submissionSent.isNotEmpty) {
-        _setLsSubmissions(submissionSent);
-        return true;
-      }
-      return false;
+      final success = await activityRepository.sendSubmission(activityId, answer, links: links);
+      return success;
     } catch (e) {
       return false;
     }
   }
 
-  Future<void> cancelSubmission(int studentActivityId, int activityId) async {
+  Future<bool> sendSubmissionWithLinks(int activityId, String answer, List<String> links) async {
     try {
-      List<Submission> lsSubmissionsState = List.from(state.lsSubmissions);
-
-      await activityRepository.cancelSubmission(studentActivityId, activityId);
-
-      List<Submission> lsSubmissions = lsSubmissionsState
-          .where((element) => element.submissionActivityStudentId != studentActivityId)
-          .toList();
-      _updateLsSubmissions(lsSubmissions);
+      final result = await activityRepository.sendSubmission(activityId, answer, links: links);
+      return result == true;
     } catch (e) {
-      throw Exception(e);
+      debugPrint("Error en sendSubmissionWithLinks: $e");
+      return false;
+    }
+  }
+
+  Future<bool> sendSubmissionWithFiles(int activityId, String answer, List<String> fileUrls) async {
+    try {
+      final success = await activityRepository.sendSubmission(activityId, answer, files: fileUrls);
+      return success;
+    } catch (e) {
+      debugPrint("Error en sendSubmissionWithFiles: $e");
+      return false;
+    }
+  }
+
+  Future<bool> sendSubmissionWithFilesAndLinks(int activityId, String answer, List<String> fileUrls, List<String> links) async {
+    try {
+      final success = await activityRepository.sendSubmission(activityId, answer, links: links, files: fileUrls);
+      return success;
+    } catch (e) {
+      debugPrint("Error en sendSubmissionWithFilesAndLinks: $e");
+      return false;
+    }
+  }
+
+  Future<String> uploadFile(PlatformFile file, int activityId, int studentId) async {
+    try {
+      return await activityRepository.uploadFile(file, activityId, studentId);
+    } catch (e) {
+      debugPrint("Error en uploadFile: $e");
+      rethrow;
+    }
+  }
+
+  Future<bool> cancelSubmission(int studentActivityId, int activityId) async {
+    try {
+      final success = await activityRepository.cancelSubmission(studentActivityId, activityId);
+      
+      if (success) {
+        // Actualizar lista local - remover el submission cancelado
+        List<Submission> lsSubmissionsState = List.from(state.lsSubmissions);
+        List<Submission> lsSubmissions = lsSubmissionsState
+            .where((element) => element.submissionActivityStudentId != studentActivityId)
+            .toList();
+        _updateLsSubmissions(lsSubmissions);
+      }
+      
+      return success;
+    } catch (e) {
+      debugPrint('Error en cancelSubmission: $e');
+      return false;
     }
   }
 
@@ -300,6 +340,18 @@ Future<void> updateActivity(
     try {
       final res =
           await activityRepository.submissionGrading(submissionId, grade);
+      return res;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<bool> removeGrade(int submissionId) async {
+    try {
+      final res = await activityRepository.removeGrade(submissionId);
+      if (res) {
+        state = state.copyWith(grade: 0);
+      }
       return res;
     } catch (e) {
       return false;

@@ -12,19 +12,19 @@ abstract class GroupsDataSource {
   Future<List<Group>> createGroupSubjects(String groupName, String description,
        List<SubjectsRow> subjectsList);
 
-  Future<bool> deleteGroup(int groupId);
+  Future<Map<String, dynamic>> deleteGroup(int groupId);
 
   Future<Group> updateGroup(
       int groupId, String groupName, String descriptionGroup);
-  
+
   Future<VerifyEmail> verifyEmail(String email);
 
   Future<List<StudentGroupSubject>> addStudentsGroup(int groupId, List<String> emails);
 
   Future<List<StudentGroupSubject>> getStudentsGroup(int groupId);
 
-  Future<bool> removeStudentFromGroup({
-    required int groupId, 
+  Future<Map<String, dynamic>> removeStudentFromGroup({
+    required int groupId,
     required int studentId
   });
 }
