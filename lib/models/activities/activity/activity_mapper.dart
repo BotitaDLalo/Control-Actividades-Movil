@@ -33,17 +33,17 @@ class ActivityMapper {
   }
 
     static Activity jsonToEntity(Map<String, dynamic> json) {
-  print("Datos json: $json");
+    print("Datos json: $json");
 
-  return Activity(
-    activityId: json['ActivityId'] != null ? json['activityId'] as int : null,  // Se permite null
-    nombreActividad: json['NombreActividad'] as String? ?? '',
-    descripcion: json['Descripcion'] as String? ?? '',
-    tipoActividadId: json['TipoActividadId'] != null ? json['TipoActividadId'] as int : null,  // Se permite null
-    fechaCreacion: json['FechaCreacionActividad'] != null ? formatDate(json['FechaCreacionActividad']) : null,  // Puede ser null
-    fechaLimite: formatDate(json['FechaLimite'] ?? ''),  // Asegurarse de que fechaLimite nunca sea null
-    materiaId: json['MateriaId'] as int? ?? 0,  // Asignar valor predeterminado si es null
-    puntaje: json['Puntaje'] != null ? json['Puntaje'] as int : null,  // Se permite null
-  );
+    return Activity(
+      activityId: json['ActivityId'] != null ? json['activityId'] as int : null,
+      nombreActividad: json['NombreActividad'] as String? ?? '',
+      descripcion: json['Descripcion'] as String? ?? '',
+      tipoActividadId: json['TipoActividadId'] != null ? json['TipoActividadId'] as int : null,
+      fechaCreacion: json['FechaCreacionActividad'] != null ? formatDate(json['FechaCreacionActividad']) : null,
+      fechaLimite: formatDate(json['FechaLimite'] ?? ''),
+      materiaId: json['MateriaId'] as int? ?? 0,
+      puntaje: json['Puntaje'] != null ? json['Puntaje'] as int : null,
+    );
   }
 }
