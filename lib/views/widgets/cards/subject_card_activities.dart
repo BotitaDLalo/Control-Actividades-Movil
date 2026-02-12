@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 class CustomActivitiesContainer extends StatelessWidget {
   final Activity? actividades;
-  
+   
   const CustomActivitiesContainer({
     super.key, 
     required this.actividades,
@@ -11,47 +11,6 @@ class CustomActivitiesContainer extends StatelessWidget {
 
   String dateFormat(String date) {
     return date.substring(0, 10);
-  }
-
-  Widget _buildEstatus() {
-    final actividad = actividades;
-    if (actividad == null) return const SizedBox.shrink();
-
-    final estatus = actividad.estatus ?? 'Pendiente';
-
-    Color statusColor;
-    String statusText;
-
-    switch (estatus.toLowerCase()) {
-      case 'entregado':
-        statusColor = Colors.green;
-        statusText = 'Entregado';
-        break;
-      case 'retrasado':
-        statusColor = Colors.red;
-        statusText = 'Retrasado';
-        break;
-      default:
-        statusColor = Colors.orange;
-        statusText = 'Pendiente';
-    }
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: statusColor.withOpacity(0.15),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: statusColor, width: 1.5),
-      ),
-      child: Text(
-        statusText,
-        style: TextStyle(
-          color: statusColor,
-          fontSize: 14,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-    );
   }
 
   @override
@@ -69,7 +28,7 @@ class CustomActivitiesContainer extends StatelessWidget {
                   TextSpan(
                     children: [
                       TextSpan(
-                        text: '${actividades?.nombreActividad.trim() ?? ""}\n',
+                        text: '${actividades?.nombreActividad?.trim() ?? "Sin nombre"}\n',
                         style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w500,
@@ -78,7 +37,7 @@ class CustomActivitiesContainer extends StatelessWidget {
                         ),
                       ),
                       TextSpan(
-                        text: "Asignada: ${dateFormat(actividades?.fechaCreacion.toString().trim() ?? "")}",
+                        text: "Asignada: ${dateFormat(actividades?.fechaCreacion?.toString()?.trim() ?? "Sin fecha")}",
                         style: const TextStyle(
                           fontSize: 16,
                           color: Colors.grey,
@@ -89,7 +48,6 @@ class CustomActivitiesContainer extends StatelessWidget {
                   textAlign: TextAlign.left,
                 ),
               ),
-              _buildEstatus(),
             ],
           ),
         ],
