@@ -69,7 +69,8 @@ class Submission {
                 if (e is Map<String, dynamic>) {
                   final nombre = e['nombre']?.toString() ?? '';
                   final url = e['url']?.toString() ?? '';
-                  return url.isNotEmpty ? url : nombre;
+                  final ruta = e['ruta']?.toString() ?? '';
+                  return ruta.isNotEmpty ? ruta : (url.isNotEmpty ? url : nombre);
                 }
                 return e.toString();
               })
@@ -91,7 +92,8 @@ class Submission {
               if (e is Map<String, dynamic>) {
                 final nombre = e['nombre']?.toString() ?? '';
                 final url = e['url']?.toString() ?? '';
-                return url.isNotEmpty ? url : nombre;
+                final ruta = e['ruta']?.toString() ?? '';
+                return ruta.isNotEmpty ? ruta : (url.isNotEmpty ? url : nombre);
               }
               return e.toString();
             })
@@ -104,7 +106,10 @@ class Submission {
         archivosFinal = (json['Archivos'] as List?)
             ?.map((e) {
               if (e is Map<String, dynamic>) {
-                return e['nombre']?.toString() ?? e['url']?.toString() ?? '';
+                final nombre = e['nombre']?.toString() ?? '';
+                final url = e['url']?.toString() ?? '';
+                final ruta = e['ruta']?.toString() ?? '';
+                return ruta.isNotEmpty ? ruta : (url.isNotEmpty ? url : nombre);
               }
               return e.toString();
             })
@@ -113,7 +118,10 @@ class Submission {
             (json['archivos'] as List?)
             ?.map((e) {
               if (e is Map<String, dynamic>) {
-                return e['nombre']?.toString() ?? e['url']?.toString() ?? '';
+                final nombre = e['nombre']?.toString() ?? '';
+                final url = e['url']?.toString() ?? '';
+                final ruta = e['ruta']?.toString() ?? '';
+                return ruta.isNotEmpty ? ruta : (url.isNotEmpty ? url : nombre);
               }
               return e.toString();
             })

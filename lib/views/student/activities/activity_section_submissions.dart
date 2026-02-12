@@ -243,11 +243,12 @@ class _ActivitySectionSubmissionState
                     
                     if (mounted) {
                       if (success) {
+                        await ref.read(activityProvider.notifier).getSubmissions(activityId);
+                        await Future.delayed(const Duration(milliseconds: 300));
                         SuccessDialog.show(
                           _safeContext!,
                           message: 'Entrega realizada correctamente',
                         );
-                        ref.read(activityProvider.notifier).getSubmissions(activityId);
                       } else {
                         ErrorDialog.show(
                           _safeContext!,
@@ -550,16 +551,46 @@ class _ActivitySectionSubmissionState
                     height: 0.5,
                   ),
                   const SizedBox(height: 16),
-                  SizedBox(
-                    height: MediaQuery.of(context).size.height * 0.20,
-                    child: SingleChildScrollView(
-                      child: Text(
-                        widget.activity.descripcion,
-                        style: const TextStyle(
-                          color: Colors.black,
-                          fontSize: 18,
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey[400]!),
+                      borderRadius: BorderRadius.circular(8),
+                      color: Colors.grey[50],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(Icons.description_outlined, size: 20, color: Colors.grey[600]),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Descripción de la actividad',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.grey[700],
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
+                        const SizedBox(height: 12),
+                        SizedBox(
+                          height: 150,
+                          child: SingleChildScrollView(
+                            child: Text(
+                              widget.activity.descripcion ?? 'Sin descripción',
+                              style: const TextStyle(
+                                color: Colors.black,
+                                fontSize: 18,
+                                height: 1.5,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   const SizedBox(

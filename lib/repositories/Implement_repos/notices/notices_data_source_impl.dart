@@ -53,15 +53,15 @@ class NoticesDataSourceImpl implements NoticesDataSource {
       int groupId = notice.groupId;
       int subjectId = notice.subjectId;
 
-      Map<String, dynamic> data = {};
+      Map<String, dynamic> queryParams = {};
 
       if (groupId != 0) {
-        data['GrupoId'] = groupId;
+        queryParams['grupoId'] = groupId;
       } else if (subjectId != 0) {
-        data['MateriaId'] = subjectId;
+        queryParams['materiaId'] = subjectId;
       }
 
-      final res = await dio.get(uri, data: data);
+      final res = await dio.get(uri, queryParameters: queryParams);
 
       if (res.statusCode == 200) {
         final resls = List<Map<String, dynamic>>.from(res.data);

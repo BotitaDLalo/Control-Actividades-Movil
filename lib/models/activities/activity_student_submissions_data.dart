@@ -44,8 +44,8 @@ class ActivityStudentSubmissionsData {
                     submissionDate: e['FechaEntrega'].toString(),
                     answer: parsedRespuesta.texto,
                     links: parsedRespuesta.enlaces,
-                    files: parsedRespuesta.archivos.map((nombre) {
-                      return FileSubmission(nombre: nombre, ruta: '');
+                    files: parsedRespuesta.archivos.map((url) {
+                      return FileSubmission(nombre: '', ruta: url);
                     }).toList(),
                     grade: e['Calificacion'] as int);
               },
