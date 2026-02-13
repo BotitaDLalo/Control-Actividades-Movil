@@ -15,7 +15,7 @@ class ActivityMapper {
           fechaCreacion: formatDate(map['FechaCreacionActividad']),
           fechaLimite: formatDate(map['FechaLimiteActividad']),
           materiaId: map['MateriaId'] as int,
-          puntaje: map['Puntaje'] as int);
+          puntaje: (map['Puntaje'] as num?)?.toDouble());
     }).toList();
   }
 
@@ -43,7 +43,7 @@ class ActivityMapper {
     fechaCreacion: json['FechaCreacionActividad'] != null ? formatDate(json['FechaCreacionActividad']) : null,  // Puede ser null
     fechaLimite: formatDate(json['FechaLimite'] ?? ''),  // Asegurarse de que fechaLimite nunca sea null
     materiaId: json['MateriaId'] as int? ?? 0,  // Asignar valor predeterminado si es null
-    puntaje: json['Puntaje'] != null ? json['Puntaje'] as int : null,  // Se permite null
+    puntaje: json['Puntaje'] != null ? (json['Puntaje'] as num).toDouble() : null,  // Se permite null
   );
   }
 }

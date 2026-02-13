@@ -54,7 +54,7 @@ class SubjectsOfflineDataSourceImpl extends SubjectsOfflineDataSource {
                   fechaCreacion: formatDate(row['FechaCreacion'] as String),
                   fechaLimite: formatDate(row['FechaLimite'] as String),
                   materiaId: row['MateriaId'] as int,
-                  puntaje: row['Puntaje'] as int,
+                  puntaje: (row['Puntaje'] as num?)?.toDouble(),
                 );
               }).toList();
 

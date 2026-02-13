@@ -82,7 +82,7 @@ class ContainerNameGroupSubjects extends StatelessWidget {
           ),
           // Botón de ajustes circular arriba derecha
           Positioned(
-            top: context.height(0.12),
+            top: context.height(0.06),
             right: context.width(0.07),
             child: GestureDetector(
               onTap: () {},

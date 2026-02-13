@@ -8,7 +8,7 @@ class Activity {
   final String? fechaCreacion;
   final String fechaLimite;
   final int? tipoActividadId;
-  final int? puntaje;
+  final double? puntaje;
   final int materiaId;
 
   Activity(
@@ -36,7 +36,7 @@ class Activity {
               fechaCreacion: formatDate(e['FechaCreacion'] as String),
               fechaLimite: formatDate(e['FechaLimite'] as String),
               materiaId: e['MateriaId'] as int,
-              puntaje: e['Puntaje'] as int),
+              puntaje: (e['Puntaje'] as num?)?.toDouble()),
         )
         .toList();
 

@@ -17,6 +17,7 @@ class ElementTile extends ConsumerWidget {
   final Widget? trailingWidget;
   final String? bottomText; // Nuevo: texto en la parte inferior
   final Color? bottomTextColor; // Nuevo: color del texto inferior
+  final Widget? footerWidget; // Widget para el footer (estatus)
 
   const ElementTile({
     super.key,
@@ -34,6 +35,7 @@ class ElementTile extends ConsumerWidget {
     this.trailingIcon,
     this.bottomText,
     this.bottomTextColor,
+    this.footerWidget,
   });
 
   @override
@@ -100,7 +102,10 @@ class ElementTile extends ConsumerWidget {
                     color: Colors.grey,
                     overflow: TextOverflow.ellipsis),
               ),
-              if (bottomText != null) ...[
+              if (footerWidget != null) ...[
+                const SizedBox(height: 8),
+                footerWidget!,
+              ] else if (bottomText != null) ...[
                 const SizedBox(height: 4),
                 Text(
                   bottomText!,
