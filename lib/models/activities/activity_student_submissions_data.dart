@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'student_submission.dart';
+import 'submission.dart';
 
 class ActivityStudentSubmissionsData {
   final int activityId;
@@ -31,29 +32,7 @@ class ActivityStudentSubmissionsData {
             .map(
               (e) {
                 final respuestaJson = e['Respuesta'] as String?;
-                List<String> links = [];
-                List<String> files = [];
-                String texto = '';
-                
-                // Parsear JSON de respuesta
-                if (respuestaJson != null && respuestaJson.isNotEmpty) {
-                  try {
-                    final decoded = jsonDecode(respuestaJson);
-                    if (decoded is Map<String, dynamic>) {
-                      texto = decoded['texto'] ?? '';
-                      links = (decoded['enlaces'] as List?)
-                          ?.map((item) => item.toString())
-                          .toList() ?? [];
-                      files = (decoded['archivos'] as List?)
-                          ?.map((item) => item.toString())
-                          .toList() ?? [];
-                    } else {
-                      texto = respuestaJson;
-                    }
-                  } catch (err) {
-                    texto = respuestaJson;
-                  }
-                }
+                final parsedRespuesta = Submission.parseRespuestaJson(respuestaJson);
                 
                 return StudentSubmission(
                     submissionId: e['EntregaId'] as int,
@@ -63,9 +42,11 @@ class ActivityStudentSubmissionsData {
                     lastName: e['ApellidoPaterno'] as String,
                     lastName2: e['ApellidoMaterno'] as String,
                     submissionDate: e['FechaEntrega'].toString(),
-                    answer: texto,
-                    links: links,
-                    files: files,
+                    answer: parsedRespuesta.texto,
+                    links: parsedRespuesta.enlaces,
+                    files: parsedRespuesta.archivos.map((url) {
+                      return FileSubmission(nombre: '', ruta: url);
+                    }).toList(),
                     grade: e['Calificacion'] as int);
               },
             )

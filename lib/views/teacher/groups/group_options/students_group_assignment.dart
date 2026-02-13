@@ -74,88 +74,94 @@ class _StudentsGroupState extends ConsumerState<StudentsGroupAssigment> {
       resizeToAvoidBottomInset: false, // Evita que el contenido suba con el teclado
       body: Stack(
         children: [
-          // Contenido scrollable
+          // Contenido scrollable centrado
           SingleChildScrollView(
-            padding: const EdgeInsets.only(bottom: 100), // Espacio para el botón fijo
-            child: Column(
-              children: [
-                const SizedBox(height: 10),
- 
-                // ======================
-                //     INPUT + SUGERENCIA
-                // ======================
-                SizedBox(
-                  width: 350,
-                  child: Column(
-                    children: [
-                      TextField(
-                        controller: controller,
-                        decoration: InputDecoration(
-                          labelText: '  Agregar alumno',
-                          prefixIconConstraints: BoxConstraints(maxWidth: 40, maxHeight: 40),
-                          prefixIcon: Padding(padding: EdgeInsets.only(left: 8, right: 8), child: SvgPicture.asset('assets/icons/buscar.svg', width: 24, height: 24, colorFilter: ColorFilter.mode(Colors.blue, BlendMode.srcIn))),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(25.0)),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.blue, width: 2.0),
-                            borderRadius: BorderRadius.all(Radius.circular(25.0)),
+            padding: const EdgeInsets.only(bottom: 100),
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const SizedBox(height: 10),
+    
+                  // ======================
+                  //     INPUT + SUGERENCIA
+                  // ======================
+                  SizedBox(
+                    width: 320,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        TextField(
+                          controller: controller,
+                          decoration: InputDecoration(
+                            labelText: '  Agregar alumno',
+                            prefixIconConstraints: BoxConstraints(maxWidth: 40, maxHeight: 40),
+                            prefixIcon: Padding(padding: EdgeInsets.only(left: 8, right: 8), child: SvgPicture.asset('assets/icons/buscar.svg', width: 24, height: 24, colorFilter: ColorFilter.mode(Colors.blue, BlendMode.srcIn))),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.all(Radius.circular(25.0)),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderSide: BorderSide(color: Colors.blue, width: 2.0),
+                              borderRadius: BorderRadius.all(Radius.circular(25.0)),
+                            ),
                           ),
                         ),
-                      ),
- 
-                      isNotEmpty
-                          ? SizedBox(
-                              width: 330,
-                              child: ElementTile(
-                                iconWidget: SvgPicture.asset(
-                                  'assets/icons/user2.svg',
-                                  width: 32,
-                                  height: 32,
-                                  colorFilter: ColorFilter.mode(Colors.blue, BlendMode.srcIn),
+    
+                        isNotEmpty
+                            ? SizedBox(
+                                width: 320,
+                                child: ElementTile(
+                                  iconWidget: SvgPicture.asset(
+                                    'assets/icons/user2.svg',
+                                    width: 32,
+                                    height: 32,
+                                    colorFilter: ColorFilter.mode(Colors.blue, BlendMode.srcIn),
+                                  ),
+                                  iconColor: Colors.white,
+                                  iconSize: 32,
+                                  title: 'Agregar',
+                                  subtitle: content,
+                                  onTapFunction: () async {
+                                    if (!formStudentsGroups.isPosting) {
+                                      await ref
+                                          .read(formStudentsGroupProvider
+                                              .notifier)
+                                          .onVerifyEmailSubmit(content);
+                                    }
+                                  },
+                                  trailingWidget: IconButton(
+                                    icon: Icon(Icons.person_add, color: Colors.blue),
+                                    iconSize: 30,
+                                    onPressed: () {},
+                                  ),
                                 ),
-                                iconColor: Colors.white,
-                                iconSize: 32,
-                                title: 'Agregar',
-                                subtitle: content,
-                                onTapFunction: () async {
-                                  if (!formStudentsGroups.isPosting) {
-                                    await ref
-                                        .read(formStudentsGroupProvider
-                                            .notifier)
-                                        .onVerifyEmailSubmit(content);
-                                  }
-                                },
-                                trailingWidget: IconButton(
-                                  icon: Icon(Icons.person_add, color: Colors.blue),
-                                  iconSize: 30,
-                                  onPressed: () {},
-                                ),
-                              ),
-                            )
-                          : const SizedBox(),
-                    ],
+                              )
+                            : const SizedBox(),
+                      ],
+                    ),
                   ),
-                ),
- 
-                // =========================
-                //        LISTA DE EMAILS
-                // =========================
-                SizedBox(
-                  height: 350,
-                  child: Column(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(top: 15, bottom: 10),
-                        child: Text(
-                          'Agregar alumnos',
-                          style: Theme.of(context).textTheme.titleLarge,
+    
+                  // =========================
+                  //        LISTA DE EMAILS
+                  // =========================
+                  SizedBox(
+                    height: 350,
+                    width: 320,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(top: 15, bottom: 10),
+                          child: Text(
+                            'Agregar alumnos',
+                            style: Theme.of(context).textTheme.titleLarge,
+                          ),
                         ),
-                      ),
- 
-                      Expanded(
-                        child: SizedBox(
-                          width: 360,
+    
+                        Expanded(
                           child: ListView.builder(
                             itemCount: lsEmails.length,
                             itemBuilder: (context, index) {
@@ -201,14 +207,14 @@ class _StudentsGroupState extends ConsumerState<StudentsGroupAssigment> {
                             },
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
- 
+    
           // Botón fijo en la parte inferior
           Positioned(
             bottom: 20,

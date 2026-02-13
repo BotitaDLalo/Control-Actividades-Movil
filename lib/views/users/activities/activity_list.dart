@@ -46,6 +46,55 @@ class _ActivityListState extends ConsumerState<ActivityList> {
         _searchController.text;
   }
 
+  Widget _buildEstatusBadge(Activity activity) {
+    // Reutilizar misma lógica del contenido de actividad (activity_section_submissions.dart)
+    final lsSub = ref.watch(activityProvider).lsSubmissions;
+    final lsSubmissions = Submission.activitiesBySubject(lsSub, activity.activityId!);
+    final fechaLimite = activity.fechaLimite;
+    
+    DateTime? fechaLimiteDate;
+    try {
+      fechaLimiteDate = DateFormat('dd-MM-yyyy HH:mm:ss').parse(fechaLimite);
+    } catch (e) {
+      try {
+        fechaLimiteDate = DateFormat('yyyy-MM-ddTHH:mm:ss').parse(fechaLimite);
+      } catch (e) {
+        fechaLimiteDate = null;
+      }
+    }
+
+    Color statusColor;
+    String statusText;
+
+    if (lsSubmissions.isNotEmpty) {
+      statusColor = Colors.green;
+      statusText = 'Entregado';
+    } else if (fechaLimiteDate != null && DateTime.now().isAfter(fechaLimiteDate)) {
+      statusColor = Colors.red;
+      statusText = 'Retrasado';
+    } else {
+      statusColor = Colors.orange;
+      statusText = 'Pendiente';
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: statusColor.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: statusColor, width: 1.5),
+      ),
+      child: Text(
+        statusText,
+        style: TextStyle(
+          color: statusColor,
+          fontSize: 12,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final cn = ref.watch(catalogNamesProvider);
@@ -84,7 +133,7 @@ class _ActivityListState extends ConsumerState<ActivityList> {
           await ref
               .read(activityProvider.notifier)
               .deleteActivity(activityId);
- 
+  
           ref.invalidate(
               activitiesBySubjectProvider(widget.subjectId));
         },
@@ -162,7 +211,6 @@ class _ActivityListState extends ConsumerState<ActivityList> {
           const SizedBox(height: 8),
 
       SizedBox(
-        // Hace que el ListView interno funcione bien
         height: MediaQuery.of(context).size.height * 0.75,
         child: activitiesAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
@@ -215,7 +263,7 @@ class _ActivityListState extends ConsumerState<ActivityList> {
                               showModalBottomActivityOptions(activity);
                             },
                           )
-                        : const SizedBox(),
+                        : _buildEstatusBadge(activity),
                     onTapFunction: () async {
                       final activityData = Activity(
                         activityId: activity.activityId,

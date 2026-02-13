@@ -130,8 +130,9 @@ class _TeacherActivityStudentsSubmissionsState
                                       userName: e.userName,
                                       fullName: fullName,
                                       answer: e.answer,
-                                      links: e.links ?? [],
-                                      files: e.files ?? [],);
+                                      links: e.links,
+                                      files: e.files.map((f) => FileInfo(nombre: f.nombre, ruta: f.ruta)).toList(),
+                                      submissionDate: e.submissionDate,);
 
                                   context.push(
                                       '/teacher-student-submission-grading',
@@ -148,6 +149,8 @@ class _TeacherActivityStudentsSubmissionsState
                                 iconSize: 32,
                                 title: fullName,
                                 subtitle: e.userName,
+                                bottomText: e.grade > 0 ? 'Calificado' : null,
+                                bottomTextColor: Colors.green,
                                 trailingWidget: Container(
                                   width: 40,
                                   height: 40,

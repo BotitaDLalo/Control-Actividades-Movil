@@ -1,9 +1,11 @@
 import 'package:aprende_mas/config/utils/packages.dart';
+import 'package:aprende_mas/config/environment/environment.dart';
 import 'package:aprende_mas/models/models.dart';
 import 'package:flutter/services.dart';
 import 'package:aprende_mas/providers/providers.dart';
 import 'package:aprende_mas/views/widgets/alerts/success_dialog.dart';
 import 'package:aprende_mas/views/widgets/alerts/error_dialog.dart';
+import 'package:aprende_mas/views/widgets/alerts/warning_confirmation_dialog.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class TeacherStudentSubmissionGrading extends ConsumerStatefulWidget {
@@ -25,6 +27,16 @@ class _TeacherStudentSubmissionGradingState
     super.dispose();
   }
 
+  String _formatDateTime(String dateTimeStr) {
+    try {
+      // El formato del backend es: 2026-02-04T17:42:56.17
+      final dateTime = DateTime.parse(dateTimeStr);
+      return '${dateTime.year}-${dateTime.month.toString().padLeft(2, '0')}-${dateTime.day.toString().padLeft(2, '0')} ${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
+    } catch (e) {
+      return dateTimeStr; // Si hay error, retornar el original
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final data = widget.data;
@@ -35,6 +47,7 @@ class _TeacherStudentSubmissionGradingState
     final answer = data.answer;
     final links = data.links;
     final files = data.files;
+    final submissionDate = data.submissionDate;
 
     final activity = ref.watch(activityProvider);
     final activityNotifier = ref.read(activityProvider.notifier);
@@ -78,6 +91,7 @@ class _TeacherStudentSubmissionGradingState
       ),
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
+        padding: const EdgeInsets.only(bottom: 100),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
@@ -115,7 +129,7 @@ class _TeacherStudentSubmissionGradingState
                   subtitle: Text(
                     userName,
                     style: const TextStyle(
-                      fontSize: 16,
+                      fontSize: 18,
                       color: Colors.grey,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -140,9 +154,19 @@ class _TeacherStudentSubmissionGradingState
                   children: [
                     const Text(
                       'Respuesta',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 28),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 6),
+                    
+                    // Fecha de envío
+                    Text(
+                      'Enviado: ${_formatDateTime(data.submissionDate)}',
+                      style: const TextStyle(
+                        color: Colors.black,
+                        fontSize: 18,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
                     
                     // Calificación y Fecha de entrega
                     Column(
@@ -152,13 +176,13 @@ class _TeacherStudentSubmissionGradingState
                           activity.grade == -1 ? 'Sin calificar' : "Calificación: ${activity.grade}/$score",
                           style: const TextStyle(
                             color: Colors.black,
-                            fontSize: 14,
+                            fontSize: 18,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 18),
                     
                     // Campo de texto con la respuesta
                     Container(
@@ -176,72 +200,109 @@ class _TeacherStudentSubmissionGradingState
                           hintText: 'Sin respuesta',
                         ),
                         style: const TextStyle(
-                          fontSize: 16,
+                          fontSize: 18,
                           color: Colors.black,
                         ),
                       ),
                     ),
                     
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 24),
                     
                     // Sección de archivos adjuntos
                     const Text(
                       'Archivos adjuntos:',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 12),
                     files.isEmpty
                         ? const Center(
                             child: Text(
                               'No hay archivos adjuntos',
-                              style: TextStyle(color: Colors.grey, fontSize: 14),
+                              style: TextStyle(color: Colors.grey, fontSize: 18),
                             ),
                           )
                         : Column(
                             children: files.map<Widget>((archivo) {
+                              String url = archivo.ruta.isNotEmpty ? archivo.ruta : '';
+                              String nombreMostrar = archivo.nombre.isNotEmpty ? archivo.nombre : '';
+                              
+                              if (url.isEmpty && nombreMostrar.isNotEmpty && nombreMostrar.startsWith('/')) {
+                                url = nombreMostrar;
+                              }
+                              
+                               if (url.isNotEmpty) {
+                                 String baseUrl = Environment.apiUrl.replaceAll(RegExp(r'/?api/?$'), '');
+                                 if (!url.startsWith('http')) {
+                                   url = '$baseUrl$url';
+                                 }
+                                if (nombreMostrar.isEmpty) {
+                                  nombreMostrar = url.split('/').last;
+                                }
+                              }
+                              
                               return Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 4.0),
-                                child: Row(
-                                  children: [
-                                    SvgPicture.asset(
-                                      'assets/icons/documento.svg',
-                                      width: 40,
-                                      height: 40,
-                                      colorFilter: const ColorFilter.mode(Colors.black, BlendMode.srcIn),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: Text(
-                                        archivo,
-                                        style: const TextStyle(fontSize: 14),
-                                        maxLines: null,
+                                padding: const EdgeInsets.symmetric(vertical: 6.0),
+                                child: GestureDetector(
+                                  onTap: () async {
+                                    if (url.isNotEmpty) {
+                                      final uri = Uri.parse(url);
+                                      if (await canLaunchUrl(uri)) {
+                                        await launchUrl(uri, mode: LaunchMode.externalApplication);
+                                      } else {
+                                        if (mounted) {
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            const SnackBar(content: Text('No se pudo abrir el archivo')),
+                                          );
+                                        }
+                                      }
+                                    }
+                                  },
+                                  child: Row(
+                                    children: [
+                                      SvgPicture.asset(
+                                        'assets/icons/documento.svg',
+                                        width: 40,
+                                        height: 40,
+                                        colorFilter: const ColorFilter.mode(Colors.black, BlendMode.srcIn),
                                       ),
-                                    ),
-                                  ],
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Text(
+                                          nombreMostrar,
+                                          style: const TextStyle(
+                                            fontSize: 18,
+                                            color: Colors.blue,
+                                            decoration: TextDecoration.underline,
+                                          ),
+                                          maxLines: null,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               );
                             }).toList(),
                           ),
                     
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 24),
                     
                     // Sección de enlaces
                     const Text(
                       'Enlaces:',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 12),
                     links.isEmpty
                         ? const Center(
                             child: Text(
                               'No hay enlaces',
-                              style: TextStyle(color: Colors.grey, fontSize: 14),
+                              style: TextStyle(color: Colors.grey, fontSize: 18),
                             ),
                           )
                         : Column(
                             children: links.map<Widget>((enlace) {
                               return Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 4.0),
+                                padding: const EdgeInsets.symmetric(vertical: 6.0),
                                 child: Row(
                                   children: [
                                     SvgPicture.asset(
@@ -264,7 +325,7 @@ class _TeacherStudentSubmissionGradingState
                                         child: Text(
                                           enlace,
                                           style: const TextStyle(
-                                            fontSize: 14,
+                                            fontSize: 18,
                                             color: Colors.blue,
                                             decoration: TextDecoration.underline,
                                           ),
@@ -280,14 +341,14 @@ class _TeacherStudentSubmissionGradingState
                   ],
                 ),
               ),
-              
+               
               const SizedBox(height: 24),
-              
+               
               // Sección de nueva calificación
               const Text(
                 'Asignar Calificación',
                 style: TextStyle(
-                  fontSize: 20,
+                  fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: Colors.black,
                 ),
@@ -319,13 +380,61 @@ class _TeacherStudentSubmissionGradingState
                   Text(
                     '/ $score',
                     style: const TextStyle(
-                      fontSize: 20,
+                      fontSize: 18,
                       fontWeight: FontWeight.bold,
                       color: Colors.black,
                     ),
                   ),
                 ],
               ),
+              if (activity.grade != null && activity.grade > 0) ...[
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: activityForm.isPosting
+                        ? null
+                        : () {
+                            WarningConfirmationDialog.show(
+                              context,
+                              message: '¿Estás seguro de quitar la calificación a este alumno?',
+                              onConfirmPressed: () async {
+                                bool success = await activityNotifier.removeGrade(submissionId);
+                                if (mounted) {
+                                  if (success) {
+                                    SuccessDialog.show(
+                                      context,
+                                      message: 'Calificación quitada correctamente',
+                                    );
+                                    gradeController.clear();
+                                  } else {
+                                    ErrorDialog.show(
+                                      context,
+                                      message: 'Error al quitar calificación',
+                                    );
+                                  }
+                                }
+                              },
+                            );
+                          },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    child: const Text(
+                      'Quitar Calificación',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ],
           ),
         ),
@@ -366,7 +475,7 @@ class _TeacherStudentSubmissionGradingState
               child: Text(
                 'Asignar Calificación',
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: 18,
                   fontWeight: FontWeight.w500,
                 ),
               ),

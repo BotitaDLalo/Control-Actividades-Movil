@@ -1,11 +1,17 @@
 import 'package:aprende_mas/config/utils/general_utils.dart';
 import 'package:aprende_mas/config/utils/packages.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:intl/intl.dart';
 import 'package:aprende_mas/models/models.dart';
 import 'package:aprende_mas/views/views.dart';
 import 'package:aprende_mas/providers/providers.dart';
 import 'package:aprende_mas/providers/activity/activity_form_state.dart';
 import 'package:aprende_mas/config/utils/utils.dart';
+import 'package:aprende_mas/config/environment/environment.dart';
+import 'package:aprende_mas/views/widgets/alerts/success_dialog.dart';
+import 'package:aprende_mas/views/widgets/alerts/error_dialog.dart';
+import 'package:aprende_mas/views/widgets/alerts/warning_confirmation_dialog.dart';
+import 'package:aprende_mas/views/widgets/alerts/warning_dialog.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:file_picker/file_picker.dart';
@@ -27,6 +33,8 @@ class ActivitySectionSubmissions extends ConsumerStatefulWidget {
 class _ActivitySectionSubmissionState
     extends ConsumerState<ActivitySectionSubmissions> {
   late final String _draftKey;
+  BuildContext? _safeContext;
+  final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
@@ -189,22 +197,6 @@ class _ActivitySectionSubmissionState
                     showModalTextField(context);
                   },
                 ),
-                // ListTile(
-                //   leading: const Icon(Icons.description),
-                //   title: const Text('Agregar Archivo'),
-                //   onTap: () {
-                //     Navigator.pop(context);
-                //     // context.push('/create-group');
-                //   },
-                // ),
-                // ListTile(
-                //   leading: const Icon(Icons.link),
-                //   title: const Text('Agregar Enlace'),
-                //   onTap: () {
-                //     Navigator.pop(context);
-                //     // context.push('/create-subject');
-                //   },
-                // ),
               ],
             ),
           );
@@ -213,20 +205,19 @@ class _ActivitySectionSubmissionState
 
   @override
   Widget build(BuildContext context) {
+    _safeContext = context;
     final authConectionType = ref.read(authProvider).authConectionType;
     final activityId = widget.activity.activityId;
     final activitiesForm = ref.watch(activityFormProvider);
     final lsSub = ref.watch(activityProvider).lsSubmissions;
     final lsSubmissions = Submission.activitiesBySubject(lsSub, activityId!);
 
-    // final lsSubmissions = ref
-    //     .read(activityProvider.notifier)
-    //     .getSubmissionsByActivity(activityId);
-
     void showSendConfirmation() {
+      if (_safeContext == null) return;
+      
       showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
+        context: _safeContext!,
+        builder: (dialogContext) => AlertDialog(
           title: const Text(
             'Enviar',
             style: TextStyle(fontWeight: FontWeight.w500, color: Colors.black),
@@ -235,18 +226,44 @@ class _ActivitySectionSubmissionState
           contentPadding: const EdgeInsets.all(10),
           actions: [
             TextButton(
-                onPressed: () {
-                  print('Intentando enviar respuesta: ${activitiesForm.answer}');
-                  if (authConectionType == AuthConnectionType.online) {
-                    ref
-                        .read(activityFormProvider.notifier)
-                        .onSendSubmission(activityId);
-                  } else if (authConectionType == AuthConnectionType.offline) {
-                    ref
-                        .read(activityFormProvider.notifier)
-                        .onSendSubmissionOffline(activityId);
+                onPressed: () async {
+                  Navigator.pop(dialogContext);
+                  
+                  bool success = false;
+                  try {
+                    if (authConectionType == AuthConnectionType.online) {
+                      success = await ref
+                          .read(activityFormProvider.notifier)
+                          .onSendSubmission(activityId);
+                    } else if (authConectionType == AuthConnectionType.offline) {
+                      success = await ref
+                          .read(activityFormProvider.notifier)
+                          .onSendSubmissionOffline(activityId);
+                    }
+                    
+                    if (mounted) {
+                      if (success) {
+                        await ref.read(activityProvider.notifier).getSubmissions(activityId);
+                        await Future.delayed(const Duration(milliseconds: 300));
+                        SuccessDialog.show(
+                          _safeContext!,
+                          message: 'Entrega realizada correctamente',
+                        );
+                      } else {
+                        ErrorDialog.show(
+                          _safeContext!,
+                          message: 'Error al realizar la entrega',
+                        );
+                      }
+                    }
+                  } catch (e) {
+                    if (mounted) {
+                      ErrorDialog.show(
+                        _safeContext!,
+                        message: 'Error de conexión',
+                      );
+                    }
                   }
-                  Navigator.pop(context);
                 },
                 child: const Text('Enviar'))
           ],
@@ -279,40 +296,6 @@ class _ActivitySectionSubmissionState
       );
     }
 
-    void showModalBottomCancelSubmit(int studentActivityId) {
-      showModalBottomSheet(
-        context: context,
-        builder: (context) {
-          return Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                ListTile(
-                  leading: SvgPicture.asset('assets/icons/eliminar1.svg', width: 24, height: 24),
-                  title: const Text('Cancelar Entregable'),
-                  onTap: () {
-                    if (authConectionType == AuthConnectionType.online) {
-                      ref.read(activityProvider.notifier).cancelSubmission(
-                          studentActivityId, widget.activity.activityId!);
-                    } else if (authConectionType ==
-                        AuthConnectionType.offline) {}
-
-                    Navigator.pop(context);
-                  },
-                ),
-              ],
-            ),
-          );
-        },
-      );
-    }
-
-    void showErrorMessage(String message) {
-      errorMessage(context, message);
-    }
-
     String _buildSubmissionSummary(ActivityFormState form) {
       String summary = '';
       if (form.answer.isNotEmpty) {
@@ -332,33 +315,136 @@ class _ActivitySectionSubmissionState
       return summary;
     }
 
+    Widget _buildEstatusWidget() {
+      final lsSub = ref.watch(activityProvider).lsSubmissions;
+      final lsSubmissions = Submission.activitiesBySubject(lsSub, widget.activity.activityId!);
+      final fechaLimite = widget.activity.fechaLimite;
+      DateTime? fechaLimiteDate;
+
+      try {
+        fechaLimiteDate = DateFormat('dd-MM-yyyy HH:mm:ss').parse(fechaLimite);
+      } catch (e) {
+        try {
+          fechaLimiteDate = DateFormat('yyyy-MM-ddTHH:mm:ss').parse(fechaLimite);
+        } catch (e) {
+          fechaLimiteDate = null;
+        }
+      }
+
+      if (lsSubmissions.isNotEmpty) {
+        return const Text(
+          'Estatus: Entregado',
+          style: TextStyle(
+            color: Colors.green,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        );
+      } else if (fechaLimiteDate != null && DateTime.now().isAfter(fechaLimiteDate)) {
+        return const Text(
+          'Estatus: Retrasado',
+          style: TextStyle(
+            color: Colors.red,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        );
+      } else {
+        return const Text(
+          'Estatus: Pendiente',
+          style: TextStyle(
+            color: Colors.orange,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        );
+      }
+    }
+
     DateTime dateNow = DateTime.now();
 
     return WillPopScope(
       onWillPop: _saveBeforeExit,
       child: Scaffold(
-        floatingActionButton:
-            dateNow.isBefore(parseCustomDate(widget.activity.fechaLimite))
-                ? FloatingActionButton(
-                    onPressed: () {
-                      activitiesForm.existsAnswer
-                          ? showSendConfirmation()
-                          : showModalActivityType(context);
-                    },
-                    shape: AppTheme.shapeFloatingActionButton(),
-                    backgroundColor: Colors.white,
-                    child: activitiesForm.existsAnswer
-                        ? Icon(
-                            Icons.send,
-                            color: Colors.grey.withOpacity(0.8),
-                          )
-                        : SvgPicture.asset(
-                            'assets/icons/agregar.svg',
-                            color: Colors.black,
-                            width: 40,
-                            height: 40,
-                          ))
-                : const SizedBox(),
+        key: scaffoldKey,
+        floatingActionButton: Builder(
+          builder: (context) {
+            final bool isGraded = lsSubmissions.any((s) => s.grade != null);
+            DateTime? fechaLimiteDate;
+            try {
+              fechaLimiteDate = DateFormat('yyyy-MM-ddTHH:mm:ss').parse(widget.activity.fechaLimite);
+            } catch (e) {
+              try {
+                fechaLimiteDate = DateFormat('dd-MM-yyyy HH:mm:ss').parse(widget.activity.fechaLimite);
+              } catch (e) {
+                fechaLimiteDate = null;
+              }
+            }
+            final bool isOverdue = fechaLimiteDate != null && DateTime.now().isAfter(fechaLimiteDate);
+            final bool canSend = !isGraded && !isOverdue && activitiesForm.existsAnswer;
+
+            if (!canSend && !isGraded && isOverdue) {
+              return FloatingActionButton(
+                onPressed: () {
+                  WarningDialog.show(
+                    context,
+                    message: 'No puedes enviar: La actividad está vencida',
+                  );
+                },
+                backgroundColor: Colors.grey.shade300,
+                shape: AppTheme.shapeFloatingActionButton(),
+                child: SvgPicture.asset(
+                  'assets/icons/agregar.svg',
+                  color: Colors.grey.shade600,
+                  width: 40,
+                  height: 40,
+                ),
+              );
+            }
+
+            if (isGraded) {
+              return FloatingActionButton(
+                onPressed: () {
+                  WarningDialog.show(
+                    context,
+                    message: 'No puedes enviar: Tu entrega ya fue calificada',
+                  );
+                },
+                backgroundColor: Colors.grey.shade300,
+                shape: AppTheme.shapeFloatingActionButton(),
+                child: SvgPicture.asset(
+                  'assets/icons/agregar.svg',
+                  color: Colors.grey.shade600,
+                  width: 40,
+                  height: 40,
+                ),
+              );
+            }
+
+            return FloatingActionButton(
+              onPressed: () {
+                activitiesForm.existsAnswer
+                    ? showSendConfirmation()
+                    : showModalActivityType(context);
+              },
+              shape: AppTheme.shapeFloatingActionButton(),
+              backgroundColor: Colors.blue,
+              child: activitiesForm.existsAnswer
+                  ? SvgPicture.asset(
+                      'assets/icons/send1.svg',
+                      color: Colors.white,
+                      width: 28,
+                      height: 28,
+                    )
+                  : SvgPicture.asset(
+                      'assets/icons/agregar.svg',
+                      color: Colors.white,
+                      width: 40,
+                      height: 40,
+                    ),
+            );
+          },
+        ),
         appBar: AppBar(
           backgroundColor: Colors.white,
           elevation: 0,
@@ -399,44 +485,128 @@ class _ActivitySectionSubmissionState
                     ),
                   ),
                   const SizedBox(height: 8),
+                  _buildEstatusWidget(),
+                  const SizedBox(height: 8),
                   Text(
-                    widget.activity.puntaje.toString(),
+                    'Puntuaje Total: ${widget.activity.puntaje}',
                     style: const TextStyle(
                         color: Colors.black,
                         fontSize: 24,
                         fontWeight: FontWeight.bold),
                   ),
+                  // Mostrar calificación (siempre visible si hay entregas)
+                  if (lsSubmissions.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        const Text(
+                          'Calificación: ',
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        if (lsSubmissions.any((s) => s.grade != null))
+                          Text(
+                            lsSubmissions.where((s) => s.grade != null).first.grade!,
+                            style: const TextStyle(
+                              color: Colors.green,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          )
+                        else
+                          const Text(
+                            'sin calificación',
+                            style: TextStyle(
+                              color: Colors.grey,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        if (lsSubmissions.any((s) => s.grade != null))
+                          SvgPicture.asset(
+                            'assets/icons/palomita2.svg',
+                            width: 20,
+                            height: 20,
+                            colorFilter: const ColorFilter.mode(Colors.green, BlendMode.srcIn),
+                          ),
+                      ],
+                    ),
+                    if (lsSubmissions.any((s) => s.gradedDate != null)) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        'Fecha que se calificó: ${lsSubmissions.where((s) => s.gradedDate != null).first.gradedDate}',
+                        style: TextStyle(
+                          color: Colors.grey[600],
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ],
                   const SizedBox(height: 16),
                   const Divider(
                     color: Colors.black,
                     height: 0.5,
                   ),
                   const SizedBox(height: 16),
-                  SizedBox(
-                    height: MediaQuery.of(context).size.height * 0.20,
-                    child: SingleChildScrollView(
-                      child: Text(
-                        widget.activity.descripcion,
-                        style: const TextStyle(
-                          color: Colors.black,
-                          fontSize: 18,
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey[400]!),
+                      borderRadius: BorderRadius.circular(8),
+                      color: Colors.grey[50],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(Icons.description_outlined, size: 20, color: Colors.grey[600]),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Descripción de la actividad',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.grey[700],
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
+                        const SizedBox(height: 12),
+                        SizedBox(
+                          height: 150,
+                          child: SingleChildScrollView(
+                            child: Text(
+                              widget.activity.descripcion ?? 'Sin descripción',
+                              style: const TextStyle(
+                                color: Colors.black,
+                                fontSize: 18,
+                                height: 1.5,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   const SizedBox(
                     height: 15,
                   ),
-                  //TODO: AQUI VAN A ESTAR LAS TAREAS ENTREGADAS
+                  //ENTREGABLES ENVIADOS
                   lsSubmissions.isNotEmpty
                       ? SizedBox(
-                          height: MediaQuery.of(context).size.height * 0.25,
+                          height: 200,
                           child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               const Text(
                                 'Entregables enviados',
                                 style: TextStyle(
-                                  fontSize: 25.0,
+                                  fontSize: 20.0,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -446,112 +616,242 @@ class _ActivitySectionSubmissionState
                                   itemBuilder: (context, index) {
                                     final submission = lsSubmissions[index];
 
-                                    return GestureDetector(
-                                      onLongPress: () {
-                                        if (submission.status!) {
-                                          showModalBottomCancelSubmit(
-                                              submission.submissionActivityStudentId);
-                                        }
-                                      },
-                                      child: ElementTile(
-                                          iconWidget: SvgPicture.asset('assets/icons/activities20.svg', width: 28, height: 28),
-                                          iconColor: Colors.white,
-                                          iconSize: 28,
-                                          title: "Respuesta",
-                                          subtitle: submission.answer != null && submission.answer!.isNotEmpty
-                                              ? (submission.answer!.length > 50 ? '${submission.answer!.substring(0, 50)}...' : submission.answer!)
-                                              : "Sin texto",
-                                          onTapFunction: () {
-                                            //TODO: Respuesta content
-                                            showDialog(
-                                              context: context,
-                                              builder: (context) => AlertDialog(
-                                                title: const Text(
-                                                  'Respuesta',
-                                                  style: TextStyle(
-                                                      fontWeight:
-                                                          FontWeight.w500),
-                                                ),
-                                                content: SingleChildScrollView(
-                                                  child: Column(
-                                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                                    mainAxisSize: MainAxisSize.min,
-                                                    children: [
-                                                      // Mostrar texto
-                                                      if (submission.answer != null && submission.answer!.isNotEmpty)
-                                                        Text(
-                                                          submission.answer!,
-                                                          style: const TextStyle(fontSize: 16),
-                                                        ),
-                                                      // Mostrar enlaces como links clicables
-                                                      if (submission.links != null && submission.links!.isNotEmpty) ...[
-                                                        const SizedBox(height: 16),
+                                    return ElementTile(
+                                      iconWidget: SvgPicture.asset('assets/icons/activities20.svg', width: 50, height: 50),
+                                      iconColor: Colors.white,
+                                      iconSize: 28,
+                                      title: "Respuesta",
+                                      subtitle: submission.answer != null && submission.answer!.isNotEmpty
+                                          ? (submission.answer!.length > 50 ? '${submission.answer!.substring(0, 50)}...' : submission.answer!)
+                                          : "Sin texto",
+                                      onTapFunction: () {
+                                        showDialog(
+                                          context: context,
+                                          builder: (context) => AlertDialog(
+                                            title: const Text(
+                                              'Respuesta',
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.w500,
+                                                color: Colors.black,
+                                              ),
+                                            ),
+                                            content: SingleChildScrollView(
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  // Mostrar calificación si existe
+                                                  if (submission.grade != null) ...[
+                                                    Row(
+                                                      children: [
                                                         const Text(
-                                                          'Enlaces:',
-                                                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                                          'Calificación: ',
+                                                          style: TextStyle(
+                                                            fontSize: 16,
+                                                            fontWeight: FontWeight.bold,
+                                                          ),
                                                         ),
-                                                        ...submission.links!.map((link) => Padding(
-                                                          padding: const EdgeInsets.only(top: 8.0),
-                                                          child: InkWell(
-                                                            onTap: () async {
-                                                              final uri = Uri.parse(link);
-                                                              if (await canLaunchUrl(uri)) {
-                                                                await launchUrl(uri);
-                                                              } else {
-                                                                if (mounted) {
-                                                                  ScaffoldMessenger.of(context).showSnackBar(
-                                                                    const SnackBar(content: Text('No se pudo abrir el enlace')),
-                                                                  );
+                                                        Text(
+                                                          submission.grade!,
+                                                          style: const TextStyle(
+                                                            fontSize: 16,
+                                                            fontWeight: FontWeight.bold,
+                                                            color: Colors.green,
+                                                          ),
+                                                        ),
+                                                        const SizedBox(width: 4),
+                                                        SvgPicture.asset(
+                                                          'assets/icons/palomita2.svg',
+                                                          width: 16,
+                                                          height: 16,
+                                                          colorFilter: const ColorFilter.mode(Colors.green, BlendMode.srcIn),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    const SizedBox(height: 16),
+                                                  ],
+                                                  if (submission.answer != null && submission.answer!.isNotEmpty)
+                                                    Text(
+                                                      submission.answer!,
+                                                      style: const TextStyle(fontSize: 16),
+                                                    ),
+                                                  if (submission.links != null && submission.links!.isNotEmpty) ...[
+                                                    const SizedBox(height: 16),
+                                                    const Text(
+                                                      'Enlaces:',
+                                                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                                    ),
+                                                    ...submission.links!.map((link) => Padding(
+                                                      padding: const EdgeInsets.only(top: 8.0),
+                                                      child: Row(
+                                                        mainAxisSize: MainAxisSize.min,
+                                                        children: [
+                                                          SvgPicture.asset(
+                                                            'assets/icons/link.svg',
+                                                            width: 40,
+                                                            height: 40,
+                                                            colorFilter: const ColorFilter.mode(Colors.blue, BlendMode.srcIn),
+                                                          ),
+                                                          const SizedBox(width: 12),
+                                                          Expanded(
+                                                            child: InkWell(
+                                                              onTap: () async {
+                                                                final uri = Uri.parse(link);
+                                                                if (await canLaunchUrl(uri)) {
+                                                                  await launchUrl(uri);
+                                                                } else {
+                                                                  if (mounted) {
+                                                                    ScaffoldMessenger.of(context).showSnackBar(
+                                                                      const SnackBar(content: Text('No se pudo abrir el enlace')),
+                                                                    );
+                                                                  }
                                                                 }
-                                                              }
-                                                            },
-                                                            child: Text(
-                                                              link,
-                                                              style: const TextStyle(
-                                                                color: Colors.blue,
-                                                                fontSize: 14,
-                                                                decoration: TextDecoration.underline,
+                                                              },
+                                                              child: Text(
+                                                                link,
+                                                                style: const TextStyle(
+                                                                  color: Colors.blue,
+                                                                  fontSize: 14,
+                                                                  decoration: TextDecoration.underline,
+                                                                ),
                                                               ),
                                                             ),
                                                           ),
-                                                        )),
-                                                      ],
-                                                      // Mostrar archivos
-                                                      if (submission.files != null && submission.files!.isNotEmpty) ...[
-                                                        const SizedBox(height: 16),
-                                                        const Text(
-                                                          'Archivos:',
-                                                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                                                        ),
-                                                        ...submission.files!.map((file) => Padding(
-                                                          padding: const EdgeInsets.only(top: 8.0),
-                                                          child: Text(
-                                                            file,
-                                                            style: const TextStyle(fontSize: 14),
+                                                        ],
+                                                      ),
+                                                    )),
+                                                  ],
+                                                  if (submission.files != null && submission.files!.isNotEmpty) ...[
+                                                    const SizedBox(height: 16),
+                                                    const Text(
+                                                      'Archivos:',
+                                                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                                    ),
+                                                    ...submission.files!.map((fileUrl) {
+                                                      // Procesar la URL igual que en la vista del docente
+                                                      String url = fileUrl;
+                                                      String nombreMostrar = fileUrl.split('/').last;
+                                                      
+                                                       // Si la URL no empieza con http, agregar la URL base
+                                                       String baseUrl = Environment.apiUrl.replaceAll(RegExp(r'/?api/?$'), '');
+                                                       if (!url.startsWith('http')) {
+                                                         url = '$baseUrl$url';
+                                                       }
+                                                      
+                                                      return Padding(
+                                                        padding: const EdgeInsets.only(top: 8.0),
+                                                        child: InkWell(
+                                                          onTap: () async {
+                                                            final uri = Uri.parse(url);
+                                                            if (await canLaunchUrl(uri)) {
+                                                              await launchUrl(uri, mode: LaunchMode.externalApplication);
+                                                            } else {
+                                                              if (mounted) {
+                                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                                  const SnackBar(content: Text('No se pudo abrir el archivo')),
+                                                                );
+                                                              }
+                                                            }
+                                                          },
+                                                          child: Row(
+                                                            mainAxisSize: MainAxisSize.min,
+                                                            children: [
+                                                              SvgPicture.asset(
+                                                                'assets/icons/documento.svg',
+                                                                width: 40,
+                                                                height: 40,
+                                                                colorFilter: const ColorFilter.mode(Colors.blue, BlendMode.srcIn),
+                                                              ),
+                                                              const SizedBox(width: 12),
+                                                              Expanded(
+                                                                child: Text(
+                                                                  nombreMostrar,
+                                                                  style: const TextStyle(
+                                                                    color: Colors.blue,
+                                                                    fontSize: 14,
+                                                                    decoration: TextDecoration.underline,
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                            ],
                                                           ),
-                                                        )),
-                                                      ],
-                                                    ],
-                                                  ),
-                                                ),
-                                                contentPadding:
-                                                    const EdgeInsets.all(10),
-                                                actions: [
-                                                  TextButton(
-                                                      onPressed: () {
-                                                        Navigator.pop(context);
-                                                      },
-                                                      child:
-                                                          const Text('Cerrar'))
+                                                        ),
+                                                      );
+                                                    }).toList(),
+                                                  ],
                                                 ],
                                               ),
-                                            );
-                                          },
-                                          trailingString: submission.status!
-                                              ? (submission.grade == null
-                                                  ? "Enviado"
-                                                  : "${submission.grade} /${widget.activity.puntaje}")
-                                              : "Pendiente a envió"),
+                                            ),
+                                            contentPadding:
+                                                const EdgeInsets.all(10),
+                                            actions: [
+                                              TextButton(
+                                                  onPressed: () {
+                                                    Navigator.pop(context);
+                                                  },
+                                                  child:
+                                                      const Text('Cerrar'))
+                                            ],
+                                          ),
+                                        );
+                                      },
+                                       trailingWidget: submission.status!
+                                           ? IconButton(
+                                               onPressed: () async {
+                                                 if (submission.grade != null && submission.grade!.isNotEmpty) {
+                                                   WarningDialog.show(
+                                                     context,
+                                                     message: 'No puedes cancelar esta entrega pues ya esta calificada',
+                                                   );
+                                                   return;
+                                                 }
+                                                 
+                                                 if (authConectionType == AuthConnectionType.online) {
+                                                   WarningConfirmationDialog.show(
+                                                     context,
+                                                     message: '¿Estás seguro de que deseas cancelar este entregable?',
+                                                     onConfirmPressed: () async {
+                                                       bool success = await ref
+                                                           .read(activityProvider.notifier)
+                                                           .cancelSubmission(
+                                                               submission.submissionActivityStudentId,
+                                                               widget.activity.activityId!);
+                                                       
+                                                       if (mounted) {
+                                                         if (success) {
+                                                           SuccessDialog.show(
+                                                             context,
+                                                             message: 'Entregable cancelado correctamente',
+                                                           );
+                                                         } else {
+                                                           ErrorDialog.show(
+                                                             context,
+                                                             message: 'Error al cancelar el entregable',
+                                                           );
+                                                         }
+                                                       }
+                                                     },
+                                                   );
+                                                 } else if (authConectionType == AuthConnectionType.offline) {
+                                                   ErrorDialog.show(
+                                                     context,
+                                                     message: 'No disponible en modo offline',
+                                                   );
+                                                 }
+                                               },
+                                               icon: SvgPicture.asset(
+                                                 'assets/icons/eliminar4.svg',
+                                                 width: 40,
+                                                 height: 40,
+                                                 colorFilter: ColorFilter.mode(
+                                                   submission.grade != null && submission.grade!.isNotEmpty
+                                                       ? Colors.grey.shade300
+                                                       : Colors.red,
+                                                   BlendMode.srcIn,
+                                                 ),
+                                               ),
+                                             )
+                                           : null,
                                     );
                                   },
                                 ),
@@ -560,12 +860,27 @@ class _ActivitySectionSubmissionState
                           ),
                         )
                       : const SizedBox(),
+                  const SizedBox(height: 40), // Espacio amplio entre secciones
                   activitiesForm.existsAnswer
-                      ? const Text(
-                          'Entregables',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                          ),
+                      ? Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Borrador de entregable',
+                              style: TextStyle(
+                                fontSize: 20.0,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            const Text(
+                              'Si necesitas actualizar tu entrega vuelve a enviar el borrador. Nota: Si esta calificada la entrega entonces no se podra reenviar',
+                              style: TextStyle(
+                                fontSize: 14.0,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          ],
                         )
                       : const SizedBox(),
                   Column(
@@ -576,7 +891,7 @@ class _ActivitySectionSubmissionState
                                 showModalBottomDropAnswer(context);
                               },
                               child: SizedBox(
-                                height: 180, // Altura mucho mayor con footer
+                                height: 180,
                                 child: Container(
                                   margin: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 8.0),
                                   decoration: BoxDecoration(
@@ -612,7 +927,7 @@ class _ActivitySectionSubmissionState
                                         trailing: IconButton(
                                           onPressed: () {
                                             ref.read(activityFormProvider.notifier).dropAnswer();
-                                            _deleteDraft(); // Eliminar del borrador también
+                                            _deleteDraft();
                                           },
                                           icon: SvgPicture.asset(
                                             'assets/icons/eliminar4.svg',
@@ -663,4 +978,3 @@ class _ActivitySectionSubmissionState
     );
   }
 }
-

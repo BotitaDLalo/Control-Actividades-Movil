@@ -1,3 +1,10 @@
+class FileSubmission {
+  final String nombre;
+  final String ruta;
+
+  FileSubmission({required this.nombre, required this.ruta});
+}
+
 class StudentSubmission {
   final int submissionId;
   final int studentId;
@@ -8,7 +15,7 @@ class StudentSubmission {
   final String submissionDate;
   final String answer;
   final List<String> links;
-  final List<String> files;
+  final List<FileSubmission> files;
   int grade;
 
   StudentSubmission({

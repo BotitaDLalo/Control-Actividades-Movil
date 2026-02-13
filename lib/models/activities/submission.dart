@@ -19,6 +19,7 @@ class Submission {
   int? activityId;
   String? answer; // Texto de la respuesta
   String? grade;
+  String? gradedDate;
   final bool? status;
   final String? submissionDate;
   // Nuevos campos para enlaces y archivos
@@ -32,6 +33,7 @@ class Submission {
     this.submissionDate,
     this.answer,
     this.grade,
+    this.gradedDate,
     this.activityId,
     this.status,
     this.links,
@@ -58,41 +60,115 @@ class Submission {
         try {
           final innerJson = jsonDecode(respuestaContent);
           textoFinal = innerJson['texto'] ?? innerJson['Respuesta'] ?? '';
-          enlacesFinal = (innerJson['enlaces'] as List?)?.map((e) => e.toString()).toList() ?? [];
-          archivosFinal = (innerJson['archivos'] as List?)?.map((e) => e.toString()).toList() ?? [];
+          enlacesFinal = (innerJson['enlaces'] as List?)
+              ?.map((e) => e.toString())
+              .where((e) => e.isNotEmpty)
+              .toList() ?? [];
+          archivosFinal = (innerJson['archivos'] as List?)
+              ?.map((e) {
+                if (e is Map<String, dynamic>) {
+                  final nombre = e['nombre']?.toString() ?? '';
+                  final url = e['url']?.toString() ?? '';
+                  final ruta = e['ruta']?.toString() ?? '';
+                  return ruta.isNotEmpty ? ruta : (url.isNotEmpty ? url : nombre);
+                }
+                return e.toString();
+              })
+              .where((nombre) => nombre.isNotEmpty)
+              .toList() ?? [];
         } catch (e) {
-          // Si falla, usar el string directamente
           textoFinal = respuestaContent;
         }
       } else if (respuestaContent is String) {
         textoFinal = respuestaContent;
       } else if (respuestaContent is Map<String, dynamic>) {
-        // Ya viene como Map, no como string JSON
         textoFinal = respuestaContent['texto'] ?? respuestaContent['Respuesta'] ?? '';
-        enlacesFinal = (respuestaContent['enlaces'] as List?)?.map((e) => e.toString()).toList() ?? [];
-        archivosFinal = (respuestaContent['archivos'] as List?)?.map((e) => e.toString()).toList() ?? [];
+        enlacesFinal = (respuestaContent['enlaces'] as List?)
+            ?.map((e) => e.toString())
+            .where((e) => e.isNotEmpty)
+            .toList() ?? [];
+        archivosFinal = (respuestaContent['archivos'] as List?)
+            ?.map((e) {
+              if (e is Map<String, dynamic>) {
+                final nombre = e['nombre']?.toString() ?? '';
+                final url = e['url']?.toString() ?? '';
+                final ruta = e['ruta']?.toString() ?? '';
+                return ruta.isNotEmpty ? ruta : (url.isNotEmpty ? url : nombre);
+              }
+              return e.toString();
+            })
+            .where((nombre) => nombre.isNotEmpty)
+            .toList() ?? [];
       }
       
       // Los archivos también pueden venir en el JSON exterior
       if (archivosFinal.isEmpty) {
-        archivosFinal = (json['Archivos'] as List?)?.map((e) => e.toString()).toList() ?? 
-                        (json['archivos'] as List?)?.map((e) => e.toString()).toList() ?? [];
+        archivosFinal = (json['Archivos'] as List?)
+            ?.map((e) {
+              if (e is Map<String, dynamic>) {
+                final nombre = e['nombre']?.toString() ?? '';
+                final url = e['url']?.toString() ?? '';
+                final ruta = e['ruta']?.toString() ?? '';
+                return ruta.isNotEmpty ? ruta : (url.isNotEmpty ? url : nombre);
+              }
+              return e.toString();
+            })
+            .where((nombre) => nombre.isNotEmpty)
+            .toList() ?? 
+            (json['archivos'] as List?)
+            ?.map((e) {
+              if (e is Map<String, dynamic>) {
+                final nombre = e['nombre']?.toString() ?? '';
+                final url = e['url']?.toString() ?? '';
+                final ruta = e['ruta']?.toString() ?? '';
+                return ruta.isNotEmpty ? ruta : (url.isNotEmpty ? url : nombre);
+              }
+              return e.toString();
+            })
+            .where((nombre) => nombre.isNotEmpty)
+            .toList() ?? [];
       }
       
       // Los enlaces también pueden venir en el JSON exterior
       if (enlacesFinal.isEmpty) {
-        enlacesFinal = (json['Enlaces'] as List?)?.map((e) => e.toString()).toList() ?? 
-                       (json['enlaces'] as List?)?.map((e) => e.toString()).toList() ?? [];
+        enlacesFinal = (json['Enlaces'] as List?)
+            ?.map((e) => e.toString())
+            .where((e) => e.isNotEmpty)
+            .toList() ?? 
+            (json['enlaces'] as List?)
+            ?.map((e) => e.toString())
+            .where((e) => e.isNotEmpty)
+            .toList() ?? [];
       }
       
-      return SubmissionResponse(
+     return SubmissionResponse(
         texto: textoFinal,
         enlaces: enlacesFinal,
         archivos: archivosFinal,
       );
     } catch (e) {
-      // Si no es JSON válido, retornar como texto plano
       return SubmissionResponse(texto: respuestaJson, enlaces: [], archivos: []);
+    }
+  }
+
+  static String? _formatDate(dynamic dateStr) {
+    if (dateStr == null) return null;
+    try {
+      String dateString = dateStr.toString();
+      // Handle ASP.NET JSON date format: /Date(1234567890000)/
+      if (dateString.startsWith('/Date(')) {
+        final match = RegExp(r'\/Date\((\d+)\)\/').firstMatch(dateString);
+        if (match != null) {
+          final milliseconds = int.parse(match.group(1)!);
+          final date = DateTime.fromMillisecondsSinceEpoch(milliseconds, isUtc: false);
+          return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+        }
+      }
+      // Handle ISO 8601 format
+      final date = DateTime.parse(dateString);
+      return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+    } catch (e) {
+      return null;
     }
   }
 
@@ -103,6 +179,7 @@ class Submission {
     for (var subRes in lssubmissionRes) {
       final gradeRes = subRes['Calificacion'];
       final submissionStateId = subRes['EstadoEntregaId'];
+      final gradedDateRaw = subRes['FechaCalificado'];
       
       // Parsear el JSON de respuesta
       final respuestaJson = subRes['Contenido'] as String?;
@@ -113,8 +190,9 @@ class Submission {
           submissionId: subRes['EntregableId'],
           activityId: subRes['ActividadId'],
           submissionDate: subRes['FechaEntrega'],
-          answer: parsedRespuesta.texto, // Usamos el texto parsed
+          answer: parsedRespuesta.texto,
           grade: gradeRes == 0 ? null : gradeRes.toString(),
+          gradedDate: _formatDate(gradedDateRaw),
           status: submissionStateId == 1 ? true : false,
           links: parsedRespuesta.enlaces,
           files: parsedRespuesta.archivos,

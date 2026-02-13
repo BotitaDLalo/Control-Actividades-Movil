@@ -65,8 +65,6 @@ class ActivityDataSourceImpl implements ActivityDataSource {
     }
   }
 
-// En activity_data_source_impl.dart
-
   @override
   Future<Activity> updateActivity(
     int activityId,
@@ -121,9 +119,8 @@ class ActivityDataSourceImpl implements ActivityDataSource {
   }
 
   @override
-  Future<List<Submission>> sendSubmission(int activityId, String answer, {List<String> links = const [], List<String> files = const []}) async {
+  Future<bool> sendSubmission(int activityId, String answer, {List<String> links = const [], List<String> files = const []}) async {
     try {
-      //const uri = "/Alumnos/RegistrarEnvioActividadAlumno";
       const uri = "/Alumnos/RegistrarEnvioActividadAlumnoConEnlaces";
       DateTime dateNow = DateTime.now();
       final id = await storageService.getId();
@@ -151,29 +148,30 @@ class ActivityDataSourceImpl implements ActivityDataSource {
       final res = await dio.post(uri, data: formData);
 
       if (res.statusCode == 200) {
-        // final resList = Map<String, dynamic>.from(res.data);
-        final resList = List<Map<String, dynamic>>.from(res.data);
-
-        final list = Submission.lsSubmissionJsonToLsEntity(resList, activityId);
-
-        return list;
+        return true;
       }
 
-      return [];
+      return false;
     } catch (e) {
       debugPrint(e.toString());
-      return [];
+      return false;
     }
   }
 
   // Método para subir un archivo y obtener la URL
   @override
-  Future<String> uploadFile(PlatformFile file) async {
+  Future<String> uploadFile(PlatformFile file, int activityId, int studentId) async {
     try {
       const uri = "/Archivos/SubirArchivo";
       
       // Crear FormData con el archivo
       final formData = FormData();
+      
+      // Agregar IDs requeridos por el backend
+      formData.fields.addAll([
+        MapEntry('ActividadId', activityId.toString()),
+        MapEntry('AlumnoId', studentId.toString()),
+      ]);
       
       // Leer el archivo como bytes
       final fileBytes = await File(file.path!).readAsBytes();
@@ -190,7 +188,6 @@ class ActivityDataSourceImpl implements ActivityDataSource {
       final res = await dio.post(uri, data: formData);
       
       if (res.statusCode == 200) {
-        // El backend debe devolver la URL del archivo
         final url = res.data['url'] as String? ?? res.data['fileUrl'] as String?;
         if (url != null) {
           debugPrint("✅ Archivo subido exitosamente: $url");
@@ -235,7 +232,7 @@ class ActivityDataSourceImpl implements ActivityDataSource {
   }
 
   @override
-  Future<List<Submission>> cancelSubmission(
+  Future<bool> cancelSubmission(
       int studentActivityId, int activityId) async {
     try {
       const uri = "/Alumnos/CancelarEnvioActividadAlumno";
@@ -248,18 +245,13 @@ class ActivityDataSourceImpl implements ActivityDataSource {
       });
 
       if (res.statusCode == 200) {
-        // final resList = Map<String, dynamic>.from(res.data);
-        final resList = List<Map<String, dynamic>>.from(res.data);
-
-        final list = Submission.lsSubmissionJsonToLsEntity(resList, activityId);
-
-        return list;
+        return true;
       }
 
-      return [];
+      return false;
     } catch (e) {
       print(e);
-      return [];
+      return false;
     }
   }
 
@@ -297,6 +289,17 @@ class ActivityDataSourceImpl implements ActivityDataSource {
       }
 
       return false;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  @override
+  Future<bool> removeGrade(int submissionId) async {
+    try {
+      const uri = "/Actividades/QuitarCalificacion";
+      final res = await dio.post(uri, data: {"EntregableId": submissionId});
+      return res.statusCode == 200;
     } catch (e) {
       return false;
     }
