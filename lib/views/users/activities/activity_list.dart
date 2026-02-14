@@ -95,6 +95,55 @@ class _ActivityListState extends ConsumerState<ActivityList> {
     );
   }
 
+  Widget _buildBadgesActividad(Activity activity) {
+    return Wrap(
+      spacing: 4,
+      runSpacing: 4,
+      children: [
+        if (activity.permitirEntregasTarde)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+            decoration: BoxDecoration(
+              color: Colors.blue.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.blue, width: 1),
+            ),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.schedule, size: 10, color: Colors.blue),
+                SizedBox(width: 2),
+                Text(
+                  'Tardías',
+                  style: TextStyle(color: Colors.blue, fontSize: 9, fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+          ),
+        if (activity.tieneLimiteEntregas)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+            decoration: BoxDecoration(
+              color: Colors.purple.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.purple, width: 1),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.repeat, size: 10, color: Colors.purple),
+                const SizedBox(width: 2),
+                Text(
+                  'Lím: ${activity.limiteEntregasPorAlumno}',
+                  style: const TextStyle(color: Colors.purple, fontSize: 9, fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final cn = ref.watch(catalogNamesProvider);
@@ -267,7 +316,9 @@ class _ActivityListState extends ConsumerState<ActivityList> {
                         : const SizedBox.shrink(),
                     footerWidget: role != cn.getRoleTeacherName
                         ? _buildEstatusBadge(activity)
-                        : null,
+                        : (activity.permitirEntregasTarde || activity.tieneLimiteEntregas)
+                            ? _buildBadgesActividad(activity)
+                            : null,
                     onTapFunction: () async {
                       final activityData = Activity(
                         activityId: activity.activityId,

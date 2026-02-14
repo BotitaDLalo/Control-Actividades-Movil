@@ -10,6 +10,9 @@ class Activity {
   final int? tipoActividadId;
   final double? puntaje;
   final int materiaId;
+  final bool permitirEntregasTarde;
+  final bool tieneLimiteEntregas;
+  final int limiteEntregasPorAlumno;
 
   Activity(
       { 
@@ -20,7 +23,10 @@ class Activity {
       this.tipoActividadId,
       this.fechaCreacion,
       required this.fechaLimite,
-      required this.materiaId});
+      required this.materiaId,
+      this.permitirEntregasTarde = false,
+      this.tieneLimiteEntregas = false,
+      this.limiteEntregasPorAlumno = 0});
 
   static final DateFormat dateTimeFormat = DateFormat('yyyy-MM-ddTHH:mm:ss');
 

@@ -380,14 +380,42 @@ class _ActivitySectionSubmissionState
               }
             }
             final bool isOverdue = fechaLimiteDate != null && DateTime.now().isAfter(fechaLimiteDate);
-            final bool canSend = !isGraded && !isOverdue && activitiesForm.existsAnswer;
+            
+            // Verificar si ha alcanzado el límite de entregas
+            final bool hasReachedLimit = widget.activity.tieneLimiteEntregas && 
+                lsSubmissions.length >= widget.activity.limiteEntregasPorAlumno;
+            
+            final bool canSend = !isGraded && activitiesForm.existsAnswer && !hasReachedLimit && 
+                (!isOverdue || widget.activity.permitirEntregasTarde);
 
-            if (!canSend && !isGraded && isOverdue) {
+            if (hasReachedLimit) {
               return FloatingActionButton(
                 onPressed: () {
                   WarningDialog.show(
                     context,
-                    message: 'No puedes enviar: La actividad está vencida',
+                    message: 'Ya has alcanzado el límite de entregas para esta actividad (${widget.activity.limiteEntregasPorAlumno})',
+                  );
+                },
+                backgroundColor: Colors.grey.shade300,
+                shape: AppTheme.shapeFloatingActionButton(),
+                child: SvgPicture.asset(
+                  'assets/icons/agregar.svg',
+                  color: Colors.grey.shade600,
+                  width: 40,
+                  height: 40,
+                ),
+              );
+            }
+
+            if (!canSend && !isGraded && isOverdue) {
+              return FloatingActionButton(
+                onPressed: () {
+                  String message = widget.activity.permitirEntregasTarde
+                      ? 'La fecha límite ha pasado, pero puedes enviar con entrega tardía'
+                      : 'No puedes enviar: La actividad está vencida';
+                  WarningDialog.show(
+                    context,
+                    message: message,
                   );
                 },
                 backgroundColor: Colors.grey.shade300,
@@ -486,6 +514,41 @@ class _ActivitySectionSubmissionState
                   const SizedBox(height: 8),
                   _buildEstatusWidget(),
                   const SizedBox(height: 8),
+                  // Indicador de entregas tardías
+                  if (widget.activity.permitirEntregasTarde) ...[
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.blue.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.blue, width: 1),
+                      ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.schedule, size: 16, color: Colors.blue),
+                          SizedBox(width: 4),
+                          Text(
+                            'Entregas tardías permitidas',
+                            style: TextStyle(color: Colors.blue, fontSize: 12, fontWeight: FontWeight.w500),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                  ],
+                  // Contador de entregas si hay límite
+                  if (widget.activity.tieneLimiteEntregas) ...[
+                    Text(
+                      'Entregas: ${lsSubmissions.length} de ${widget.activity.limiteEntregasPorAlumno}',
+                      style: const TextStyle(
+                        color: Colors.black87,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                  ],
                   Text(
                     'Puntuaje Total: ${widget.activity.puntaje}',
                     style: const TextStyle(
