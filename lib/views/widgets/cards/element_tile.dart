@@ -43,7 +43,7 @@ class ElementTile extends ConsumerWidget {
     return Padding(
       padding: const EdgeInsets.only(top: 5.0, bottom: 15.0, left: 8.0, right: 8.0),
       child: Container(
-        height: 140, // Altura fija para la card
+        height: 155, // Altura fija para la card
         decoration: BoxDecoration(
           color: Colors.white, // Fondo blanco
           borderRadius: BorderRadius.circular(10), // Bordes redondeados
@@ -104,7 +104,10 @@ class ElementTile extends ConsumerWidget {
               ),
               if (footerWidget != null) ...[
                 const SizedBox(height: 8),
-                footerWidget!,
+                Align(
+                  alignment: Alignment.bottomRight,
+                  child: footerWidget!,
+                ),
               ] else if (bottomText != null) ...[
                 const SizedBox(height: 4),
                 Text(
