@@ -73,6 +73,7 @@ class ActivityDataSourceImpl implements ActivityDataSource {
     DateTime fechaLimite,
     int puntaje,
     int materiaId,
+    {bool permitirEntregasTarde = false, bool tieneLimiteEntregas = false, int limiteEntregasPorAlumno = 0}
   ) async {
     try {
       final uri = "/Actividades/ActualizarActividad?id=$activityId";
@@ -103,6 +104,11 @@ class ActivityDataSourceImpl implements ActivityDataSource {
 
         // Fecha de creación para evitar error de rango SQL
         "FechaCreacionActividad": fechaCreacionSegura,
+
+        // Nuevos campos
+        "PermitirEntregasTarde": permitirEntregasTarde,
+        "TieneLimiteEntregas": tieneLimiteEntregas,
+        "LimiteEntregasPorAlumno": limiteEntregasPorAlumno,
       });
 
       debugPrint("Update response: ${response.data}");

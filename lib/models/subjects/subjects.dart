@@ -42,8 +42,11 @@ class Subject {
                   //tipoActividadId: a['TipoActividadId'],
                   fechaCreacion: formatDate(a['FechaCreacion']),
                   fechaLimite: formatDate(a['FechaLimite']),
-                  puntaje: a['Puntaje'],
+                  puntaje: a['Puntaje'] != null ? (a['Puntaje'] as num).toDouble() : null,
                   materiaId: a['MateriaId'],
+                  permitirEntregasTarde: a['PermitirEntregasTarde'] ?? false,
+                  tieneLimiteEntregas: a['TieneLimiteEntregas'] ?? false,
+                  limiteEntregasPorAlumno: a['LimiteEntregasPorAlumno'] ?? 0,
                 ))
             .toList(),
         avisos: (e['Avisos'] as List<dynamic>? ?? [])
@@ -74,7 +77,11 @@ class Subject {
               tipoActividadId: e['TipoActividadId'],
               fechaCreacion: formatDate(e['FechaCreacion']),
               fechaLimite: formatDate(e['FechaLimite']),
-              puntaje: e['Puntaje'],
-              materiaId: map['MateriaId'])) // Usar el materiaId del Subject padre
+              puntaje: e['Puntaje'] != null ? (e['Puntaje'] as num).toDouble() : null,
+              materiaId: map['MateriaId'],
+              permitirEntregasTarde: e['PermitirEntregasTarde'] ?? false,
+              tieneLimiteEntregas: e['TieneLimiteEntregas'] ?? false,
+              limiteEntregasPorAlumno: e['LimiteEntregasPorAlumno'] ?? 0,
+            ))
           .toList());
 }

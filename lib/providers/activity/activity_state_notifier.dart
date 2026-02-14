@@ -161,12 +161,17 @@ Future<void> updateActivity(
   String descripcion, 
   DateTime fechaLimite, 
   int puntaje, 
-  int materiaId) async {
+  int materiaId,
+  {bool permitirEntregasTarde = false, bool tieneLimiteEntregas = false, int limiteEntregasPorAlumno = 0}
+) async {
     try {
       state = state.copyWith(isLoading: true);
       
       final updatedActivity = await activityRepository.updateActivity(
-          activityId, nombre, descripcion, fechaLimite, puntaje, materiaId);
+          activityId, nombre, descripcion, fechaLimite, puntaje, materiaId,
+          permitirEntregasTarde: permitirEntregasTarde,
+          tieneLimiteEntregas: tieneLimiteEntregas,
+          limiteEntregasPorAlumno: limiteEntregasPorAlumno);
 
 // 2. IMPORTANTE: Actualizamos la lista localmente AQUÍ MISMO
       _updateActivityInState(updatedActivity);

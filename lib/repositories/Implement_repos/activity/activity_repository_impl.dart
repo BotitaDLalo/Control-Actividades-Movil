@@ -25,7 +25,8 @@ class ActivityRepositoryImpl implements ActivityRepository {
       String descripcion, 
       DateTime fechaLimite, 
       int puntaje,
-      int materiaId
+      int materiaId,
+      {bool permitirEntregasTarde = false, bool tieneLimiteEntregas = false, int limiteEntregasPorAlumno = 0}
   ) {
     return activityDataSource.updateActivity(
         activityId, 
@@ -33,7 +34,10 @@ class ActivityRepositoryImpl implements ActivityRepository {
         descripcion, 
         fechaLimite, 
         puntaje,
-        materiaId
+        materiaId,
+        permitirEntregasTarde: permitirEntregasTarde,
+        tieneLimiteEntregas: tieneLimiteEntregas,
+        limiteEntregasPorAlumno: limiteEntregasPorAlumno
     );
   }
 

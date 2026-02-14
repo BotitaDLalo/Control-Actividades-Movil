@@ -143,7 +143,10 @@ Future<List<Group>> getGroupsSubjects() async {
                   'FechaCreacion': activity.fechaCreacion.toString(),
                   'FechaLimite': activity.fechaLimite.toString(),
                   'Puntaje': activity.puntaje,
-                  'MateriaId': subjectId
+                  'MateriaId': subjectId,
+                  'PermitirEntregasTarde': activity.permitirEntregasTarde ? 1 : 0,
+                  'TieneLimiteEntregas': activity.tieneLimiteEntregas ? 1 : 0,
+                  'LimiteEntregasPorAlumno': activity.limiteEntregasPorAlumno,
                   
                 }, conflictAlgorithm: ConflictAlgorithm.replace);
 

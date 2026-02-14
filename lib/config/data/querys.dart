@@ -57,6 +57,9 @@ class Querys {
           MateriaId INTEGER,
           Enviado INTEGER,
           FechaProgramada TEXT,
+          PermitirEntregasTarde INTEGER DEFAULT 0,
+          TieneLimiteEntregas INTEGER DEFAULT 0,
+          LimiteEntregasPorAlumno INTEGER DEFAULT 0,
           FOREIGN KEY (MateriaId) REFERENCES tbMaterias(MateriaId));
         """,
         """

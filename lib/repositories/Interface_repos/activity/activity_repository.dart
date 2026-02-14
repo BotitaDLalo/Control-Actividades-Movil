@@ -9,7 +9,8 @@ abstract class ActivityRepository {
   Future<void> deleteActivity(int activityId);
 
   Future<Activity> updateActivity(int activityId, String nombreActividad,
-      String descripcion, DateTime fechaLimite, int puntaje, int materiaId);
+      String descripcion, DateTime fechaLimite, int puntaje, int materiaId,
+      {bool permitirEntregasTarde = false, bool tieneLimiteEntregas = false, int limiteEntregasPorAlumno = 0});
 
   Future<bool> sendSubmission(int activityId, String answer, {List<String> links = const [], List<String> files = const []});
 

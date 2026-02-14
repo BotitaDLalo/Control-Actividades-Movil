@@ -19,10 +19,35 @@ final activityFormProvider =
     final uploadFile = activityNotifier.uploadFile;
     final updateActivity = activityNotifier.updateActivity;
 
+    // Wrapper para updateActivity que pasa los nuevos parámetros
+    final updateActivityWrapper = (
+      int activityId, 
+      String nombre,
+      String descripcion, 
+      DateTime fechaLimite, 
+      int puntaje,
+      int materiaId,
+      bool permitirEntregasTarde,
+      bool tieneLimiteEntregas,
+      int limiteEntregasPorAlumno
+    ) async {
+      return updateActivity(
+        activityId, 
+        nombre, 
+        descripcion, 
+        fechaLimite, 
+        puntaje, 
+        materiaId,
+        permitirEntregasTarde: permitirEntregasTarde,
+        tieneLimiteEntregas: tieneLimiteEntregas,
+        limiteEntregasPorAlumno: limiteEntregasPorAlumno
+      );
+    };
+
     return ActivityFormNotifier(
         submissionGradingCallback: submissionGrading,
         activityCallback: createActivity,
-        updateActivityCallback: updateActivity,
+        updateActivityCallback: updateActivityWrapper,
         sendSubmissionCallback: sendActivity,
         sendSubmissionWithLinksCallback: sendActivityWithLinks,
         sendSubmissionWithFilesCallback: sendActivityWithFiles,

@@ -42,7 +42,11 @@ class Activity {
               fechaCreacion: formatDate(e['FechaCreacion'] as String),
               fechaLimite: formatDate(e['FechaLimite'] as String),
               materiaId: e['MateriaId'] as int,
-              puntaje: (e['Puntaje'] as num?)?.toDouble()),
+              puntaje: (e['Puntaje'] as num?)?.toDouble(),
+              permitirEntregasTarde: (e['PermitirEntregasTarde'] as int?) == 1,
+              tieneLimiteEntregas: (e['TieneLimiteEntregas'] as int?) == 1,
+              limiteEntregasPorAlumno: (e['LimiteEntregasPorAlumno'] as int?) ?? 0,
+          ),
         )
         .toList();
 

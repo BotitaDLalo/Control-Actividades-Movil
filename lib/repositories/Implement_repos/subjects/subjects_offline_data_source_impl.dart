@@ -138,6 +138,9 @@ class SubjectsOfflineDataSourceImpl extends SubjectsOfflineDataSource {
                   'FechaLimite': activity.fechaLimite.toString(),
                   'Puntaje': activity.puntaje,
                   'MateriaId': subjectId,
+                  'PermitirEntregasTarde': activity.permitirEntregasTarde ? 1 : 0,
+                  'TieneLimiteEntregas': activity.tieneLimiteEntregas ? 1 : 0,
+                  'LimiteEntregasPorAlumno': activity.limiteEntregasPorAlumno,
                 },
                 conflictAlgorithm: ConflictAlgorithm.replace,
               );

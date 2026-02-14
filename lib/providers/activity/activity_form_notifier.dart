@@ -14,8 +14,11 @@ class ActivityFormNotifier extends StateNotifier<ActivityFormState> {
       String nombre,
       String descripcion, 
       DateTime fechaLimite, 
-      int puntaje,   // <--- Agregamos int puntaje
-      int materiaId  // <--- Agregamos int materiaId
+      int puntaje,
+      int materiaId,
+      bool permitirEntregasTarde,
+      bool tieneLimiteEntregas,
+      int limiteEntregasPorAlumno
   )? updateActivityCallback;
   
   final Function(int, String) sendSubmissionCallback;
@@ -223,7 +226,7 @@ class ActivityFormNotifier extends StateNotifier<ActivityFormState> {
 
       try {
         if (updateActivityCallback != null) {
-          // Llamar al callback de actualización (AHORA CON 6 ARGUMENTOS)
+          // Llamar al callback de actualización (AHORA CON 9 ARGUMENTOS)
           await updateActivityCallback!(
             activityId,
             state.nombre.value,
@@ -231,6 +234,9 @@ class ActivityFormNotifier extends StateNotifier<ActivityFormState> {
             fechaHoraConcatenada,
             puntajeToSend, // <--- Usamos el valor calculado (100 por defecto o el ingresado)
             subjectId,     // <--- MateriaId/SubjectId
+            state.permitirEntregasTarde,
+            state.tieneLimiteEntregas,
+            state.limiteEntregasPorAlumno,
           );
           
           state = state.copyWith(isFormPosted: true);
@@ -271,7 +277,10 @@ class ActivityFormNotifier extends StateNotifier<ActivityFormState> {
         "descripcion": state.descripcion.value,
         "fechaLimite": fechaHoraConcatenada.toIso8601String(),
         "puntaje": puntajeToSend,
-        "materiaId": subjectId
+        "materiaId": subjectId,
+        "PermitirEntregasTarde": state.permitirEntregasTarde,
+        "TieneLimiteEntregas": state.tieneLimiteEntregas,
+        "LimiteEntregasPorAlumno": state.limiteEntregasPorAlumno,
       };
 
       try {
@@ -434,5 +443,22 @@ class ActivityFormNotifier extends StateNotifier<ActivityFormState> {
 
     void onLinksChanged(List<String> links) {
       state = state.copyWith(links: links, existsAnswer: _hasContent());
+    }
+
+    // Nuevos métodos para entregas tardías y límites
+    void onPermitirEntregasTardeChanged(bool value) {
+      state = state.copyWith(permitirEntregasTarde: value);
+    }
+
+    void onTieneLimiteEntregasChanged(bool value) {
+      state = state.copyWith(
+        tieneLimiteEntregas: value,
+        // Si se desactiva el límite, resetear el límite a 1
+        limiteEntregasPorAlumno: value ? state.limiteEntregasPorAlumno : 1,
+      );
+    }
+
+    void onLimiteEntregasPorAlumnoChanged(int value) {
+      state = state.copyWith(limiteEntregasPorAlumno: value);
     }
 }

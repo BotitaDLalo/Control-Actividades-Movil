@@ -78,17 +78,17 @@ class _ActivityListState extends ConsumerState<ActivityList> {
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
         color: statusColor.withOpacity(0.15),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: statusColor, width: 1.5),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: statusColor, width: 1),
       ),
       child: Text(
         statusText,
         style: TextStyle(
           color: statusColor,
-          fontSize: 12,
+          fontSize: 9,
           fontWeight: FontWeight.bold,
         ),
       ),
@@ -315,7 +315,17 @@ class _ActivityListState extends ConsumerState<ActivityList> {
                           )
                         : const SizedBox.shrink(),
                     footerWidget: role != cn.getRoleTeacherName
-                        ? _buildEstatusBadge(activity)
+                        ? Wrap(
+                            alignment: WrapAlignment.end,
+                            crossAxisAlignment: WrapCrossAlignment.center,
+                            spacing: 4,
+                            runSpacing: 4,
+                            children: [
+                              if (activity.permitirEntregasTarde || activity.tieneLimiteEntregas)
+                                _buildBadgesActividad(activity),
+                              _buildEstatusBadge(activity),
+                            ],
+                          )
                         : (activity.permitirEntregasTarde || activity.tieneLimiteEntregas)
                             ? _buildBadgesActividad(activity)
                             : null,
