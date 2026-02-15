@@ -380,6 +380,56 @@ class _ActivitySectionSubmissionState
       }
 
       if (lsSubmissions.isNotEmpty) {
+        // Obtener la última entrega
+        final ultimaEntrega = lsSubmissions.last;
+        final fechaEntregaStr = ultimaEntrega.submissionDate;
+        
+        // Comparar fechas para ver si es tardía
+        bool esTardia = false;
+        if (fechaEntregaStr != null && fechaLimiteDate != null) {
+          try {
+            DateTime? fechaEntregaDate;
+            try {
+              fechaEntregaDate = DateTime.parse(fechaEntregaStr);
+            } catch (e) {
+              try {
+                fechaEntregaDate = DateFormat('dd-MM-yyyy HH:mm:ss').parse(fechaEntregaStr);
+              } catch (e2) {
+                fechaEntregaDate = DateFormat('yyyy-MM-ddTHH:mm:ss').parse(fechaEntregaStr);
+              }
+            }
+            if (fechaEntregaDate != null) {
+              esTardia = fechaEntregaDate.isAfter(fechaLimiteDate);
+            }
+          } catch (e) {
+            esTardia = false;
+          }
+        }
+        
+        if (esTardia) {
+          return const Row(
+            children: [
+              Text(
+                'Estatus: Entregado',
+                style: TextStyle(
+                  color: Colors.green,
+                  fontSize: 17,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(width: 8),
+              Text(
+                '(Tardío)',
+                style: TextStyle(
+                  color: Colors.orange,
+                  fontSize: 17,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          );
+        }
+        
         return const Text(
           'Estatus: Entregado',
           style: TextStyle(

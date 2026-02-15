@@ -37,6 +37,28 @@ class _TeacherStudentSubmissionGradingState
     }
   }
 
+  DateTime _parseDateTime(String str) {
+    try {
+      return DateTime.parse(str);
+    } catch (e) {
+      try {
+        final parts = str.split(' ');
+        final dateParts = parts[0].split('-');
+        final timeParts = parts[1].split(':');
+        return DateTime(
+          int.parse(dateParts[2]),
+          int.parse(dateParts[1]),
+          int.parse(dateParts[0]),
+          int.parse(timeParts[0]),
+          int.parse(timeParts[1]),
+          timeParts.length > 2 ? int.parse(timeParts[2]) : 0,
+        );
+      } catch (e2) {
+        return DateTime.now();
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final data = widget.data;
@@ -166,6 +188,19 @@ class _TeacherStudentSubmissionGradingState
                         fontSize: 18,
                       ),
                     ),
+                    if (data.deadline.isNotEmpty && data.submissionDate.isNotEmpty) ...[
+                      if (_parseDateTime(data.submissionDate).isAfter(_parseDateTime(data.deadline))) ...[
+                        const SizedBox(height: 4),
+                        const Text(
+                          'Entrega tardía',
+                          style: TextStyle(
+                            color: Colors.orange,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ],
                     const SizedBox(height: 12),
                     
                     // Calificación y Fecha de entrega

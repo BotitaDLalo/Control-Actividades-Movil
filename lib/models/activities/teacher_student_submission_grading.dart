@@ -15,6 +15,7 @@ class TeacherStudentSubmissionGradingModel {
   final int grade;
   final double score;
   final String submissionDate;
+  final String deadline;
 
   TeacherStudentSubmissionGradingModel({
     required this.submissionId,
@@ -26,5 +27,6 @@ class TeacherStudentSubmissionGradingModel {
     required this.grade,
     required this.score,
     required this.submissionDate,
+    required this.deadline,
   });
 }
