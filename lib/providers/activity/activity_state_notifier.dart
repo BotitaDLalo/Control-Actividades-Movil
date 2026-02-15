@@ -34,7 +34,7 @@ class ActivityNotifier extends StateNotifier<ActivityState> {
     try {
       state = state.copyWith(isLoading: true);
       final activities = await activityRepository.getAllActivities(subjectId);
-      _setActivities(activities);
+      _setActivities(activities, subjectId);
     } catch (e) {
       state = state.copyWith(errorMessage: e.toString());
       // Re-throw para que auth_state_notifier pueda capturar el error
@@ -50,7 +50,7 @@ class ActivityNotifier extends StateNotifier<ActivityState> {
       state = state.copyWith(isLoading: true);
       final lsActivities =
           await activityOfflineRepository.getAllActivitiesOffline(subjectId);
-      _setActivities(lsActivities);
+      _setActivities(lsActivities, subjectId);
       debugPrint("Actividades cargadas desde offline: ${lsActivities.map((a) => {'id': a.activityId, 'nombre': a.nombreActividad}).toList()}");
     } catch (e) {
       debugPrint(e.toString());
@@ -69,7 +69,7 @@ class ActivityNotifier extends StateNotifier<ActivityState> {
       final activities = await activityRepository.getAllActivities(subjectId);
       
       // Si tiene éxito, actualiza el estado y guarda los datos en la BD local
-      _setActivities(activities);
+      _setActivities(activities, subjectId);
       // TODO: La lógica para guardar/actualizar actividades en la BD local debe ser implementada aquí
       // para que los datos estén disponibles en modo offline la próxima vez.
       
@@ -80,7 +80,7 @@ class ActivityNotifier extends StateNotifier<ActivityState> {
       try {
         final offlineActivities = await activityOfflineRepository.getAllActivitiesOffline(subjectId);
         debugPrint("Cargando desde offline: ${offlineActivities.map((a) => {'id': a.activityId, 'nombre': a.nombreActividad}).toList()}");
-        _setActivities(offlineActivities);
+        _setActivities(offlineActivities, subjectId);
       } catch (e2) {
         // 3. Si la carga offline también falla, se informa el error original.
         debugPrint("Error en carga offline de actividades: $e2");
@@ -92,18 +92,18 @@ class ActivityNotifier extends StateNotifier<ActivityState> {
     }
   }
 
-void _setActivities(List<Activity> activities) {
-  if (activities.isNotEmpty) {
-    List<Activity> lsActivities = List.from(state.lsActivities);
+void _setActivities(List<Activity> newActivitiesForSubject, int subjectId) {
+  // 1. Hacemos una copia de la lista actual para poder modificarla.
+  final currentGlobalActivities = List<Activity>.from(state.lsActivities);
 
-    List<Activity> newActivities = activities.where((newActivity) {
-      return !lsActivities.any((existingActivity) => existingActivity.activityId == newActivity.activityId);
-    }).toList();
+  // 2. Eliminamos de la lista global todas las actividades que pertenecen a la materia que estamos actualizando.
+  currentGlobalActivities.removeWhere((activity) => activity.materiaId == subjectId);
 
-    if (newActivities.isNotEmpty) {
-      state = state.copyWith(lsActivities: [...newActivities, ...lsActivities]);
-    }
-  }
+  // 3. Agregamos las nuevas actividades (recién obtenidas) a la lista global.
+  currentGlobalActivities.addAll(newActivitiesForSubject);
+
+  // 4. Actualizamos el estado con la lista combinada y actualizada.
+  state = state.copyWith(lsActivities: currentGlobalActivities);
 }
 
 
@@ -230,40 +230,60 @@ Future<void> updateActivity(
   Future<bool> sendSubmission(int activityId, String answer, {List<String> links = const []}) async {
     try {
       final success = await activityRepository.sendSubmission(activityId, answer, links: links);
-      return success;
+      if (success) return true;
+      return await _fallbackToOffline(activityId, answer, links: links);
     } catch (e) {
-      return false;
+      return await _fallbackToOffline(activityId, answer, links: links);
     }
   }
 
   Future<bool> sendSubmissionWithLinks(int activityId, String answer, List<String> links) async {
     try {
       final result = await activityRepository.sendSubmission(activityId, answer, links: links);
-      return result == true;
+      if (result == true) return true;
+      return await _fallbackToOffline(activityId, answer, links: links);
     } catch (e) {
       debugPrint("Error en sendSubmissionWithLinks: $e");
-      return false;
+      return await _fallbackToOffline(activityId, answer, links: links);
     }
   }
 
   Future<bool> sendSubmissionWithFiles(int activityId, String answer, List<String> fileUrls) async {
     try {
       final success = await activityRepository.sendSubmission(activityId, answer, files: fileUrls);
-      return success;
+      if (success) return true;
+      return await _fallbackToOffline(activityId, answer, files: fileUrls);
     } catch (e) {
       debugPrint("Error en sendSubmissionWithFiles: $e");
-      return false;
+      return await _fallbackToOffline(activityId, answer, files: fileUrls);
     }
   }
 
   Future<bool> sendSubmissionWithFilesAndLinks(int activityId, String answer, List<String> fileUrls, List<String> links) async {
     try {
       final success = await activityRepository.sendSubmission(activityId, answer, links: links, files: fileUrls);
-      return success;
+      if (success) return true;
+      return await _fallbackToOffline(activityId, answer, links: links, files: fileUrls);
     } catch (e) {
       debugPrint("Error en sendSubmissionWithFilesAndLinks: $e");
-      return false;
+      return await _fallbackToOffline(activityId, answer, links: links, files: fileUrls);
     }
+  }
+
+  Future<bool> _fallbackToOffline(int activityId, String answer,
+      {List<String>? links, List<String>? files}) async {
+    final hasInternet = await ConnectivityCheck.checkInternetConnectivity();
+    if (!hasInternet) {
+      String offlineAnswer = answer;
+      if (links != null && links.isNotEmpty) {
+        offlineAnswer += "\n\n[Enlaces pendientes]:\n${links.join('\n')}";
+      }
+      if (files != null && files.isNotEmpty) {
+        offlineAnswer += "\n\n[Archivos adjuntos]:\n${files.join('\n')}";
+      }
+      return await sendSubmissionOffline(activityId, offlineAnswer);
+    }
+    return false;
   }
 
   Future<String> uploadFile(PlatformFile file, int activityId, int studentId) async {

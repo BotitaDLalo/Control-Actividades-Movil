@@ -324,4 +324,45 @@ Future<List<Activity>> getAllActivitiesOffline(int subjectId) async {
       rethrow;
     }
   }
+
+  @override
+  Future<List<Submission>> getAllPendingSubmissions() async {
+    try {
+      final db = await DbLocal.database;
+      final id = await storageService.getId();
+      List<Submission> lsSubmissions = [];
+
+      // Consulta JOIN para obtener todas las entregas pendientes y sus datos asociados
+      final queryResult = await db.rawQuery('''
+        SELECT
+          ea.ActividadId,
+          ea.FechaEntrega,
+          e.EntregableId,
+          e.Contenido,
+          ea.EntregaActividadAlumnoId
+        FROM tbEntregableActividadAlumno ea
+        JOIN tbEntregables e ON ea.EntregaActividadAlumnoId = e.EntregaActividadAlumnoId
+        WHERE ea.UsuarioId = ? AND ea.EstadoEntregaId = 0
+      ''', [id]);
+
+      for (var row in queryResult) {
+        final submission = Submission(
+          submissionId: row['EntregableId'] as int,
+          activityId: row['ActividadId'] as int,
+          submissionActivityStudentId: row['EntregaActividadAlumnoId'] as int,
+          submissionDate: row['FechaEntrega'] as String,
+          answer: row['Contenido'] as String?,
+          status: false, // Sabemos que es pendiente (0)
+        );
+        lsSubmissions.add(submission);
+      }
+
+      debugPrint("📦 [SYNC] Se encontraron ${lsSubmissions.length} entregas pendientes para sincronizar.");
+      return lsSubmissions;
+
+    } catch (e) {
+      debugPrint('Error en getAllPendingSubmissions: $e');
+      return [];
+    }
+  }
 }
