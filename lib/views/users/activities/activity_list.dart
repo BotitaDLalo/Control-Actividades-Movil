@@ -339,6 +339,9 @@ class _ActivityListState extends ConsumerState<ActivityList> {
                         fechaLimite: activity.fechaLimite,
                         materiaId: activity.materiaId,
                         puntaje: activity.puntaje,
+                        permitirEntregasTarde: activity.permitirEntregasTarde,
+                        tieneLimiteEntregas: activity.tieneLimiteEntregas,
+                        limiteEntregasPorAlumno: activity.limiteEntregasPorAlumno,
                       );
 
                       if (role == cn.getRoleTeacherName) {

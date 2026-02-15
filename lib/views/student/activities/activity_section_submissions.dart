@@ -212,6 +212,55 @@ class _ActivitySectionSubmissionState
     final lsSub = ref.watch(activityProvider).lsSubmissions;
     final lsSubmissions = Submission.activitiesBySubject(lsSub, activityId!);
 
+    // Función para mostrar warning de entrega tardía
+    void _showLateDeliveryWarning(BuildContext context) {
+      if (_safeContext == null) return;
+
+      WarningConfirmationDialog.show(
+        _safeContext!,
+        message: 'La fecha límite ha pasado. Puedes enviar tu entrega pero se registrará como tardía/retrasada.',
+        onConfirmPressed: () async {
+          bool success = false;
+          try {
+            if (authConectionType == AuthConnectionType.online) {
+              success = await ref
+                  .read(activityFormProvider.notifier)
+                  .onSendSubmission(activityId);
+            } else if (authConectionType == AuthConnectionType.offline) {
+              success = await ref
+                  .read(activityFormProvider.notifier)
+                  .onSendSubmissionOffline(activityId);
+            }
+            
+            if (mounted) {
+              if (success) {
+                SuccessDialog.show(
+                  _safeContext!,
+                  message: 'Entrega realizada correctamente',
+                );
+                ref.read(activityProvider.notifier).getSubmissions(activityId);
+              } else {
+                ErrorDialog.show(
+                  _safeContext!,
+                  message: 'Error al realizar la entrega',
+                );
+              }
+            }
+          } catch (e) {
+            if (mounted) {
+              ErrorDialog.show(
+                _safeContext!,
+                message: 'Error al realizar la entrega: $e',
+              );
+            }
+          }
+        },
+        onCancelPressed: () {
+          // Cancelar - no hace nada adicional
+        },
+      );
+    }
+
     void showSendConfirmation() {
       if (_safeContext == null) return;
       
@@ -335,7 +384,7 @@ class _ActivitySectionSubmissionState
           'Estatus: Entregado',
           style: TextStyle(
             color: Colors.green,
-            fontSize: 18,
+            fontSize: 17,
             fontWeight: FontWeight.bold,
           ),
         );
@@ -344,7 +393,7 @@ class _ActivitySectionSubmissionState
           'Estatus: Retrasado',
           style: TextStyle(
             color: Colors.red,
-            fontSize: 18,
+            fontSize: 17,
             fontWeight: FontWeight.bold,
           ),
         );
@@ -353,7 +402,7 @@ class _ActivitySectionSubmissionState
           'Estatus: Pendiente',
           style: TextStyle(
             color: Colors.orange,
-            fontSize: 18,
+            fontSize: 17,
             fontWeight: FontWeight.bold,
           ),
         );
@@ -407,15 +456,13 @@ class _ActivitySectionSubmissionState
               );
             }
 
-            if (!canSend && !isGraded && isOverdue) {
+            // Si está vencida, no se permite entrega tardía y no ha sido calificada - mostrar botón gris
+            if (!canSend && !isGraded && isOverdue && !widget.activity.permitirEntregasTarde) {
               return FloatingActionButton(
                 onPressed: () {
-                  String message = widget.activity.permitirEntregasTarde
-                      ? 'La fecha límite ha pasado, pero puedes enviar con entrega tardía'
-                      : 'No puedes enviar: La actividad está vencida';
                   WarningDialog.show(
                     context,
-                    message: message,
+                    message: 'No puedes enviar: La actividad está vencida',
                   );
                 },
                 backgroundColor: Colors.grey.shade300,
@@ -426,6 +473,36 @@ class _ActivitySectionSubmissionState
                   width: 40,
                   height: 40,
                 ),
+              );
+            }
+
+            // Si está vencida pero SE PERMITE entrega tardía - mostrar botón naranja
+            if (isOverdue && widget.activity.permitirEntregasTarde && !isGraded && !hasReachedLimit) {
+              return FloatingActionButton(
+                onPressed: () {
+                  if (activitiesForm.existsAnswer) {
+                    // Ya tiene respuesta → mostrar warning de entrega tardía
+                    _showLateDeliveryWarning(context);
+                  } else {
+                    // No tiene respuesta → primero agregar respuesta/archivos
+                    showModalActivityType(context);
+                  }
+                },
+                shape: AppTheme.shapeFloatingActionButton(),
+                backgroundColor: Colors.orange, // Naranja para indicar que es entrega tardía
+                child: activitiesForm.existsAnswer
+                    ? SvgPicture.asset(
+                        'assets/icons/send1.svg',
+                        color: Colors.white,
+                        width: 28,
+                        height: 28,
+                      )
+                    : SvgPicture.asset(
+                        'assets/icons/agregar.svg',
+                        color: Colors.white,
+                        width: 40,
+                        height: 40,
+                      ),
               );
             }
 
@@ -508,52 +585,35 @@ class _ActivitySectionSubmissionState
                     'Fecha vencimiento: ${widget.activity.fechaLimite} ',
                     style: const TextStyle(
                       color: Colors.black,
-                      fontSize: 18,
+                      fontSize: 17,
                     ),
                   ),
                   const SizedBox(height: 8),
                   _buildEstatusWidget(),
+                  const SizedBox(height: 4),
+                  // Indicadores de entregas tardías y límite
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 4,
+                    children: [
+                      if (widget.activity.permitirEntregasTarde)
+                        const Text(
+                          'Entregas tardías permitidas',
+                          style: TextStyle(color: Colors.blue, fontSize: 17, fontWeight: FontWeight.w500),
+                        ),
+                      if (widget.activity.tieneLimiteEntregas)
+                        Text(
+                          'Límite: ${lsSubmissions.length}/${widget.activity.limiteEntregasPorAlumno} entrega(s)',
+                          style: const TextStyle(color: Colors.purple, fontSize: 17, fontWeight: FontWeight.w500),
+                        ),
+                    ],
+                  ),
                   const SizedBox(height: 8),
-                  // Indicador de entregas tardías
-                  if (widget.activity.permitirEntregasTarde) ...[
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Colors.blue.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: Colors.blue, width: 1),
-                      ),
-                      child: const Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.schedule, size: 16, color: Colors.blue),
-                          SizedBox(width: 4),
-                          Text(
-                            'Entregas tardías permitidas',
-                            style: TextStyle(color: Colors.blue, fontSize: 12, fontWeight: FontWeight.w500),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                  ],
-                  // Contador de entregas si hay límite
-                  if (widget.activity.tieneLimiteEntregas) ...[
-                    Text(
-                      'Entregas: ${lsSubmissions.length} de ${widget.activity.limiteEntregasPorAlumno}',
-                      style: const TextStyle(
-                        color: Colors.black87,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                  ],
                   Text(
                     'Puntuaje Total: ${widget.activity.puntaje}',
                     style: const TextStyle(
                         color: Colors.black,
-                        fontSize: 24,
+                        fontSize: 17,
                         fontWeight: FontWeight.bold),
                   ),
                   // Mostrar calificación (siempre visible si hay entregas)
@@ -565,7 +625,7 @@ class _ActivitySectionSubmissionState
                           'Calificación: ',
                           style: TextStyle(
                             color: Colors.black,
-                            fontSize: 20,
+                            fontSize: 17,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -574,7 +634,7 @@ class _ActivitySectionSubmissionState
                             lsSubmissions.where((s) => s.grade != null).first.grade!,
                             style: const TextStyle(
                               color: Colors.green,
-                              fontSize: 20,
+                              fontSize: 17,
                               fontWeight: FontWeight.bold,
                             ),
                           )
@@ -583,7 +643,7 @@ class _ActivitySectionSubmissionState
                             'sin calificación',
                             style: TextStyle(
                               color: Colors.grey,
-                              fontSize: 20,
+                              fontSize: 17,
                               fontWeight: FontWeight.bold,
                             ),
                           ),

@@ -39,7 +39,7 @@ class ContainerNameGroupSubjects extends StatelessWidget {
                   name,
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: context.fontSize(24), // Tamaño base 24, escalado responsive
+                    fontSize: context.fontSize(21), // Tamaño base 21, escalado responsive
                     fontWeight: FontWeight.bold,
                   ),
                   maxLines: 2,
