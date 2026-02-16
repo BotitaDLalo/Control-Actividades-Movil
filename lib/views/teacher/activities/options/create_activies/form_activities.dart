@@ -1,4 +1,5 @@
 import 'package:aprende_mas/config/utils/packages.dart';
+import 'package:flutter/services.dart';
 import 'package:aprende_mas/providers/activity/activity_provider.dart';
 import 'package:aprende_mas/providers/activity/activty_form_provider.dart';
 import 'package:aprende_mas/views/widgets/alerts/error_dialog.dart';
@@ -71,6 +72,10 @@ class _FormActivitiesState extends ConsumerState<FormActivities> {
           notifier.onPuntajeChanged(act.puntaje.toString());
           notifier.onFechaLimiteChanged(datePart);
           notifier.onHoraLimiteChanged(timePart);
+          // Inicializar los nuevos campos de entregas
+          notifier.onPermitirEntregasTardeChanged(act.permitirEntregasTarde);
+          notifier.onTieneLimiteEntregasChanged(act.tieneLimiteEntregas);
+          notifier.onLimiteEntregasPorAlumnoChanged(act.limiteEntregasPorAlumno);
           
         } else {
           notifier.clearForm();
@@ -191,6 +196,7 @@ class _FormActivitiesState extends ConsumerState<FormActivities> {
               controller: activityNotifier.puntajeController,
               onChanged: activityNotifier.onPuntajeChanged,
               keyboardType: TextInputType.number,
+              inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*'))],
               decoration: InputDecoration(
                 labelText: 'Puntaje (Opcional)',
                 focusedBorder: OutlineInputBorder(
@@ -199,6 +205,73 @@ class _FormActivitiesState extends ConsumerState<FormActivities> {
                 ),
               ),
             ),
+            const SizedBox(
+              height: 20,
+            ),
+            // Toggle: Permitir entregas tardías
+            SwitchListTile(
+              title: const Text(
+                'Permitir entregas tardías',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              subtitle: const Text(
+                'Los alumnos podrán entregar después de la fecha límite',
+                style: TextStyle(fontSize: 12, color: Colors.grey),
+              ),
+              value: activityForm.permitirEntregasTarde,
+              activeColor: subjectColor,
+              onChanged: (value) {
+                activityNotifier.onPermitirEntregasTardeChanged(value);
+              },
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+            // Toggle: Limitar número de entregas
+            SwitchListTile(
+              title: const Text(
+                'Limitar número de entregas',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              subtitle: const Text(
+                'Restringir cuántas veces puede entregar el alumno',
+                style: TextStyle(fontSize: 12, color: Colors.grey),
+              ),
+              value: activityForm.tieneLimiteEntregas,
+              activeColor: subjectColor,
+              onChanged: (value) {
+                activityNotifier.onTieneLimiteEntregasChanged(value);
+              },
+            ),
+            // Campo numérico para límite de entregas (solo visible si tiene límite)
+            if (activityForm.tieneLimiteEntregas) ...[
+              const SizedBox(
+                height: 10,
+              ),
+              TextFormField(
+                initialValue: activityForm.limiteEntregasPorAlumno.toString(),
+                keyboardType: TextInputType.number,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                decoration: InputDecoration(
+                  labelText: 'Límite de entregas por alumno',
+                  hintText: 'Ej: 1, 2, 3...',
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: subjectColor, width: 2.0),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                onChanged: (value) {
+                  final intValue = int.tryParse(value) ?? 1;
+                  activityNotifier.onLimiteEntregasPorAlumnoChanged(intValue);
+                },
+              ),
+            ],
             const SizedBox(
               height: 30, // Separación antes del botón
             ),

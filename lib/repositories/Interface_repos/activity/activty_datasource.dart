@@ -9,7 +9,8 @@ abstract class ActivityDataSource {
   Future<void> deleteActivity(int activityId);
 
   Future<Activity> updateActivity(int activityId, String nombreActividad,
-      String descripcion, DateTime fechaLimite, int puntaje, int materiaId);
+      String descripcion, DateTime fechaLimite, int puntaje, int materiaId,
+      {bool permitirEntregasTarde = false, bool tieneLimiteEntregas = false, int limiteEntregasPorAlumno = 0});
 
   Future<bool> sendSubmission(int activityId, String answer, {List<String> links = const [], List<String> files = const []});
 
@@ -22,7 +23,7 @@ abstract class ActivityDataSource {
 
   Future<ActivityStudentSubmissionsData> getStudentSubmissions(int activityId);
 
-  Future<bool> submissionGrading(int submissionId, int grade);
+  Future<bool> submissionGrading(int submissionId, double grade);
 
   Future<bool> removeGrade(int submissionId);
 }

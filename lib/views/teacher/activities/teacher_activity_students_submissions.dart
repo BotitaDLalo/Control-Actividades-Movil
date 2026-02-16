@@ -132,7 +132,8 @@ class _TeacherActivityStudentsSubmissionsState
                                       answer: e.answer,
                                       links: e.links,
                                       files: e.files.map((f) => FileInfo(nombre: f.nombre, ruta: f.ruta)).toList(),
-                                      submissionDate: e.submissionDate,);
+                                      submissionDate: e.submissionDate,
+                                      deadline: widget.activity.fechaLimite,);
 
                                   context.push(
                                       '/teacher-student-submission-grading',

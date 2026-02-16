@@ -39,7 +39,7 @@ class ContainerNameGroupSubjects extends StatelessWidget {
                   name,
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: context.fontSize(24), // Tamaño base 24, escalado responsive
+                    fontSize: context.fontSize(21), // Tamaño base 21, escalado responsive
                     fontWeight: FontWeight.bold,
                   ),
                   maxLines: 2,
@@ -82,7 +82,7 @@ class ContainerNameGroupSubjects extends StatelessWidget {
           ),
           // Botón de ajustes circular arriba derecha
           Positioned(
-            top: context.height(0.12),
+            top: context.height(0.06),
             right: context.width(0.07),
             child: GestureDetector(
               onTap: () {},

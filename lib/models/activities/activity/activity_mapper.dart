@@ -15,7 +15,10 @@ class ActivityMapper {
           fechaCreacion: formatDate(map['FechaCreacionActividad']),
           fechaLimite: formatDate(map['FechaLimiteActividad']),
           materiaId: map['MateriaId'] as int,
-          puntaje: map['Puntaje'] as int);
+          puntaje: (map['Puntaje'] as num?)?.toDouble(),
+          permitirEntregasTarde: map['PermitirEntregasTarde'] as bool? ?? false,
+          tieneLimiteEntregas: map['TieneLimiteEntregas'] as bool? ?? false,
+          limiteEntregasPorAlumno: map['LimiteEntregasPorAlumno'] as int? ?? 0);
     }).toList();
   }
 
@@ -28,7 +31,10 @@ class ActivityMapper {
       'fechaCreacionActividad': formatDate(activity.fechaCreacion!),
       'fechaLimiteActividad': formatDate(activity.fechaLimite),
       'materiaId': activity.materiaId,
-      'puntaje': activity.puntaje
+      'puntaje': activity.puntaje,
+      'PermitirEntregasTarde': activity.permitirEntregasTarde,
+      'TieneLimiteEntregas': activity.tieneLimiteEntregas,
+      'LimiteEntregasPorAlumno': activity.limiteEntregasPorAlumno
     };
   }
 
@@ -36,14 +42,17 @@ class ActivityMapper {
   print("Datos json: $json");
 
   return Activity(
-    activityId: json['ActivityId'] != null ? json['activityId'] as int : null,  // Se permite null
+    activityId: json['ActivityId'] != null ? json['activityId'] as int : null,
     nombreActividad: json['NombreActividad'] as String? ?? '',
     descripcion: json['Descripcion'] as String? ?? '',
-    tipoActividadId: json['TipoActividadId'] != null ? json['TipoActividadId'] as int : null,  // Se permite null
-    fechaCreacion: json['FechaCreacionActividad'] != null ? formatDate(json['FechaCreacionActividad']) : null,  // Puede ser null
-    fechaLimite: formatDate(json['FechaLimite'] ?? ''),  // Asegurarse de que fechaLimite nunca sea null
-    materiaId: json['MateriaId'] as int? ?? 0,  // Asignar valor predeterminado si es null
-    puntaje: json['Puntaje'] != null ? json['Puntaje'] as int : null,  // Se permite null
+    tipoActividadId: json['TipoActividadId'] != null ? json['TipoActividadId'] as int : null,
+    fechaCreacion: json['FechaCreacionActividad'] != null ? formatDate(json['FechaCreacionActividad']) : null,
+    fechaLimite: formatDate(json['FechaLimite'] ?? ''),
+    materiaId: json['MateriaId'] as int? ?? 0,
+    puntaje: json['Puntaje'] != null ? (json['Puntaje'] as num).toDouble() : null,
+    permitirEntregasTarde: json['PermitirEntregasTarde'] as bool? ?? false,
+    tieneLimiteEntregas: json['TieneLimiteEntregas'] as bool? ?? false,
+    limiteEntregasPorAlumno: json['LimiteEntregasPorAlumno'] as int? ?? 0,
   );
   }
 }

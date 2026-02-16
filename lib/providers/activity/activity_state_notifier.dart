@@ -5,6 +5,7 @@ import 'package:aprende_mas/repositories/Interface_repos/activity/activity_repos
 import 'package:aprende_mas/repositories/Interface_repos/activity/activity_offline_repository.dart';
 import 'package:aprende_mas/models/activities/activity/activity.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:aprende_mas/repositories/Implement_repos/activity/activity_data_source_impl.dart';
 
 class ActivityNotifier extends StateNotifier<ActivityState> {
   final ActivityRepository activityRepository;
@@ -161,12 +162,17 @@ Future<void> updateActivity(
   String descripcion, 
   DateTime fechaLimite, 
   int puntaje, 
-  int materiaId) async {
+  int materiaId,
+  {bool permitirEntregasTarde = false, bool tieneLimiteEntregas = false, int limiteEntregasPorAlumno = 0}
+) async {
     try {
       state = state.copyWith(isLoading: true);
       
       final updatedActivity = await activityRepository.updateActivity(
-          activityId, nombre, descripcion, fechaLimite, puntaje, materiaId);
+          activityId, nombre, descripcion, fechaLimite, puntaje, materiaId,
+          permitirEntregasTarde: permitirEntregasTarde,
+          tieneLimiteEntregas: tieneLimiteEntregas,
+          limiteEntregasPorAlumno: limiteEntregasPorAlumno);
 
 // 2. IMPORTANTE: Actualizamos la lista localmente AQUÍ MISMO
       _updateActivityInState(updatedActivity);
@@ -351,12 +357,12 @@ Future<void> updateActivity(
         state.copyWith(lsSubmissions: [...lsSubmisionsState, ...lsSubmisions]);
   }
 
-  void setSubmissionGrade(int grade) {
+  void setSubmissionGrade(double grade) {
     state = state.copyWith(grade: grade);
   }
 
   Future<bool> submissionGrading(
-      {required int submissionId, required int grade}) async {
+      {required int submissionId, required double grade}) async {
     try {
       final res =
           await activityRepository.submissionGrading(submissionId, grade);

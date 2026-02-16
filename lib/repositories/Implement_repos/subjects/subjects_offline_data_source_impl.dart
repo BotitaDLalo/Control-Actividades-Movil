@@ -54,7 +54,7 @@ class SubjectsOfflineDataSourceImpl extends SubjectsOfflineDataSource {
                   fechaCreacion: formatDate(row['FechaCreacion'] as String),
                   fechaLimite: formatDate(row['FechaLimite'] as String),
                   materiaId: row['MateriaId'] as int,
-                  puntaje: row['Puntaje'] as int,
+                  puntaje: (row['Puntaje'] as num?)?.toDouble(),
                 );
               }).toList();
 
@@ -138,6 +138,9 @@ class SubjectsOfflineDataSourceImpl extends SubjectsOfflineDataSource {
                   'FechaLimite': activity.fechaLimite.toString(),
                   'Puntaje': activity.puntaje,
                   'MateriaId': subjectId,
+                  'PermitirEntregasTarde': activity.permitirEntregasTarde ? 1 : 0,
+                  'TieneLimiteEntregas': activity.tieneLimiteEntregas ? 1 : 0,
+                  'LimiteEntregasPorAlumno': activity.limiteEntregasPorAlumno,
                 },
                 conflictAlgorithm: ConflictAlgorithm.replace,
               );

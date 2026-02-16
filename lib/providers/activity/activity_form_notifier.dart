@@ -5,6 +5,7 @@ import 'package:aprende_mas/providers/activity/activity_form_state.dart';
 import 'package:aprende_mas/views/widgets/inputs/generic_input.dart';
 import 'package:aprende_mas/config/data/data.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:aprende_mas/repositories/Implement_repos/activity/activity_data_source_impl.dart';
 
 class ActivityFormNotifier extends StateNotifier<ActivityFormState> {
   final Function(Map<String, dynamic> activityLike)? activityCallback;
@@ -14,8 +15,11 @@ class ActivityFormNotifier extends StateNotifier<ActivityFormState> {
       String nombre,
       String descripcion, 
       DateTime fechaLimite, 
-      int puntaje,   // <--- Agregamos int puntaje
-      int materiaId  // <--- Agregamos int materiaId
+      int puntaje,
+      int materiaId,
+      bool permitirEntregasTarde,
+      bool tieneLimiteEntregas,
+      int limiteEntregasPorAlumno
   )? updateActivityCallback;
   
   final Function(int, String) sendSubmissionCallback;
@@ -23,8 +27,8 @@ class ActivityFormNotifier extends StateNotifier<ActivityFormState> {
   final Function(int, String, List<String>, List<String>)? sendSubmissionWithFilesAndLinksCallback;
   final Function(int, String, List<String>)? sendSubmissionWithFilesCallback;
   final Function(int, String) sendSubmissionOfflineCallback;
-   final Function({required int submissionId, required int grade})
-      submissionGradingCallback;
+   final Function({required int submissionId, required double grade})
+       submissionGradingCallback;
   final Future<String> Function(PlatformFile file, int activityId, int studentId)? uploadFileCallback;
 
    final TextEditingController nombreController;
@@ -223,7 +227,7 @@ class ActivityFormNotifier extends StateNotifier<ActivityFormState> {
 
       try {
         if (updateActivityCallback != null) {
-          // Llamar al callback de actualización (AHORA CON 6 ARGUMENTOS)
+          // Llamar al callback de actualización (AHORA CON 9 ARGUMENTOS)
           await updateActivityCallback!(
             activityId,
             state.nombre.value,
@@ -231,6 +235,9 @@ class ActivityFormNotifier extends StateNotifier<ActivityFormState> {
             fechaHoraConcatenada,
             puntajeToSend, // <--- Usamos el valor calculado (100 por defecto o el ingresado)
             subjectId,     // <--- MateriaId/SubjectId
+            state.permitirEntregasTarde,
+            state.tieneLimiteEntregas,
+            state.limiteEntregasPorAlumno,
           );
           
           state = state.copyWith(isFormPosted: true);
@@ -271,7 +278,10 @@ class ActivityFormNotifier extends StateNotifier<ActivityFormState> {
         "descripcion": state.descripcion.value,
         "fechaLimite": fechaHoraConcatenada.toIso8601String(),
         "puntaje": puntajeToSend,
-        "materiaId": subjectId
+        "materiaId": subjectId,
+        "PermitirEntregasTarde": state.permitirEntregasTarde,
+        "TieneLimiteEntregas": state.tieneLimiteEntregas,
+        "LimiteEntregasPorAlumno": state.limiteEntregasPorAlumno,
       };
 
       try {
@@ -374,6 +384,8 @@ class ActivityFormNotifier extends StateNotifier<ActivityFormState> {
             final result = await sendSubmissionCallback(activityId, state.answer);
             submissionSent = result == true;
           }
+        } on SubmissionException {
+          rethrow;
         } catch (e) {
           debugPrint("❌ Error en callbacks de envío: $e");
           submissionSent = false;
@@ -410,9 +422,9 @@ class ActivityFormNotifier extends StateNotifier<ActivityFormState> {
      state = state.copyWith(isPosting: true);
 
      response.isValid = true;
-     final grade = state.newGrade.value;
-     bool submitedGrade = await submissionGradingCallback(
-         grade: int.parse(grade), submissionId: submissionId);
+      final grade = state.newGrade.value;
+      bool submitedGrade = await submissionGradingCallback(
+          grade: double.parse(grade), submissionId: submissionId);
      response.success = submitedGrade;
 
      state = state.copyWith(isPosting: false);
@@ -434,5 +446,22 @@ class ActivityFormNotifier extends StateNotifier<ActivityFormState> {
 
     void onLinksChanged(List<String> links) {
       state = state.copyWith(links: links, existsAnswer: _hasContent());
+    }
+
+    // Nuevos métodos para entregas tardías y límites
+    void onPermitirEntregasTardeChanged(bool value) {
+      state = state.copyWith(permitirEntregasTarde: value);
+    }
+
+    void onTieneLimiteEntregasChanged(bool value) {
+      state = state.copyWith(
+        tieneLimiteEntregas: value,
+        // Si se desactiva el límite, resetear el límite a 1
+        limiteEntregasPorAlumno: value ? state.limiteEntregasPorAlumno : 1,
+      );
+    }
+
+    void onLimiteEntregasPorAlumnoChanged(int value) {
+      state = state.copyWith(limiteEntregasPorAlumno: value);
     }
 }

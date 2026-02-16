@@ -9,6 +9,15 @@ import 'package:aprende_mas/config/data/data.dart';
 import 'package:intl/intl.dart';
 import 'package:file_picker/file_picker.dart';
 
+/// Excepción personalizada para errores de envío de entregas
+class SubmissionException implements Exception {
+  final String message;
+  SubmissionException(this.message);
+  
+  @override
+  String toString() => message;
+}
+
 class ActivityDataSourceImpl implements ActivityDataSource {
   final storageService = KeyValueStorageServiceImpl();
   @override
@@ -73,6 +82,7 @@ class ActivityDataSourceImpl implements ActivityDataSource {
     DateTime fechaLimite,
     int puntaje,
     int materiaId,
+    {bool permitirEntregasTarde = false, bool tieneLimiteEntregas = false, int limiteEntregasPorAlumno = 0}
   ) async {
     try {
       final uri = "/Actividades/ActualizarActividad?id=$activityId";
@@ -103,6 +113,11 @@ class ActivityDataSourceImpl implements ActivityDataSource {
 
         // Fecha de creación para evitar error de rango SQL
         "FechaCreacionActividad": fechaCreacionSegura,
+
+        // Nuevos campos
+        "PermitirEntregasTarde": permitirEntregasTarde,
+        "TieneLimiteEntregas": tieneLimiteEntregas,
+        "LimiteEntregasPorAlumno": limiteEntregasPorAlumno,
       });
 
       debugPrint("Update response: ${response.data}");
@@ -145,13 +160,24 @@ class ActivityDataSourceImpl implements ActivityDataSource {
         MapEntry('TipoEntregaId', '1'),
       ]);
 
-      final res = await dio.post(uri, data: formData);
+      final res = await dio.post(
+        uri, 
+        data: formData,
+        options: Options(validateStatus: (status) => status! < 500),
+      );
 
       if (res.statusCode == 200) {
         return true;
       }
 
+      // Si el status code es 400, lanzar excepción con mensaje personalizado
+      if (res.statusCode == 400) {
+        throw SubmissionException('Has alcanzado el límite de entregas asignado por tu docente');
+      }
+
       return false;
+    } on SubmissionException {
+      rethrow;
     } catch (e) {
       debugPrint(e.toString());
       return false;
@@ -277,7 +303,7 @@ class ActivityDataSourceImpl implements ActivityDataSource {
   }
 
   @override
-  Future<bool> submissionGrading(int submissionId, int grade) async {
+  Future<bool> submissionGrading(int submissionId, double grade) async {
     try {
       const uri = "/Actividades/AsignarCalificacion";
 

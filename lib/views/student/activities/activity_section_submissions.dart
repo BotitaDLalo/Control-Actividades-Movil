@@ -16,10 +16,17 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:aprende_mas/repositories/Implement_repos/activity/activity_data_source_impl.dart';
 
 final hasSubmissionsProvider = StateProvider(
   (ref) => false,
 );
+
+enum SendButtonState {
+  canSend,
+  lateDelivery,
+  disabled,
+}
 
 class ActivitySectionSubmissions extends ConsumerStatefulWidget {
   final Activity activity;
@@ -212,6 +219,62 @@ class _ActivitySectionSubmissionState
     final lsSub = ref.watch(activityProvider).lsSubmissions;
     final lsSubmissions = Submission.activitiesBySubject(lsSub, activityId!);
 
+    // Función para mostrar warning de entrega tardía
+    void _showLateDeliveryWarning(BuildContext context) {
+      if (_safeContext == null) return;
+
+      WarningConfirmationDialog.show(
+        _safeContext!,
+        message: 'La fecha límite ha pasado. Puedes enviar tu entrega pero se registrará como tardía/retrasada.',
+        onConfirmPressed: () async {
+          bool success = false;
+          try {
+            if (authConectionType == AuthConnectionType.online) {
+              success = await ref
+                  .read(activityFormProvider.notifier)
+                  .onSendSubmission(activityId);
+            } else if (authConectionType == AuthConnectionType.offline) {
+              success = await ref
+                  .read(activityFormProvider.notifier)
+                  .onSendSubmissionOffline(activityId);
+            }
+            
+            if (mounted) {
+              if (success) {
+                SuccessDialog.show(
+                  _safeContext!,
+                  message: 'Entrega realizada correctamente',
+                );
+                ref.read(activityProvider.notifier).getSubmissions(activityId);
+              } else {
+                ErrorDialog.show(
+                  _safeContext!,
+                  message: 'Error al realizar la entrega',
+                );
+              }
+            }
+          } on SubmissionException catch (e) {
+            if (mounted) {
+              ErrorDialog.show(
+                _safeContext!,
+                message: e.message,
+              );
+            }
+          } catch (e) {
+            if (mounted) {
+              ErrorDialog.show(
+                _safeContext!,
+                message: 'Error al realizar la entrega: $e',
+              );
+            }
+          }
+        },
+        onCancelPressed: () {
+          // Cancelar - no hace nada adicional
+        },
+      );
+    }
+
     void showSendConfirmation() {
       if (_safeContext == null) return;
       
@@ -254,6 +317,13 @@ class _ActivitySectionSubmissionState
                           message: 'Error al realizar la entrega',
                         );
                       }
+                    }
+                  } on SubmissionException catch (e) {
+                    if (mounted) {
+                      ErrorDialog.show(
+                        _safeContext!,
+                        message: e.message,
+                      );
                     }
                   } catch (e) {
                     if (mounted) {
@@ -331,11 +401,61 @@ class _ActivitySectionSubmissionState
       }
 
       if (lsSubmissions.isNotEmpty) {
+        // Obtener la última entrega
+        final ultimaEntrega = lsSubmissions.last;
+        final fechaEntregaStr = ultimaEntrega.submissionDate;
+        
+        // Comparar fechas para ver si es tardía
+        bool esTardia = false;
+        if (fechaEntregaStr != null && fechaLimiteDate != null) {
+          try {
+            DateTime? fechaEntregaDate;
+            try {
+              fechaEntregaDate = DateTime.parse(fechaEntregaStr);
+            } catch (e) {
+              try {
+                fechaEntregaDate = DateFormat('dd-MM-yyyy HH:mm:ss').parse(fechaEntregaStr);
+              } catch (e2) {
+                fechaEntregaDate = DateFormat('yyyy-MM-ddTHH:mm:ss').parse(fechaEntregaStr);
+              }
+            }
+            if (fechaEntregaDate != null) {
+              esTardia = fechaEntregaDate.isAfter(fechaLimiteDate);
+            }
+          } catch (e) {
+            esTardia = false;
+          }
+        }
+        
+        if (esTardia) {
+          return const Row(
+            children: [
+              Text(
+                'Estatus: Entregado',
+                style: TextStyle(
+                  color: Colors.green,
+                  fontSize: 17,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(width: 8),
+              Text(
+                '(Tardío)',
+                style: TextStyle(
+                  color: Colors.orange,
+                  fontSize: 17,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          );
+        }
+        
         return const Text(
           'Estatus: Entregado',
           style: TextStyle(
             color: Colors.green,
-            fontSize: 18,
+            fontSize: 17,
             fontWeight: FontWeight.bold,
           ),
         );
@@ -344,7 +464,7 @@ class _ActivitySectionSubmissionState
           'Estatus: Retrasado',
           style: TextStyle(
             color: Colors.red,
-            fontSize: 18,
+            fontSize: 17,
             fontWeight: FontWeight.bold,
           ),
         );
@@ -353,7 +473,7 @@ class _ActivitySectionSubmissionState
           'Estatus: Pendiente',
           style: TextStyle(
             color: Colors.orange,
-            fontSize: 18,
+            fontSize: 17,
             fontWeight: FontWeight.bold,
           ),
         );
@@ -380,9 +500,55 @@ class _ActivitySectionSubmissionState
               }
             }
             final bool isOverdue = fechaLimiteDate != null && DateTime.now().isAfter(fechaLimiteDate);
-            final bool canSend = !isGraded && !isOverdue && activitiesForm.existsAnswer;
+            
+            final bool hasReachedLimit = widget.activity.tieneLimiteEntregas && 
+                lsSubmissions.length >= widget.activity.limiteEntregasPorAlumno;
+            
+            final bool hasExistingSubmission = lsSubmissions.isNotEmpty;
+            
+            final bool canSend = activitiesForm.existsAnswer && !hasReachedLimit && !hasExistingSubmission && 
+                (!isOverdue || widget.activity.permitirEntregasTarde);
 
-            if (!canSend && !isGraded && isOverdue) {
+            if (hasExistingSubmission) {
+              return FloatingActionButton(
+                onPressed: () {
+                  WarningDialog.show(
+                    context,
+                    message: 'Debes eliminar tu entrega actual antes de mandar otra',
+                  );
+                },
+                backgroundColor: Colors.grey.shade300,
+                shape: AppTheme.shapeFloatingActionButton(),
+                child: SvgPicture.asset(
+                  'assets/icons/agregar.svg',
+                  color: Colors.grey.shade600,
+                  width: 40,
+                  height: 40,
+                ),
+              );
+            }
+
+            if (hasReachedLimit) {
+              return FloatingActionButton(
+                onPressed: () {
+                  WarningDialog.show(
+                    context,
+                    message: 'Ya has alcanzado el límite de entregas para esta actividad (${widget.activity.limiteEntregasPorAlumno})',
+                  );
+                },
+                backgroundColor: Colors.grey.shade300,
+                shape: AppTheme.shapeFloatingActionButton(),
+                child: SvgPicture.asset(
+                  'assets/icons/agregar.svg',
+                  color: Colors.grey.shade600,
+                  width: 40,
+                  height: 40,
+                ),
+              );
+            }
+
+            // Si está vencida, no se permite entrega tardía y no ha sido calificada - mostrar botón gris
+            if (!canSend && !isGraded && isOverdue && !widget.activity.permitirEntregasTarde) {
               return FloatingActionButton(
                 onPressed: () {
                   WarningDialog.show(
@@ -398,6 +564,36 @@ class _ActivitySectionSubmissionState
                   width: 40,
                   height: 40,
                 ),
+              );
+            }
+
+            // Si está vencida pero SE PERMITE entrega tardía - mostrar botón naranja
+            if (isOverdue && widget.activity.permitirEntregasTarde && !isGraded && !hasReachedLimit) {
+              return FloatingActionButton(
+                onPressed: () {
+                  if (activitiesForm.existsAnswer) {
+                    // Ya tiene respuesta → mostrar warning de entrega tardía
+                    _showLateDeliveryWarning(context);
+                  } else {
+                    // No tiene respuesta → primero agregar respuesta/archivos
+                    showModalActivityType(context);
+                  }
+                },
+                shape: AppTheme.shapeFloatingActionButton(),
+                backgroundColor: Colors.orange, // Naranja para indicar que es entrega tardía
+                child: activitiesForm.existsAnswer
+                    ? SvgPicture.asset(
+                        'assets/icons/send1.svg',
+                        color: Colors.white,
+                        width: 28,
+                        height: 28,
+                      )
+                    : SvgPicture.asset(
+                        'assets/icons/agregar.svg',
+                        color: Colors.white,
+                        width: 40,
+                        height: 40,
+                      ),
               );
             }
 
@@ -480,17 +676,35 @@ class _ActivitySectionSubmissionState
                     'Fecha vencimiento: ${widget.activity.fechaLimite} ',
                     style: const TextStyle(
                       color: Colors.black,
-                      fontSize: 18,
+                      fontSize: 17,
                     ),
                   ),
                   const SizedBox(height: 8),
                   _buildEstatusWidget(),
+                  const SizedBox(height: 4),
+                  // Indicadores de entregas tardías y límite
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 4,
+                    children: [
+                      if (widget.activity.permitirEntregasTarde)
+                        const Text(
+                          'Entregas tardías permitidas',
+                          style: TextStyle(color: Colors.blue, fontSize: 17, fontWeight: FontWeight.w500),
+                        ),
+                      if (widget.activity.tieneLimiteEntregas)
+                        Text(
+                          'Límite: ${widget.activity.limiteEntregasPorAlumno} entrega(s)',
+                          style: const TextStyle(color: Colors.purple, fontSize: 17, fontWeight: FontWeight.w500),
+                        ),
+                    ],
+                  ),
                   const SizedBox(height: 8),
                   Text(
                     'Puntuaje Total: ${widget.activity.puntaje}',
                     style: const TextStyle(
                         color: Colors.black,
-                        fontSize: 24,
+                        fontSize: 17,
                         fontWeight: FontWeight.bold),
                   ),
                   // Mostrar calificación (siempre visible si hay entregas)
@@ -502,7 +716,7 @@ class _ActivitySectionSubmissionState
                           'Calificación: ',
                           style: TextStyle(
                             color: Colors.black,
-                            fontSize: 20,
+                            fontSize: 17,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -511,7 +725,7 @@ class _ActivitySectionSubmissionState
                             lsSubmissions.where((s) => s.grade != null).first.grade!,
                             style: const TextStyle(
                               color: Colors.green,
-                              fontSize: 20,
+                              fontSize: 17,
                               fontWeight: FontWeight.bold,
                             ),
                           )
@@ -520,7 +734,7 @@ class _ActivitySectionSubmissionState
                             'sin calificación',
                             style: TextStyle(
                               color: Colors.grey,
-                              fontSize: 20,
+                              fontSize: 17,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -550,16 +764,46 @@ class _ActivitySectionSubmissionState
                     height: 0.5,
                   ),
                   const SizedBox(height: 16),
-                  SizedBox(
-                    height: MediaQuery.of(context).size.height * 0.20,
-                    child: SingleChildScrollView(
-                      child: Text(
-                        widget.activity.descripcion,
-                        style: const TextStyle(
-                          color: Colors.black,
-                          fontSize: 18,
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey[400]!),
+                      borderRadius: BorderRadius.circular(8),
+                      color: Colors.grey[50],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(Icons.description_outlined, size: 20, color: Colors.grey[600]),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Descripción de la actividad',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.grey[700],
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
+                        const SizedBox(height: 12),
+                        SizedBox(
+                          height: 150,
+                          child: SingleChildScrollView(
+                            child: Text(
+                              widget.activity.descripcion ?? 'Sin descripción',
+                              style: const TextStyle(
+                                color: Colors.black,
+                                fontSize: 18,
+                                height: 1.5,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   const SizedBox(
@@ -573,7 +817,7 @@ class _ActivitySectionSubmissionState
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               const Text(
-                                'Entregables enviados',
+                                'Entregable actual enviado',
                                 style: TextStyle(
                                   fontSize: 20.0,
                                   fontWeight: FontWeight.bold,
@@ -581,9 +825,13 @@ class _ActivitySectionSubmissionState
                               ),
                               Flexible(
                                 child: ListView.builder(
-                                  itemCount: lsSubmissions.length,
+                                  itemCount: 1,
                                   itemBuilder: (context, index) {
-                                    final submission = lsSubmissions[index];
+                                    final submission = lsSubmissions.isNotEmpty ? lsSubmissions.last : null;
+
+                                    if (submission == null) {
+                                      return const SizedBox();
+                                    }
 
                                     return ElementTile(
                                       iconWidget: SvgPicture.asset('assets/icons/activities20.svg', width: 50, height: 50),
@@ -786,13 +1034,14 @@ class _ActivitySectionSubmissionState
                                                                submission.submissionActivityStudentId,
                                                                widget.activity.activityId!);
                                                        
-                                                       if (mounted) {
-                                                         if (success) {
-                                                           SuccessDialog.show(
-                                                             context,
-                                                             message: 'Entregable cancelado correctamente',
-                                                           );
-                                                         } else {
+                                                        if (mounted) {
+                                                          if (success) {
+                                                            SuccessDialog.show(
+                                                              context,
+                                                              message: 'Entregable cancelado correctamente',
+                                                            );
+                                                            ref.read(activityProvider.notifier).getSubmissions(widget.activity.activityId!);
+                                                          } else {
                                                            ErrorDialog.show(
                                                              context,
                                                              message: 'Error al cancelar el entregable',

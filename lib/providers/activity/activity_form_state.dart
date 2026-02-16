@@ -21,6 +21,10 @@ class ActivityFormState {
   final bool existsAnswer;
   final List<PlatformFile> files;
   final List<String> links;
+  // Nuevos campos para entregas tardías y límites
+  final bool permitirEntregasTarde;
+  final bool tieneLimiteEntregas;
+  final int limiteEntregasPorAlumno;
 
   ActivityFormState({
     this.activities = const [],
@@ -38,6 +42,9 @@ class ActivityFormState {
     this.grade = 0,
     this.files = const [],
     this.links = const [],
+    this.permitirEntregasTarde = false,
+    this.tieneLimiteEntregas = false,
+    this.limiteEntregasPorAlumno = 1,
   });
 
   // Método para crear una nueva instancia con campos actualizados
@@ -57,6 +64,9 @@ class ActivityFormState {
     int? grade,
     List<PlatformFile>? files,
     List<String>? links,
+    bool? permitirEntregasTarde,
+    bool? tieneLimiteEntregas,
+    int? limiteEntregasPorAlumno,
   }) =>
       ActivityFormState(
           activities: activities ?? this.activities,
@@ -73,7 +83,10 @@ class ActivityFormState {
           newGrade: newGrade ?? this.newGrade,
           existsAnswer: existsAnswer ?? this.existsAnswer,
           files: files ?? this.files,
-          links: links ?? this.links);
+          links: links ?? this.links,
+          permitirEntregasTarde: permitirEntregasTarde ?? this.permitirEntregasTarde,
+          tieneLimiteEntregas: tieneLimiteEntregas ?? this.tieneLimiteEntregas,
+          limiteEntregasPorAlumno: limiteEntregasPorAlumno ?? this.limiteEntregasPorAlumno);
 
   @override
   String toString() {

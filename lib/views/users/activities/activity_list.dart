@@ -46,6 +46,104 @@ class _ActivityListState extends ConsumerState<ActivityList> {
         _searchController.text;
   }
 
+  Widget _buildEstatusBadge(Activity activity) {
+    // Reutilizar misma lógica del contenido de actividad (activity_section_submissions.dart)
+    final lsSub = ref.watch(activityProvider).lsSubmissions;
+    final lsSubmissions = Submission.activitiesBySubject(lsSub, activity.activityId!);
+    final fechaLimite = activity.fechaLimite;
+    
+    DateTime? fechaLimiteDate;
+    try {
+      fechaLimiteDate = DateFormat('dd-MM-yyyy HH:mm:ss').parse(fechaLimite);
+    } catch (e) {
+      try {
+        fechaLimiteDate = DateFormat('yyyy-MM-ddTHH:mm:ss').parse(fechaLimite);
+      } catch (e) {
+        fechaLimiteDate = null;
+      }
+    }
+
+    Color statusColor;
+    String statusText;
+
+    if (lsSubmissions.isNotEmpty) {
+      statusColor = Colors.green;
+      statusText = 'Entregado';
+    } else if (fechaLimiteDate != null && DateTime.now().isAfter(fechaLimiteDate)) {
+      statusColor = Colors.red;
+      statusText = 'Retrasado';
+    } else {
+      statusColor = Colors.orange;
+      statusText = 'Pendiente';
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: statusColor.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: statusColor, width: 1),
+      ),
+      child: Text(
+        statusText,
+        style: TextStyle(
+          color: statusColor,
+          fontSize: 9,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBadgesActividad(Activity activity) {
+    return Wrap(
+      spacing: 4,
+      runSpacing: 4,
+      children: [
+        if (activity.permitirEntregasTarde)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+            decoration: BoxDecoration(
+              color: Colors.blue.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.blue, width: 1),
+            ),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.schedule, size: 10, color: Colors.blue),
+                SizedBox(width: 2),
+                Text(
+                  'Tardías',
+                  style: TextStyle(color: Colors.blue, fontSize: 9, fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+          ),
+        if (activity.tieneLimiteEntregas)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+            decoration: BoxDecoration(
+              color: Colors.purple.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.purple, width: 1),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.repeat, size: 10, color: Colors.purple),
+                const SizedBox(width: 2),
+                Text(
+                  'Lím: ${activity.limiteEntregasPorAlumno}',
+                  style: const TextStyle(color: Colors.purple, fontSize: 9, fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final cn = ref.watch(catalogNamesProvider);
@@ -215,7 +313,22 @@ class _ActivityListState extends ConsumerState<ActivityList> {
                               showModalBottomActivityOptions(activity);
                             },
                           )
-                        : const SizedBox(),
+                        : const SizedBox.shrink(),
+                    footerWidget: role != cn.getRoleTeacherName
+                        ? Wrap(
+                            alignment: WrapAlignment.end,
+                            crossAxisAlignment: WrapCrossAlignment.center,
+                            spacing: 4,
+                            runSpacing: 4,
+                            children: [
+                              if (activity.permitirEntregasTarde || activity.tieneLimiteEntregas)
+                                _buildBadgesActividad(activity),
+                              _buildEstatusBadge(activity),
+                            ],
+                          )
+                        : (activity.permitirEntregasTarde || activity.tieneLimiteEntregas)
+                            ? _buildBadgesActividad(activity)
+                            : null,
                     onTapFunction: () async {
                       final activityData = Activity(
                         activityId: activity.activityId,
@@ -226,6 +339,9 @@ class _ActivityListState extends ConsumerState<ActivityList> {
                         fechaLimite: activity.fechaLimite,
                         materiaId: activity.materiaId,
                         puntaje: activity.puntaje,
+                        permitirEntregasTarde: activity.permitirEntregasTarde,
+                        tieneLimiteEntregas: activity.tieneLimiteEntregas,
+                        limiteEntregasPorAlumno: activity.limiteEntregasPorAlumno,
                       );
 
                       if (role == cn.getRoleTeacherName) {

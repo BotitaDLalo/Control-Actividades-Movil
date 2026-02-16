@@ -8,8 +8,11 @@ class Activity {
   final String? fechaCreacion;
   final String fechaLimite;
   final int? tipoActividadId;
-  final int? puntaje;
+  final double? puntaje;
   final int materiaId;
+  final bool permitirEntregasTarde;
+  final bool tieneLimiteEntregas;
+  final int limiteEntregasPorAlumno;
 
   Activity(
       { 
@@ -20,7 +23,10 @@ class Activity {
       this.tipoActividadId,
       this.fechaCreacion,
       required this.fechaLimite,
-      required this.materiaId});
+      required this.materiaId,
+      this.permitirEntregasTarde = false,
+      this.tieneLimiteEntregas = false,
+      this.limiteEntregasPorAlumno = 0});
 
   static final DateFormat dateTimeFormat = DateFormat('yyyy-MM-ddTHH:mm:ss');
 
@@ -36,7 +42,11 @@ class Activity {
               fechaCreacion: formatDate(e['FechaCreacion'] as String),
               fechaLimite: formatDate(e['FechaLimite'] as String),
               materiaId: e['MateriaId'] as int,
-              puntaje: e['Puntaje'] as int),
+              puntaje: (e['Puntaje'] as num?)?.toDouble(),
+              permitirEntregasTarde: (e['PermitirEntregasTarde'] as int?) == 1,
+              tieneLimiteEntregas: (e['TieneLimiteEntregas'] as int?) == 1,
+              limiteEntregasPorAlumno: (e['LimiteEntregasPorAlumno'] as int?) ?? 0,
+          ),
         )
         .toList();
 

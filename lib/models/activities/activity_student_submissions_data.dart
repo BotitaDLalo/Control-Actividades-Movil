@@ -4,7 +4,7 @@ import 'submission.dart';
 
 class ActivityStudentSubmissionsData {
   final int activityId;
-  final int score;
+  final double score;
   final int totalSubmissions;
   List<StudentSubmission> lsStudentsSubmissions;
   ActivityStudentSubmissionsData(
@@ -26,7 +26,7 @@ class ActivityStudentSubmissionsData {
     final lsResponse = response['AlumnosEntregables'] as List<dynamic>;
     return ActivityStudentSubmissionsData(
         activityId: response['ActividadId'] as int,
-        score: response['Puntaje'] as int,
+        score: (response['Puntaje'] as num).toDouble(),
         totalSubmissions: response['TotalEntregados'] as int,
         lsStudentsSubmissions: lsResponse
             .map(
@@ -47,7 +47,7 @@ class ActivityStudentSubmissionsData {
                     files: parsedRespuesta.archivos.map((nombre) {
                       return FileSubmission(nombre: nombre, ruta: '');
                     }).toList(),
-                    grade: e['Calificacion'] as int);
+                    grade: (e['Calificacion'] as num).toDouble());
               },
             )
             .toList());

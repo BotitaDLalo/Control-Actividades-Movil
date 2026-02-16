@@ -17,6 +17,7 @@ class ElementTile extends ConsumerWidget {
   final Widget? trailingWidget;
   final String? bottomText; // Nuevo: texto en la parte inferior
   final Color? bottomTextColor; // Nuevo: color del texto inferior
+  final Widget? footerWidget; // Widget para el footer (estatus)
 
   const ElementTile({
     super.key,
@@ -34,6 +35,7 @@ class ElementTile extends ConsumerWidget {
     this.trailingIcon,
     this.bottomText,
     this.bottomTextColor,
+    this.footerWidget,
   });
 
   @override
@@ -41,7 +43,7 @@ class ElementTile extends ConsumerWidget {
     return Padding(
       padding: const EdgeInsets.only(top: 5.0, bottom: 15.0, left: 8.0, right: 8.0),
       child: Container(
-        height: 140, // Altura fija para la card
+        height: 155, // Altura fija para la card
         decoration: BoxDecoration(
           color: Colors.white, // Fondo blanco
           borderRadius: BorderRadius.circular(10), // Bordes redondeados
@@ -100,7 +102,13 @@ class ElementTile extends ConsumerWidget {
                     color: Colors.grey,
                     overflow: TextOverflow.ellipsis),
               ),
-              if (bottomText != null) ...[
+              if (footerWidget != null) ...[
+                const SizedBox(height: 8),
+                Align(
+                  alignment: Alignment.bottomRight,
+                  child: footerWidget!,
+                ),
+              ] else if (bottomText != null) ...[
                 const SizedBox(height: 4),
                 Text(
                   bottomText!,

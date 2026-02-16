@@ -37,6 +37,28 @@ class _TeacherStudentSubmissionGradingState
     }
   }
 
+  DateTime _parseDateTime(String str) {
+    try {
+      return DateTime.parse(str);
+    } catch (e) {
+      try {
+        final parts = str.split(' ');
+        final dateParts = parts[0].split('-');
+        final timeParts = parts[1].split(':');
+        return DateTime(
+          int.parse(dateParts[2]),
+          int.parse(dateParts[1]),
+          int.parse(dateParts[0]),
+          int.parse(timeParts[0]),
+          int.parse(timeParts[1]),
+          timeParts.length > 2 ? int.parse(timeParts[2]) : 0,
+        );
+      } catch (e2) {
+        return DateTime.now();
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final data = widget.data;
@@ -166,6 +188,19 @@ class _TeacherStudentSubmissionGradingState
                         fontSize: 18,
                       ),
                     ),
+                    if (data.deadline.isNotEmpty && data.submissionDate.isNotEmpty) ...[
+                      if (_parseDateTime(data.submissionDate).isAfter(_parseDateTime(data.deadline))) ...[
+                        const SizedBox(height: 4),
+                        const Text(
+                          'Entrega tardía',
+                          style: TextStyle(
+                            color: Colors.orange,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ],
                     const SizedBox(height: 12),
                     
                     // Calificación y Fecha de entrega
@@ -351,41 +386,68 @@ class _TeacherStudentSubmissionGradingState
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: Colors.black,
-                ),
+              ),
               ),
               const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      onChanged: (value) {
-                        activityFormNotifier.onSubmissionGradeChanged(value);
-                      },
-                      keyboardType: TextInputType.number,
-                      controller: gradeController,
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                      decoration: InputDecoration(
-                        labelText: 'Ingresa la calificación',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.blue, width: 2.0),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
+              StatefulBuilder(
+                builder: (context, setState) {
+                  final gradeValue = double.tryParse(gradeController.text) ?? 0;
+                  final isGradeInvalid = gradeValue > score;
+                  
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              onChanged: (value) {
+                                activityFormNotifier.onSubmissionGradeChanged(value);
+                                setState(() {});
+                              },
+                              keyboardType: TextInputType.number,
+                              controller: gradeController,
+                              inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*'))],
+                              decoration: InputDecoration(
+                                labelText: 'Ingresa la calificación',
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(color: isGradeInvalid ? Colors.red : Colors.blue, width: 2.0),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(color: isGradeInvalid ? Colors.red : Colors.grey, width: 1.0),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Text(
+                            '/ $score',
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Text(
-                    '/ $score',
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
-                  ),
-                ],
+                      if (isGradeInvalid) ...[
+                        const SizedBox(height: 8),
+                        Text(
+                          'La calificación no puede ser mayor a $score',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.red.shade700,
+                          ),
+                        ),
+                      ],
+                    ],
+                  );
+                },
               ),
               if (activity.grade != null && activity.grade > 0) ...[
                 const SizedBox(height: 16),
@@ -444,42 +506,50 @@ class _TeacherStudentSubmissionGradingState
         padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16, top: 8),
         child: SizedBox(
           width: double.infinity,
-          child: ElevatedButton(
-            onPressed: activityForm.isPosting
-                ? null
-                : () async {
-                    final submitedGraded = await ref
-                        .read(activityFormProvider.notifier)
-                        .onSubmitGrade(submissionId);
+          child: Builder(
+            builder: (context) {
+              final gradeValue = double.tryParse(gradeController.text) ?? 0;
+              final isGradeInvalid = gradeValue > score;
+              final canSubmit = !activityForm.isPosting && !isGradeInvalid && gradeController.text.isNotEmpty;
+              
+              return ElevatedButton(
+                onPressed: canSubmit
+                    ? () async {
+                        final submitedGraded = await ref
+                            .read(activityFormProvider.notifier)
+                            .onSubmitGrade(submissionId);
 
-                    if (submitedGraded.isValid) {
-                      if (submitedGraded.success) {
-                        showSuccessMessage('Se asignó la calificación.');
-                        activityNotifier.setSubmissionGrade(
-                            int.parse(activityForm.newGrade.value));
-                      } else {
-                        showErrorMessage('Ocurrio un error');
+                        if (submitedGraded.isValid) {
+                          if (submitedGraded.success) {
+                            showSuccessMessage('Se asignó la calificación.');
+                            activityNotifier.setSubmissionGrade(
+                                double.parse(activityForm.newGrade.value));
+                          } else {
+                            showErrorMessage('Ocurrio un error');
+                          }
+                          closeKeyboard();
+                        }
                       }
-                      closeKeyboard();
-                    }
-                  },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blue,
-              foregroundColor: Colors.white,
-              padding: EdgeInsets.zero,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
-            child: const Center(
-              child: Text(
-                'Asignar Calificación',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w500,
+                    : null,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: isGradeInvalid ? Colors.grey : Colors.blue,
+                  foregroundColor: Colors.white,
+                  padding: EdgeInsets.zero,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
-              ),
-            ),
+                child: const Center(
+                  child: Text(
+                    'Asignar Calificación',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              );
+            },
           ),
         ),
       ),

@@ -50,7 +50,7 @@ Future<List<Group>> getGroupsSubjects() async {
             fechaCreacion: formatDate(row['FechaCreacion'] as String),
             fechaLimite: formatDate(row['FechaLimite'] as String),
             materiaId: row['MateriaId'] as int,
-            puntaje: row['Puntaje'] as int,
+            puntaje: (row['Puntaje'] as num?)?.toDouble(),
           );
         }).toList();
 
@@ -143,7 +143,10 @@ Future<List<Group>> getGroupsSubjects() async {
                   'FechaCreacion': activity.fechaCreacion.toString(),
                   'FechaLimite': activity.fechaLimite.toString(),
                   'Puntaje': activity.puntaje,
-                  'MateriaId': subjectId
+                  'MateriaId': subjectId,
+                  'PermitirEntregasTarde': activity.permitirEntregasTarde ? 1 : 0,
+                  'TieneLimiteEntregas': activity.tieneLimiteEntregas ? 1 : 0,
+                  'LimiteEntregasPorAlumno': activity.limiteEntregasPorAlumno,
                   
                 }, conflictAlgorithm: ConflictAlgorithm.replace);
 
