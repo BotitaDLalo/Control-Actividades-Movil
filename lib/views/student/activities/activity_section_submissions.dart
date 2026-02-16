@@ -22,6 +22,12 @@ final hasSubmissionsProvider = StateProvider(
   (ref) => false,
 );
 
+enum SendButtonState {
+  canSend,
+  lateDelivery,
+  disabled,
+}
+
 class ActivitySectionSubmissions extends ConsumerStatefulWidget {
   final Activity activity;
   const ActivitySectionSubmissions({super.key, required this.activity});
@@ -495,12 +501,32 @@ class _ActivitySectionSubmissionState
             }
             final bool isOverdue = fechaLimiteDate != null && DateTime.now().isAfter(fechaLimiteDate);
             
-            // Verificar si ha alcanzado el límite de entregas
             final bool hasReachedLimit = widget.activity.tieneLimiteEntregas && 
                 lsSubmissions.length >= widget.activity.limiteEntregasPorAlumno;
             
-            final bool canSend = !isGraded && activitiesForm.existsAnswer && !hasReachedLimit && 
+            final bool hasExistingSubmission = lsSubmissions.isNotEmpty;
+            
+            final bool canSend = activitiesForm.existsAnswer && !hasReachedLimit && !hasExistingSubmission && 
                 (!isOverdue || widget.activity.permitirEntregasTarde);
+
+            if (hasExistingSubmission) {
+              return FloatingActionButton(
+                onPressed: () {
+                  WarningDialog.show(
+                    context,
+                    message: 'Debes eliminar tu entrega actual antes de mandar otra',
+                  );
+                },
+                backgroundColor: Colors.grey.shade300,
+                shape: AppTheme.shapeFloatingActionButton(),
+                child: SvgPicture.asset(
+                  'assets/icons/agregar.svg',
+                  color: Colors.grey.shade600,
+                  width: 40,
+                  height: 40,
+                ),
+              );
+            }
 
             if (hasReachedLimit) {
               return FloatingActionButton(
@@ -1008,13 +1034,14 @@ class _ActivitySectionSubmissionState
                                                                submission.submissionActivityStudentId,
                                                                widget.activity.activityId!);
                                                        
-                                                       if (mounted) {
-                                                         if (success) {
-                                                           SuccessDialog.show(
-                                                             context,
-                                                             message: 'Entregable cancelado correctamente',
-                                                           );
-                                                         } else {
+                                                        if (mounted) {
+                                                          if (success) {
+                                                            SuccessDialog.show(
+                                                              context,
+                                                              message: 'Entregable cancelado correctamente',
+                                                            );
+                                                            ref.read(activityProvider.notifier).getSubmissions(widget.activity.activityId!);
+                                                          } else {
                                                            ErrorDialog.show(
                                                              context,
                                                              message: 'Error al cancelar el entregable',
