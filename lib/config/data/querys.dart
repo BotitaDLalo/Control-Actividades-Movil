@@ -81,6 +81,9 @@ class Querys {
           FechaEntrega TEXT NOT NULL,
           EstadoEntregaId INTEGER NOT NULL,
           FechaCalificado TEXT,
+          Calificacion REAL DEFAULT 0,
+          Estatus INTEGER DEFAULT 1,
+          EntregaTardia INTEGER DEFAULT 0,
           FOREIGN KEY (ActividadId) REFERENCES tbActividades(ActividadId),
           FOREIGN KEY (UsuarioId) REFERENCES tbUsuarioActivo(UsuarioId)
         );

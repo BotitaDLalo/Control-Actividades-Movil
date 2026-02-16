@@ -22,7 +22,7 @@ class SubjectsStateNotifier extends StateNotifier<SubjectsState> {
       required this.activityOffline})
       : super(SubjectsState());
 
-  Future<void> getSubjects() async {
+  /*Future<void> getSubjects() async {
     try {
       final subjects = await subjectsRepository.getSubjectsWithoutGroup();
       debugPrint("SubjectsStateNotifier: ${subjects.map((s) => {'id': s.materiaId, 'desc': s.descripcion, 'code': s.codigoAcceso}).toList()}");
@@ -45,7 +45,34 @@ class SubjectsStateNotifier extends StateNotifier<SubjectsState> {
         // No hacer nada
       }
     }
+  }*/
+  Future<void> getSubjects() async {
+  final subjects = await subjectsRepository.getSubjectsWithoutGroup();
+
+  if (!mounted) return;
+
+  if (subjects != null && subjects.isNotEmpty) {
+    debugPrint("Online: ${subjects.map((s) => {
+      'id': s.materiaId,
+      'desc': s.descripcion,
+      'code': s.codigoAcceso
+    }).toList()}");
+
+    setSubjects(subjects);
+    await subjectsOffline.saveSubjectsWithoutGroup(subjects);
+  } else {
+  final subjectsOfflineList = await subjectsOffline.getSujectsWithoutGroup();
+
+    debugPrint("Offline: ${subjectsOfflineList.map((s) => {
+      'id': s.materiaId,
+      'desc': s.descripcion,
+      'code': s.codigoAcceso
+    }).toList()}");
+
+    setSubjects(subjectsOfflineList);
   }
+}
+
 
   Future<List<Subject>> getSubjectsWithoutGroup() async {
     try {

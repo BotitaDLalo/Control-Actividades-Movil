@@ -1,5 +1,6 @@
 import 'package:aprende_mas/providers/providers.dart';
 import 'package:aprende_mas/repositories/Implement_repos/activity/activity_offline_repository_impl.dart';
+import 'package:aprende_mas/repositories/Implement_repos/activity/activity_offline_datasource_impl.dart';
 import 'package:aprende_mas/repositories/Implement_repos/authentication/auth_user_offline_repository_impl.dart';
 import 'package:aprende_mas/config/services/google/google_signin_api.dart';
 import 'package:aprende_mas/config/utils/packages.dart';
@@ -402,49 +403,31 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
 
   Future<void> _submissionsPending(
       List<Group> lsGroups, List<Subject> lsSubjectsWithoutGroup) async {
-    List<Submission> lsSubmissionsPending = [];
-
-    //& set para activity state
-    if (lsGroups.isNotEmpty) {
-      for (var group in lsGroups) {
-        for (var subj in group.materias ?? []) {
-          for (var act in subj.actividades ?? []) {
-            final activity = act as Activity;
-            final activityId = activity.activityId;
-
-            //& Guardar entregables para submissions state
-            List<Submission> lsSubmissions =
-                await activityOffline.getSubmissionsPending(activityId!);
-            lsSubmissionsPending.addAll(lsSubmissions);
-          }
-        }
-      }
-    }
-
-    if (lsSubjectsWithoutGroup.isNotEmpty) {
-      for (var subject in lsSubjectsWithoutGroup) {
-        for (var act in subject.actividades ?? []) {
-          final activity = act as Activity;
-          final activityId = activity.activityId;
-
-          //& Guardar entregables para submissions state
-          List<Submission> lsSubmissions =
-              await activityOffline.getSubmissionsPending(activityId!);
-          lsSubmissionsPending.addAll(lsSubmissions);
-        }
-      }
-    }
+    // 1. Obtener TODAS las entregas pendientes con una sola consulta optimizada.
+    // TODO: Refactorizar. Se instancia el datasource directamente porque el método
+    // `getAllPendingSubmissions` no se ha propagado a la capa de repositorio.
+    // Lo ideal es llamar a `activityOffline.getAllPendingSubmissions()`.
+    final datasource = ActivityOfflineDatasourceImpl();
+    final List<Submission> lsSubmissionsPending =
+        await datasource.getAllPendingSubmissions();
 
     if (lsSubmissionsPending.isNotEmpty) {
+      debugPrint("🔄 [SYNC] Iniciando envío de ${lsSubmissionsPending.length} entregas pendientes al servidor.");
       for (var submission in lsSubmissionsPending) {
         int activityId = submission.activityId ?? -1;
         if (activityId != -1) {
           String answer = submission.answer ?? "";
+          
+          // 2. Llama al método de envío ONLINE
           bool submissionSentSuccess = await sendSubmission(activityId, answer);
 
+          // 3. Si el envío es exitoso, borra el registro local
           if (submissionSentSuccess) {
+            debugPrint("✅ [SYNC] Entrega ${submission.submissionId} para actividad $activityId enviada con éxito. Eliminando de la cola local.");
             int submissionId = submission.submissionId;
             await activityOffline.deleteSubmissionOfflineSent(submissionId);
+          } else {
+            debugPrint("❌ [SYNC] Falló el envío de la entrega ${submission.submissionId} para la actividad $activityId. Se reintentará en el próximo inicio de sesión.");
           }
         }
       }

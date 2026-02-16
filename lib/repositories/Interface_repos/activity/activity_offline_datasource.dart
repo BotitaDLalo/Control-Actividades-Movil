@@ -7,4 +7,5 @@ abstract class ActivityOfflineDatasource {
   Future<List<Submission>> sendSubmissionOffline(int activityId, String answer);
   Future<List<Submission>> getSubmissionsPending(int activityId);
   Future<void> deleteSubmissionOfflineSent(int submissionId);
+  Future<List<Submission>> getAllPendingSubmissions();
 }

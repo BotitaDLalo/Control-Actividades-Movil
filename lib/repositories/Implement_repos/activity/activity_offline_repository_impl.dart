@@ -42,4 +42,9 @@ class ActivityOfflineRepositoryImpl implements ActivityOfflineRepository {
   Future<void> deleteSubmissionOfflineSent(int submissionId) {
     return activityOfflineDatasource.deleteSubmissionOfflineSent(submissionId);
   }
+
+  @override
+  Future<List<Submission>> getAllPendingSubmissions() {
+    return activityOfflineDatasource.getAllPendingSubmissions();
+  }
 }
