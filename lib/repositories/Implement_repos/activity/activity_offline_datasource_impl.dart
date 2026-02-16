@@ -86,7 +86,10 @@ Future<List<Activity>> getAllActivitiesOffline(int subjectId) async {
                 'ActividadId': activityId,
                 'UsuarioId': id,
                 'FechaEntrega': sub.submissionDate,
-                'EstadoEntregaId': sub.status! ? 1 : 0 // 1: Enviado, 0: Pendiente
+                'EstadoEntregaId': sub.status! ? 1 : 0, // 1: Enviado, 0: Pendiente
+                'Estatus': 1, // 1 = Activo
+                'Calificacion': 0,
+                'EntregaTardia': 0,
               });
             } else {
               // Actualizar existente
@@ -95,7 +98,8 @@ Future<List<Activity>> getAllActivitiesOffline(int subjectId) async {
                 'tbEntregableActividadAlumno',
                 {
                   'FechaEntrega': sub.submissionDate,
-                  'EstadoEntregaId': sub.status! ? 1 : 0
+                  'EstadoEntregaId': sub.status! ? 1 : 0,
+                  'Estatus': 1, // Mantener activo
                 },
                 where: 'EntregaActividadAlumnoId = ?',
                 whereArgs: [entregaActividadAlumnoId],
@@ -131,7 +135,7 @@ Future<List<Activity>> getAllActivitiesOffline(int subjectId) async {
       
       // Consultamos la tabla nueva tbEntregableActividadAlumno
       final querylsStudentActivities = await db.query('tbEntregableActividadAlumno',
-          columns: ['EntregaActividadAlumnoId', 'FechaEntrega', 'EstadoEntregaId'],
+          columns: ['EntregaActividadAlumnoId', 'FechaEntrega', 'EstadoEntregaId', 'Calificacion', 'FechaCalificado'],
           where: 'ActividadId = ? AND UsuarioId = ?',
           whereArgs: [activityId, id]);
 
@@ -139,6 +143,10 @@ Future<List<Activity>> getAllActivitiesOffline(int subjectId) async {
         int studentActivityId = sa['EntregaActividadAlumnoId'] as int;
         String submissionDate = sa['FechaEntrega'] as String;
         bool status = (sa['EstadoEntregaId'] as int) == 1;
+        
+        // Leer calificación desde tbEntregableActividadAlumno
+        final calificacion = sa['Calificacion'] as double? ?? 0.0;
+        final fechaCalificado = sa['FechaCalificado'] as String?;
 
         // Consultamos la tabla nueva tbEntregables
         final querylsSubmissions = await db.query('tbEntregables',
@@ -152,13 +160,17 @@ Future<List<Activity>> getAllActivitiesOffline(int subjectId) async {
               submissionActivityStudentId: studentActivityId,
               status: status,
               submissionDate: submissionDate);
-          
+           
           if (sub['Contenido'] != null) {
             submission.answer = sub['Contenido'] as String;
           }
-          // Nota: Enlace y Archivo no están explícitos en el nuevo esquema tbEntregables (solo Contenido),
-          // pero si se agregan columnas o se usa Contenido para todo, ajusta aquí.
           
+          // Asignar calificación si existe
+          if (calificacion > 0) {
+            submission.grade = calificacion.toString();
+            submission.gradedDate = fechaCalificado;
+          }
+           
           submission.activityId = activityId;
           lsSubmisions.add(submission);
         }
@@ -194,12 +206,16 @@ Future<List<Activity>> getAllActivitiesOffline(int subjectId) async {
               'UsuarioId': id,
               'FechaEntrega': dateNow.toString(),
               'EstadoEntregaId': 0, // 0 = Pendiente de sincronización
+              'Estatus': 1, // 1 = Activo
+              'Calificacion': 0,
+              'EntregaTardia': 0,
             });
           } else {
             tbId = existing.first['EntregaActividadAlumnoId'] as int;
             await txn.update('tbEntregableActividadAlumno', {
               'FechaEntrega': dateNow.toString(),
-              'EstadoEntregaId': 0
+              'EstadoEntregaId': 0,
+              'Estatus': 1,
             }, where: 'EntregaActividadAlumnoId = ?', whereArgs: [tbId]);
           }
 
@@ -260,7 +276,7 @@ Future<List<Activity>> getAllActivitiesOffline(int subjectId) async {
       List<Submission> lsSubmisions = [];
       
       final querylsStudentActivities = await db.query('tbEntregableActividadAlumno',
-          columns: ['EntregaActividadAlumnoId', 'FechaEntrega', 'EstadoEntregaId'],
+          columns: ['EntregaActividadAlumnoId', 'FechaEntrega', 'EstadoEntregaId', 'Calificacion', 'FechaCalificado'],
           where: 'ActividadId = ? AND EstadoEntregaId = 0 AND UsuarioId = ?',
           whereArgs: [activityId, id]);
 
@@ -268,6 +284,10 @@ Future<List<Activity>> getAllActivitiesOffline(int subjectId) async {
         int studentActivityId = sa['EntregaActividadAlumnoId'] as int;
         String submissionDate = sa['FechaEntrega'] as String;
         bool status = (sa['EstadoEntregaId'] as int) == 1;
+        
+        // Leer calificación
+        final calificacion = sa['Calificacion'] as double? ?? 0.0;
+        final fechaCalificado = sa['FechaCalificado'] as String?;
 
         final querylsSubmissions = await db.query('tbEntregables',
             columns: ['EntregableId', 'Contenido'],
@@ -282,6 +302,11 @@ Future<List<Activity>> getAllActivitiesOffline(int subjectId) async {
               submissionDate: submissionDate);
           if (sub['Contenido'] != null) {
             submission.answer = sub['Contenido'] as String;
+          }
+          // Asignar calificación si existe
+          if (calificacion > 0) {
+            submission.grade = calificacion.toString();
+            submission.gradedDate = fechaCalificado;
           }
           submission.activityId = activityId;
           lsSubmisions.add(submission);
@@ -300,7 +325,7 @@ Future<List<Activity>> getAllActivitiesOffline(int subjectId) async {
     try {
       final db = await DbLocal.database;
       
-      // Buscar el ID del padre antes de borrar el hijo
+      // Buscar el ID del padre antes de modificar
       final querySubmission = await db.query('tbEntregables',
           columns: ['EntregaActividadAlumnoId'],
           where: 'EntregableId = ?',
@@ -308,16 +333,34 @@ Future<List<Activity>> getAllActivitiesOffline(int subjectId) async {
 
       if (querySubmission.isNotEmpty) {
         int studentActivityId = querySubmission.first['EntregaActividadAlumnoId'] as int;
-
-        // Eliminar registro de tbEntregables
-        await db.delete('tbEntregables', 
-            where: 'EntregableId = ?', 
-            whereArgs: [submissionId]);
-
-        // Eliminar registro padre tbEntregableActividadAlumno
-        await db.delete('tbEntregableActividadAlumno', 
-            where: 'EntregaActividadAlumnoId = ?', 
+        
+        // Verificar si tiene calificación antes de eliminar
+        final entregaData = await db.query('tbEntregableActividadAlumno',
+            columns: ['Calificacion', 'Estatus'],
+            where: 'EntregaActividadAlumnoId = ?',
             whereArgs: [studentActivityId]);
+            
+        if (entregaData.isNotEmpty) {
+          final calificacion = entregaData.first['Calificacion'] as double? ?? 0.0;
+          
+          // Si tiene calificación, no se puede eliminar - marcar como inactiva
+          if (calificacion > 0) {
+            await db.update('tbEntregableActividadAlumno',
+              {'Estatus': 0},
+              where: 'EntregaActividadAlumnoId = ?',
+              whereArgs: [studentActivityId]);
+          } else {
+            // Eliminar registro de tbEntregables
+            await db.delete('tbEntregables', 
+                where: 'EntregableId = ?', 
+                whereArgs: [submissionId]);
+
+            // Eliminar registro padre tbEntregableActividadAlumno
+            await db.delete('tbEntregableActividadAlumno', 
+                where: 'EntregaActividadAlumnoId = ?', 
+                whereArgs: [studentActivityId]);
+          }
+        }
       }
     } catch (e) {
       debugPrint('Error en deleteSubmissionOfflineSent: $e');
@@ -339,13 +382,18 @@ Future<List<Activity>> getAllActivitiesOffline(int subjectId) async {
           ea.FechaEntrega,
           e.EntregableId,
           e.Contenido,
-          ea.EntregaActividadAlumnoId
+          ea.EntregaActividadAlumnoId,
+          ea.Calificacion,
+          ea.FechaCalificado
         FROM tbEntregableActividadAlumno ea
         JOIN tbEntregables e ON ea.EntregaActividadAlumnoId = e.EntregaActividadAlumnoId
         WHERE ea.UsuarioId = ? AND ea.EstadoEntregaId = 0
       ''', [id]);
 
       for (var row in queryResult) {
+        final calificacion = row['Calificacion'] as double? ?? 0.0;
+        final fechaCalificado = row['FechaCalificado'] as String?;
+        
         final submission = Submission(
           submissionId: row['EntregableId'] as int,
           activityId: row['ActividadId'] as int,
@@ -354,6 +402,13 @@ Future<List<Activity>> getAllActivitiesOffline(int subjectId) async {
           answer: row['Contenido'] as String?,
           status: false, // Sabemos que es pendiente (0)
         );
+        
+        // Asignar calificación si existe
+        if (calificacion > 0) {
+          submission.grade = calificacion.toString();
+          submission.gradedDate = fechaCalificado;
+        }
+        
         lsSubmissions.add(submission);
       }
 
