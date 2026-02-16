@@ -8,6 +8,10 @@ class NoticesFormState {
   final bool isDeleted;
   final GenericInput title;
   final GenericInput description;
+  final GenericInput startDate;
+  final GenericInput endDate;
+  final GenericInput links;
+  final GenericInput frequencyDays;
   final int noticeId;
   // CAMBIO: Campo agregado para mostrar mensajes de error al usuario
   // cuando falla la creación/actualización de avisos
@@ -20,6 +24,10 @@ class NoticesFormState {
       this.isDeleted = false,
       this.title = const GenericInput.pure(),
       this.description = const GenericInput.pure(),
+      this.startDate = const GenericInput.pure(),
+      this.endDate = const GenericInput.pure(),
+      this.links = const GenericInput.pure(),
+      this.frequencyDays = const GenericInput.pure(),
       this.noticeId = 0,
       this.errorMessage = ''});
 
@@ -30,6 +38,10 @@ class NoticesFormState {
     bool? isDeleted,
     GenericInput? title,
     GenericInput? description,
+    GenericInput? startDate,
+    GenericInput? endDate,
+    GenericInput? links,
+    GenericInput? frequencyDays,
     int? noticeId,
     // CAMBIO: Parámetro agregado para actualizar errorMessage
     String? errorMessage,
@@ -41,6 +53,10 @@ class NoticesFormState {
           isDeleted: isDeleted ?? this.isDeleted,
           title: title ?? this.title,
           description: description ?? this.description,
+          startDate: startDate ?? this.startDate,
+          endDate: endDate ?? this.endDate,
+          links: links ?? this.links,
+          frequencyDays: frequencyDays ?? this.frequencyDays,
           noticeId: noticeId ?? this.noticeId,
           errorMessage: errorMessage ?? this.errorMessage);
 }

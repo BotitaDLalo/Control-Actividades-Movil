@@ -1,5 +1,7 @@
 import 'package:aprende_mas/config/utils/general_utils.dart';
 
+import 'dart:convert';
+
 class NoticeModel {
   final int? noticeId;
   final String? teacherFullName;
@@ -9,6 +11,10 @@ class NoticeModel {
   int groupId;
   int subjectId;
   String? subjectName;
+  final String? startDate;
+  final String? endDate;
+  final String? links;
+  final int frequencyDays;
 
   NoticeModel({
     this.noticeId,
@@ -19,6 +25,10 @@ class NoticeModel {
     this.groupId = 0,
     this.subjectId = 0,
     this.subjectName,
+    this.startDate,
+    this.endDate,
+    this.links,
+    this.frequencyDays = 0,
   });
 
   NoticeModel copyWith({
@@ -30,6 +40,10 @@ class NoticeModel {
     int? groupId,
     int? subjectId,
     String? subjectName,
+    String? startDate,
+    String? endDate,
+    String? links,
+    int? frequencyDays,
   }) =>
       NoticeModel(
         noticeId: noticeId ?? this.noticeId,
@@ -40,6 +54,10 @@ class NoticeModel {
         groupId: groupId ?? this.groupId,
         subjectId: subjectId ?? this.subjectId,
         subjectName: subjectName ?? this.subjectName,
+        startDate: startDate ?? this.startDate,
+        endDate: endDate ?? this.endDate,
+        links: links ?? this.links,
+        frequencyDays: frequencyDays ?? this.frequencyDays,
       );
 
   static List<NoticeModel> jsonToEntitylsNotices(
@@ -55,6 +73,10 @@ class NoticeModel {
               createdDate: formatDate(e['FechaCreacion'].toString()),
               groupId: e['GrupoId'],
               subjectId: e['MateriaId'],
+              startDate: e['FechaInicio'] != null ? formatDate(e['FechaInicio'].toString()) : null,
+              endDate: e['FechaFin'] != null ? formatDate(e['FechaFin'].toString()) : null,
+              links: e['Enlaces'] is List ? jsonEncode(e['Enlaces']) : e['Enlaces'],
+              frequencyDays: e['FrecuenciaDias'] ?? 0,
             ),
           )
           .toList();
@@ -68,5 +90,9 @@ class NoticeModel {
         createdDate: formatDate(e['FechaCreacion'].toString()),
         groupId: e['GrupoId'] ?? 0,
         subjectId: e['MateriaId'] ?? 0,
+        startDate: e['FechaInicio'] != null ? formatDate(e['FechaInicio'].toString()) : null,
+        endDate: e['FechaFin'] != null ? formatDate(e['FechaFin'].toString()) : null,
+        links: e['Enlaces'] is List ? jsonEncode(e['Enlaces']) : e['Enlaces'],
+        frequencyDays: e['FrecuenciaDias'] ?? 0,
       );
 }

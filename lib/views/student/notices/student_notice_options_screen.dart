@@ -3,7 +3,7 @@ import 'package:aprende_mas/config/utils/packages.dart';
 import 'package:aprende_mas/models/models.dart';
 import 'package:aprende_mas/views/widgets/activities_body/notice/notice_body/notice_body.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:aprende_mas/providers/notices/notices_provider.dart';
+import 'package:aprende_mas/providers/notices/future_notices_provider.dart';
 
 class StudentNoticeOptionsScreen extends ConsumerStatefulWidget {
   final int groupId;
@@ -35,12 +35,6 @@ class _StudentNoticeOptionsScreenState
       });
     });
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(noticesProvider.notifier).loadNotices(
-            subjectId: widget.subjectId != 0 ? widget.subjectId : null,
-            groupId: widget.groupId != 0 ? widget.groupId : null,
-          );
-    });
     super.initState();
   }
 
@@ -50,19 +44,59 @@ class _StudentNoticeOptionsScreenState
     super.dispose();
   }
 
+  // Helper para parsear fechas y validar vigencia
+  DateTime? _parseDate(String dateStr) {
+    if (dateStr.isEmpty) return null;
+    try {
+      return DateTime.parse(dateStr);
+    } catch (_) {
+      try {
+        // Separar fecha de hora si existe (ej: "20-02-2026 00:00:00")
+        final datePart = dateStr.split(' ')[0];
+
+        // Soporte para dd-MM-yyyy
+        final parts = datePart.split('-');
+        if (parts.length == 3) {
+          return DateTime(int.parse(parts[2]), int.parse(parts[1]), int.parse(parts[0]));
+        }
+        // Soporte para dd/MM/yyyy
+        final partsSlash = datePart.split('/');
+        if (partsSlash.length == 3) {
+          return DateTime(int.parse(partsSlash[2]), int.parse(partsSlash[1]), int.parse(partsSlash[0]));
+        }
+      } catch (e) {
+        debugPrint("Error parsing date: $dateStr");
+      }
+    }
+    return null;
+  }
+
+  bool _isNoticeActive(NoticeModel notice) {
+    if (notice.startDate == null || notice.endDate == null) return true;
+    final start = _parseDate(notice.startDate!);
+    final end = _parseDate(notice.endDate!);
+    if (start == null || end == null) return true;
+    final now = DateTime.now();
+    final startDate = DateTime(start.year, start.month, start.day);
+    final endDate = DateTime(end.year, end.month, end.day, 23, 59, 59);
+    return !now.isBefore(startDate) && !now.isAfter(endDate);
+  }
+
   @override
   Widget build(BuildContext context) {
     final subjectColor = getSubjectColor(widget.subjectId);
-    final noticesState = ref.watch(noticesProvider);
-    final allNotices = noticesState.lsNotices;
-    final isLoading = noticesState.isLoading;
+    final futureNotices = ref.watch(futureNoticesProvider(notice));
 
     return Scaffold(
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : Builder(builder: (context) {
+      body: futureNotices.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, stackTrace) => Center(child: Text(error.toString())),
+        data: (allNotices) {
           // Filtrado local
           final filteredNotices = allNotices.where((element) {
+            // 1. Validar vigencia
+            if (!_isNoticeActive(element)) return false;
+
             final titleLower = element.title.toLowerCase();
             final descLower = element.description.toLowerCase();
             final searchLower = _searchTerm.toLowerCase();
@@ -142,11 +176,7 @@ class _StudentNoticeOptionsScreenState
                                   children: [
                                     NoticeBody(
                                         optionsIsVisible: false,
-                                        noticeId: e.noticeId ?? 0,
-                                        teacherName: e.teacherFullName ?? "",
-                                        createdDate: e.createdDate.toString(),
-                                        title: e.title,
-                                        content: e.description),
+                                        notice: e),
                                     SizedBox(height: 12)
                                   ],
                                 );
@@ -156,7 +186,8 @@ class _StudentNoticeOptionsScreenState
               ],
             ),
           );
-        }),
+        },
+      ),
     );
   }
 }
