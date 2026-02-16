@@ -487,11 +487,11 @@ class _TeacherStudentSubmissionGradingState
                         .read(activityFormProvider.notifier)
                         .onSubmitGrade(submissionId);
 
-                    if (submitedGraded.isValid) {
+                      if (submitedGraded.isValid) {
                       if (submitedGraded.success) {
                         showSuccessMessage('Se asignó la calificación.');
                         activityNotifier.setSubmissionGrade(
-                            int.parse(activityForm.newGrade.value));
+                            double.parse(activityForm.newGrade.value));
                       } else {
                         showErrorMessage('Ocurrio un error');
                       }

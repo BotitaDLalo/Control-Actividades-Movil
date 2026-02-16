@@ -27,8 +27,8 @@ class ActivityFormNotifier extends StateNotifier<ActivityFormState> {
   final Function(int, String, List<String>, List<String>)? sendSubmissionWithFilesAndLinksCallback;
   final Function(int, String, List<String>)? sendSubmissionWithFilesCallback;
   final Function(int, String) sendSubmissionOfflineCallback;
-   final Function({required int submissionId, required int grade})
-      submissionGradingCallback;
+   final Function({required int submissionId, required double grade})
+       submissionGradingCallback;
   final Future<String> Function(PlatformFile file, int activityId, int studentId)? uploadFileCallback;
 
    final TextEditingController nombreController;
@@ -422,9 +422,9 @@ class ActivityFormNotifier extends StateNotifier<ActivityFormState> {
      state = state.copyWith(isPosting: true);
 
      response.isValid = true;
-     final grade = state.newGrade.value;
-     bool submitedGrade = await submissionGradingCallback(
-         grade: int.parse(grade), submissionId: submissionId);
+      final grade = state.newGrade.value;
+      bool submitedGrade = await submissionGradingCallback(
+          grade: double.parse(grade), submissionId: submissionId);
      response.success = submitedGrade;
 
      state = state.copyWith(isPosting: false);

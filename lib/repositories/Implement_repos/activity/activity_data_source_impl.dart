@@ -303,7 +303,7 @@ class ActivityDataSourceImpl implements ActivityDataSource {
   }
 
   @override
-  Future<bool> submissionGrading(int submissionId, int grade) async {
+  Future<bool> submissionGrading(int submissionId, double grade) async {
     try {
       const uri = "/Actividades/AsignarCalificacion";
 

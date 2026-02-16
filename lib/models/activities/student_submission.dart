@@ -16,7 +16,7 @@ class StudentSubmission {
   final String answer;
   final List<String> links;
   final List<FileSubmission> files;
-  int grade;
+  double grade;
 
   StudentSubmission({
       required this.submissionId,

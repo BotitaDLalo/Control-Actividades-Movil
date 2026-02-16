@@ -345,12 +345,12 @@ Future<void> updateActivity(
         state.copyWith(lsSubmissions: [...lsSubmisionsState, ...lsSubmisions]);
   }
 
-  void setSubmissionGrade(int grade) {
+  void setSubmissionGrade(double grade) {
     state = state.copyWith(grade: grade);
   }
 
   Future<bool> submissionGrading(
-      {required int submissionId, required int grade}) async {
+      {required int submissionId, required double grade}) async {
     try {
       final res =
           await activityRepository.submissionGrading(submissionId, grade);

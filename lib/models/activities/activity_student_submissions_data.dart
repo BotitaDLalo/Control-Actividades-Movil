@@ -47,7 +47,7 @@ class ActivityStudentSubmissionsData {
                     files: parsedRespuesta.archivos.map((nombre) {
                       return FileSubmission(nombre: nombre, ruta: '');
                     }).toList(),
-                    grade: e['Calificacion'] as int);
+                    grade: (e['Calificacion'] as num).toDouble());
               },
             )
             .toList());

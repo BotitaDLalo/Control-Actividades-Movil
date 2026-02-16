@@ -73,7 +73,7 @@ class ActivityRepositoryImpl implements ActivityRepository {
   }
 
   @override
-  Future<bool> submissionGrading(int submissionId, int grade) {
+  Future<bool> submissionGrading(int submissionId, double grade) {
     return activityDataSource.submissionGrading(submissionId, grade);
   }
 

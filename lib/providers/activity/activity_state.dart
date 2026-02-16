@@ -6,13 +6,13 @@ class ActivityState {
   final bool isLoading; // Indica si las actividades están cargándose
   final String? errorMessage; // Mensaje de error en caso de fallo
   final String answer;
-  final int grade;
+  final double grade;
   final List<Submission> lsSubmissions;
 
   ActivityState(
       {this.lsActivities = const [],
       this.isLoading = false,
-      this.grade = 0,
+      this.grade = 0.0,
       this.errorMessage,
       this.lsSubmissions = const [],
       this.answer = ""});
@@ -22,7 +22,7 @@ class ActivityState {
       bool? isLoading,
       String? errorMessage,
       String? answer,
-      int? grade,
+      double? grade,
       List<Submission>? lsSubmissions}) {
     return ActivityState(
         lsActivities: lsActivities ?? this.lsActivities,

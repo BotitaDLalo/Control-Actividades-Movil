@@ -12,7 +12,7 @@ class TeacherStudentSubmissionGradingModel {
   final String answer;
   final List<String> links;
   final List<FileInfo> files;
-  final int grade;
+  final double grade;
   final double score;
   final String submissionDate;
   final String deadline;
