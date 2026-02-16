@@ -6,6 +6,7 @@ import 'package:aprende_mas/views/views.dart';
 import 'package:aprende_mas/views/widgets/buttons/custom_rounded_button.dart';
 // CAMBIO: Import agregado para mostrar mensajes de error con snackbar
 import 'package:aprende_mas/views/widgets/alerts/error_snackbar.dart';
+import 'package:aprende_mas/views/widgets/inputs/custom_time_form_field.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart'; // Asegurar importación de Material/Widget
 import 'package:flutter_svg/flutter_svg.dart';
@@ -39,15 +40,8 @@ class _TeacherCreateNoticeState extends ConsumerState<TeacherCreateNotice> {
     if (isEditing) {
       // Usamos addPostFrameCallback para asegurar que el contexto de Riverpod esté listo.
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        // Inicializa el provider con los valores del aviso para edición
-        ref.read(noticesFormProvider.notifier).onInitializeEditData(
-          notice.noticeId!,
-          notice.title, 
-          notice.description,
-        );
-        // Opcional: Asegurar que el provider sepa los valores iniciales.
-        ref.read(noticesFormProvider.notifier).onTitleChanged(notice.title);
-        ref.read(noticesFormProvider.notifier).onDescriptionChanged(notice.description);
+        // Inicializa el provider con los valores del aviso completo para edición
+        ref.read(noticesFormProvider.notifier).onInitializeEditData(notice);
       });
     }
   }
@@ -203,6 +197,55 @@ class _TeacherCreateNoticeState extends ConsumerState<TeacherCreateNotice> {
                 maxLines: null,
                 decoration: InputDecoration(
                   labelText: 'Mensaje',
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: displayColor, width: 2.0),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(
+                    child: CustomTimeFormField(
+                      label: 'Fecha Inicio',
+                      hint: 'Fecha Inicio',
+                      isDateField: true,
+                      initialValue: isEditing ? notice.startDate : null,
+                      onChanged: formNoticeNotifier.onStartDateChanged,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: CustomTimeFormField(
+                      label: 'Fecha Fin',
+                      hint: 'Fecha Fin',
+                      isDateField: true,
+                      initialValue: isEditing ? notice.endDate : null,
+                      onChanged: formNoticeNotifier.onEndDateChanged,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              TextFormField(
+                initialValue: isEditing ? notice.links : null,
+                onChanged: formNoticeNotifier.onLinksChanged,
+                decoration: InputDecoration(
+                  labelText: 'Enlace (opcional)',
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: displayColor, width: 2.0),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              TextFormField(
+                initialValue: isEditing ? notice.frequencyDays.toString() : null,
+                onChanged: formNoticeNotifier.onFrequencyDaysChanged,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  labelText: 'Frecuencia (días)',
                   focusedBorder: OutlineInputBorder(
                     borderSide: BorderSide(color: displayColor, width: 2.0),
                     borderRadius: BorderRadius.circular(10),

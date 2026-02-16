@@ -8,34 +8,16 @@ import 'package:aprende_mas/models/models.dart'; // Asegúrate de tener NoticeMo
 
 class NoticeBody extends StatelessWidget {
   final bool optionsIsVisible;
-  final int noticeId;
-  final String teacherName;
-  final String createdDate;
-  final String title;
-  final String content;
+  final NoticeModel notice;
 
   const NoticeBody({
     super.key,
     required this.optionsIsVisible,
-    required this.noticeId,
-    required this.teacherName,
-    required this.createdDate,
-    required this.title,
-    required this.content,
+    required this.notice,
   });
 
   @override
   Widget build(BuildContext context) {
-    // 🚨 CREAMOS EL MODELO A PARTIR DE LOS PARÁMETROS:
-    final NoticeModel noticeData = NoticeModel(
-      noticeId: noticeId,
-      teacherFullName: teacherName,
-      createdDate: createdDate,
-      title: title,
-      description: content,
-      // Los campos groupId y subjectId se dejan por defecto o se pasan si son necesarios
-    );
-
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
       padding: const EdgeInsets.all(16),
@@ -50,14 +32,16 @@ class NoticeBody extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           DataBody(
-            // 🚨 CAMBIO AQUÍ: PASAMOS EL MODELO COMPLETO
-            notice: noticeData, 
+            notice: notice,
             optionsIsVisible: optionsIsVisible,
           ),
           const SizedBox(height: 8),
           NoticeDescription(
-            title: title,
-            content: content,
+            title: notice.title,
+            content: notice.description,
+            startDate: notice.startDate,
+            endDate: notice.endDate,
+            links: notice.links,
           ),
         ],
       ),

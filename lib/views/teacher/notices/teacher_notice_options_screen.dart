@@ -198,11 +198,7 @@ class _NoticeOptionsScreenState
                                         children: [
                                           NoticeBody(
                                             optionsIsVisible: true,
-                                            noticeId: e.noticeId ?? 0,
-                                            teacherName: e.teacherFullName ?? "",
-                                            createdDate: e.createdDate.toString(),
-                                            title: e.title,
-                                            content: e.description,
+                                            notice: e,
                                           ),
                                           SizedBox(
                                             height:
