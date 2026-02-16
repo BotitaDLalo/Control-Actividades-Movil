@@ -16,6 +16,7 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:aprende_mas/repositories/Implement_repos/activity/activity_data_source_impl.dart';
 
 final hasSubmissionsProvider = StateProvider(
   (ref) => false,
@@ -246,6 +247,13 @@ class _ActivitySectionSubmissionState
                 );
               }
             }
+          } on SubmissionException catch (e) {
+            if (mounted) {
+              ErrorDialog.show(
+                _safeContext!,
+                message: e.message,
+              );
+            }
           } catch (e) {
             if (mounted) {
               ErrorDialog.show(
@@ -303,6 +311,13 @@ class _ActivitySectionSubmissionState
                           message: 'Error al realizar la entrega',
                         );
                       }
+                    }
+                  } on SubmissionException catch (e) {
+                    if (mounted) {
+                      ErrorDialog.show(
+                        _safeContext!,
+                        message: e.message,
+                      );
                     }
                   } catch (e) {
                     if (mounted) {
@@ -653,7 +668,7 @@ class _ActivitySectionSubmissionState
                         ),
                       if (widget.activity.tieneLimiteEntregas)
                         Text(
-                          'Límite: ${lsSubmissions.length}/${widget.activity.limiteEntregasPorAlumno} entrega(s)',
+                          'Límite: ${widget.activity.limiteEntregasPorAlumno} entrega(s)',
                           style: const TextStyle(color: Colors.purple, fontSize: 17, fontWeight: FontWeight.w500),
                         ),
                     ],
@@ -776,7 +791,7 @@ class _ActivitySectionSubmissionState
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               const Text(
-                                'Entregables enviados',
+                                'Entregable actual enviado',
                                 style: TextStyle(
                                   fontSize: 20.0,
                                   fontWeight: FontWeight.bold,
@@ -784,9 +799,13 @@ class _ActivitySectionSubmissionState
                               ),
                               Flexible(
                                 child: ListView.builder(
-                                  itemCount: lsSubmissions.length,
+                                  itemCount: 1,
                                   itemBuilder: (context, index) {
-                                    final submission = lsSubmissions[index];
+                                    final submission = lsSubmissions.isNotEmpty ? lsSubmissions.last : null;
+
+                                    if (submission == null) {
+                                      return const SizedBox();
+                                    }
 
                                     return ElementTile(
                                       iconWidget: SvgPicture.asset('assets/icons/activities20.svg', width: 50, height: 50),

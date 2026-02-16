@@ -5,6 +5,7 @@ import 'package:aprende_mas/providers/activity/activity_form_state.dart';
 import 'package:aprende_mas/views/widgets/inputs/generic_input.dart';
 import 'package:aprende_mas/config/data/data.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:aprende_mas/repositories/Implement_repos/activity/activity_data_source_impl.dart';
 
 class ActivityFormNotifier extends StateNotifier<ActivityFormState> {
   final Function(Map<String, dynamic> activityLike)? activityCallback;
@@ -383,6 +384,8 @@ class ActivityFormNotifier extends StateNotifier<ActivityFormState> {
             final result = await sendSubmissionCallback(activityId, state.answer);
             submissionSent = result == true;
           }
+        } on SubmissionException {
+          rethrow;
         } catch (e) {
           debugPrint("❌ Error en callbacks de envío: $e");
           submissionSent = false;

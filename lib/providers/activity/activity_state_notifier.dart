@@ -5,6 +5,7 @@ import 'package:aprende_mas/repositories/Interface_repos/activity/activity_repos
 import 'package:aprende_mas/repositories/Interface_repos/activity/activity_offline_repository.dart';
 import 'package:aprende_mas/models/activities/activity/activity.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:aprende_mas/repositories/Implement_repos/activity/activity_data_source_impl.dart';
 
 class ActivityNotifier extends StateNotifier<ActivityState> {
   final ActivityRepository activityRepository;
@@ -236,6 +237,8 @@ Future<void> updateActivity(
     try {
       final success = await activityRepository.sendSubmission(activityId, answer, links: links);
       return success;
+    } on SubmissionException {
+      rethrow;
     } catch (e) {
       return false;
     }
@@ -245,6 +248,8 @@ Future<void> updateActivity(
     try {
       final result = await activityRepository.sendSubmission(activityId, answer, links: links);
       return result == true;
+    } on SubmissionException {
+      rethrow;
     } catch (e) {
       debugPrint("Error en sendSubmissionWithLinks: $e");
       return false;
@@ -255,6 +260,8 @@ Future<void> updateActivity(
     try {
       final success = await activityRepository.sendSubmission(activityId, answer, files: fileUrls);
       return success;
+    } on SubmissionException {
+      rethrow;
     } catch (e) {
       debugPrint("Error en sendSubmissionWithFiles: $e");
       return false;
@@ -265,6 +272,8 @@ Future<void> updateActivity(
     try {
       final success = await activityRepository.sendSubmission(activityId, answer, links: links, files: fileUrls);
       return success;
+    } on SubmissionException {
+      rethrow;
     } catch (e) {
       debugPrint("Error en sendSubmissionWithFilesAndLinks: $e");
       return false;
