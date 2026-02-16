@@ -1,6 +1,5 @@
 import 'package:aprende_mas/providers/providers.dart';
 import 'package:aprende_mas/repositories/Implement_repos/activity/activity_offline_repository_impl.dart';
-import 'package:aprende_mas/repositories/Implement_repos/activity/activity_offline_datasource_impl.dart';
 import 'package:aprende_mas/repositories/Implement_repos/authentication/auth_user_offline_repository_impl.dart';
 import 'package:aprende_mas/config/services/google/google_signin_api.dart';
 import 'package:aprende_mas/config/utils/packages.dart';
@@ -403,13 +402,9 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
 
   Future<void> _submissionsPending(
       List<Group> lsGroups, List<Subject> lsSubjectsWithoutGroup) async {
-    // 1. Obtener TODAS las entregas pendientes con una sola consulta optimizada.
-    // TODO: Refactorizar. Se instancia el datasource directamente porque el método
-    // `getAllPendingSubmissions` no se ha propagado a la capa de repositorio.
-    // Lo ideal es llamar a `activityOffline.getAllPendingSubmissions()`.
-    final datasource = ActivityOfflineDatasourceImpl();
+    // Obtener TODAS las entregas pendientes usando el repository
     final List<Submission> lsSubmissionsPending =
-        await datasource.getAllPendingSubmissions();
+        await activityOffline.getAllPendingSubmissions();
 
     if (lsSubmissionsPending.isNotEmpty) {
       debugPrint("🔄 [SYNC] Iniciando envío de ${lsSubmissionsPending.length} entregas pendientes al servidor.");
@@ -418,10 +413,10 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
         if (activityId != -1) {
           String answer = submission.answer ?? "";
           
-          // 2. Llama al método de envío ONLINE
+          // Llama al método de envío ONLINE
           bool submissionSentSuccess = await sendSubmission(activityId, answer);
 
-          // 3. Si el envío es exitoso, borra el registro local
+          // Si el envío es exitoso, borra el registro local
           if (submissionSentSuccess) {
             debugPrint("✅ [SYNC] Entrega ${submission.submissionId} para actividad $activityId enviada con éxito. Eliminando de la cola local.");
             int submissionId = submission.submissionId;
