@@ -18,6 +18,11 @@ class ActivityOfflineRepositoryImpl implements ActivityOfflineRepository {
   }
 
   @override
+  Future<void> saveActivitiesOffline(List<Activity> lsActivities, int subjectId) {
+    return activityOfflineDatasource.saveActivitiesOffline(lsActivities, subjectId);
+  }
+
+  @override
   Future<void> saveSubmissions(List<Submission> lsSubmissions, int activityId) {
     return activityOfflineDatasource.saveSubmissions(lsSubmissions, activityId);
   }

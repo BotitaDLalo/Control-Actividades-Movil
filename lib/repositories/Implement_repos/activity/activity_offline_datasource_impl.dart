@@ -13,26 +13,12 @@ class ActivityOfflineDatasourceImpl implements ActivityOfflineDatasource {
   Future<List<Activity>> getAllActivitiesOffline(int subjectId) async {
     try {
       final db = await DbLocal.database;
-      final querylsActivitiesId = await db.query('tbActividades',
-          columns: ['ActividadId'],
-          where: '"MateriaId" = ?',
+      final querylsActivities = await db.query('tbActividades',
+          where: 'MateriaId = ?',
           whereArgs: [subjectId]);
 
-      final lsActivitiesId = querylsActivitiesId
-          .map(
-            (e) => e['ActividadId'] as int,
-          )
-          .toList();
-
-      final placeholders = List.filled(lsActivitiesId.length, '?').join(',');
-
-      String query =
-          "SELECT * FROM tbActividades WHERE ActividadId IN ($placeholders)";
-
-      final querylsActivities = await db.rawQuery(query, lsActivitiesId);
-
       final lsActivities = Activity.queryToEntityActivity(querylsActivities);
-
+      debugPrint("📦 [OFFLINE] Actividades cargadas desde BD local para materia $subjectId: ${lsActivities.length}");
       return lsActivities;
     } catch (e) {
       debugPrint('Error en getAllActivitiesOffline: $e');
@@ -40,25 +26,36 @@ class ActivityOfflineDatasourceImpl implements ActivityOfflineDatasource {
     }
   }
 
-//Nuevo metdodo para llamar actividades offline por materia
-/*@override
-Future<List<Activity>> getAllActivitiesOffline(int subjectId) async {
-  try {
-    final db = await DbLocal.database;
-
-    final querylsActivities = await db.query(
-      'tbActividades',
-      where: 'MateriaId = ?',
-      whereArgs: [subjectId],
-    );
-
-    return Activity.queryToEntityActivity(querylsActivities);
-  } catch (e) {
-    debugPrint('Error en getAllActivitiesOffline: $e');
-    return [];
+  @override
+  Future<void> saveActivitiesOffline(List<Activity> lsActivities, int subjectId) async {
+    try {
+      final db = await DbLocal.database;
+      debugPrint("💾 [OFFLINE] Guardando ${lsActivities.length} actividades para materia $subjectId");
+      
+      for (var activity in lsActivities) {
+        await db.insert(
+          'tbActividades',
+          {
+            'ActividadId': activity.activityId,
+            'NombreActividad': activity.nombreActividad,
+            'Descripcion': activity.descripcion,
+            'FechaCreacion': activity.fechaCreacion?.toString() ?? DateTime.now().toString(),
+            'FechaLimite': activity.fechaLimite.toString(),
+            'Puntaje': activity.puntaje,
+            'MateriaId': subjectId,
+            'PermitirEntregasTarde': activity.permitirEntregasTarde ? 1 : 0,
+            'TieneLimiteEntregas': activity.tieneLimiteEntregas ? 1 : 0,
+            'LimiteEntregasPorAlumno': activity.limiteEntregasPorAlumno,
+          },
+          conflictAlgorithm: ConflictAlgorithm.replace,
+        );
+      }
+      debugPrint("✅ [OFFLINE] Actividades guardadas correctamente en BD local");
+    } catch (e) {
+      debugPrint('Error en saveActivitiesOffline: $e');
+      rethrow;
+    }
   }
-}*/
-
 
   @override
   Future<void> saveSubmissions(

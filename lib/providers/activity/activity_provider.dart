@@ -1,9 +1,10 @@
 import 'package:aprende_mas/config/utils/packages.dart';
+import 'package:aprende_mas/config/network/connectivity_check.dart';
 import 'package:aprende_mas/providers/activity/activity_state.dart';
 import 'package:aprende_mas/providers/activity/activity_state_notifier.dart';
 import 'package:aprende_mas/repositories/Implement_repos/activity/activity_offline_repository_impl.dart';
 import 'package:aprende_mas/repositories/Implement_repos/activity/activity_repository_impl.dart';
-import 'package:aprende_mas/models/activities/activity/activity.dart'; // 👈 Asegúrate que esta ruta es correcta
+import 'package:aprende_mas/models/activities/activity/activity.dart';
 
 final activityRepositoryProvider = Provider<ActivityRepositoryImpl>((ref) {
   return ActivityRepositoryImpl();
@@ -22,25 +23,39 @@ final activityProvider =
   return ActivityNotifier(
     activityOfflineRepository: activityOfflineRepository,
     activityRepository: activityRepository,
-    // activityOfflineRepository: activityOfflineRepository
   );
 });
+
 final activitiesBySubjectProvider =
     FutureProvider.family<List<Activity>, int>((ref, subjectId) async {
-  // Se obtienen ambos repositorios
   final activityRepository = ref.watch(activityRepositoryProvider);
   final activityOfflineRepository = ref.watch(activityOfflineRepositoryProvider);
 
-  try {
-    // Se intenta obtener los datos de la fuente online primero
-    final onlineActivities =
-        await activityRepository.getActivitiesBySubject(subjectId);
-    return onlineActivities;
-  } catch (e) {
-    // Si la carga online falla, se recurre a la fuente de datos offline
-    print(
-        "Fallo al cargar actividades online, usando caché offline. Error: $e");
-    return activityOfflineRepository.getAllActivitiesOffline(subjectId);
+  final hasInternet = await ConnectivityCheck.checkInternetConnectivity();
+  
+  if (hasInternet) {
+    try {
+      final onlineActivities =
+          await activityRepository.getActivitiesBySubject(subjectId);
+      
+      if (onlineActivities.isNotEmpty) {
+        try {
+          await activityOfflineRepository.saveActivitiesOffline(onlineActivities, subjectId);
+        } catch (e) {
+          debugPrint("⚠️ [OFFLINE] Error guardando actividades en BD local: $e");
+        }
+      }
+      
+      return onlineActivities;
+    } catch (e) {
+      debugPrint("⚠️ [ONLINE] Error cargando actividades online: $e");
+      final offlineActivities = await activityOfflineRepository.getAllActivitiesOffline(subjectId);
+      return offlineActivities;
+    }
+  } else {
+    debugPrint("📴 [OFFLINE] Sin internet, cargando desde BD local");
+    final offlineActivities = await activityOfflineRepository.getAllActivitiesOffline(subjectId);
+    return offlineActivities;
   }
 });
 

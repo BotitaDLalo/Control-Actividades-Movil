@@ -2,6 +2,7 @@ import 'package:aprende_mas/models/models.dart';
 
 abstract class ActivityOfflineRepository {
   Future<List<Activity>> getAllActivitiesOffline(int subjectId);
+  Future<void> saveActivitiesOffline(List<Activity> lsActivities, int subjectId);
 
   Future<void> saveSubmissions(List<Submission> lsSubmissions, int activityId);
 
