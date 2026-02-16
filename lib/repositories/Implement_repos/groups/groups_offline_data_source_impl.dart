@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:aprende_mas/models/models.dart';
 import 'package:aprende_mas/repositories/Interface_repos/groups/groups_offline_data_source.dart';
 import 'package:aprende_mas/config/data/db_local.dart';
@@ -78,7 +79,11 @@ Future<List<Group>> getGroupsSubjects() async {
           createdDate: formatDate(row['FechaCreacion'] as String),
           teacherFullName: row['DocenteNombre'] as String?,
           groupId: row['GrupoId'] as int? ?? 0,
-          subjectId: row['MateriaId'] as int? ?? 0
+          subjectId: row['MateriaId'] as int? ?? 0,
+          startDate: row['FechaInicio'] as String?,
+          endDate: row['FechaFin'] as String?,
+          links: row['Enlaces'] is List ? jsonEncode(row['Enlaces']) : row['Enlaces'] as String?,
+          frequencyDays: row['FrecuenciaDias'] as int? ?? 0,
         );
       }).toList();
 
@@ -154,7 +159,6 @@ Future<List<Group>> getGroupsSubjects() async {
             }
             if (group.avisos != null) {
               for (final notice in group.avisos!) {
-                print('📝 Intentando guardar aviso:');
                 await db.insert(
                   'tbAvisos',
                   {
@@ -165,10 +169,14 @@ Future<List<Group>> getGroupsSubjects() async {
                   'GrupoId': groupId,
                   'MateriaId': notice.subjectId != 0 ? notice.subjectId : null,
                   'DocenteNombre': notice.teacherFullName,
+                  'FechaInicio': notice.startDate,
+                  'FechaFin': notice.endDate,
+                  'Enlaces': notice.links,
+                  'FrecuenciaDias': notice.frequencyDays,
                   },
                   conflictAlgorithm: ConflictAlgorithm.replace,
                 );
-                print('✅ Aviso insertado');
+                debugPrint('✅ Aviso insertado');
               }
             }
 

@@ -70,7 +70,11 @@ class Querys {
           GrupoId INTEGER,
           MateriaId INTEGER,
           FechaCreacion TEXT NOT NULL,
-          DocenteNombre TEXT
+          DocenteNombre TEXT,
+          FechaInicio TEXT,
+          FechaFin TEXT,
+          Enlaces TEXT,
+          FrecuenciaDias INTEGER
         );
         """,
         """
