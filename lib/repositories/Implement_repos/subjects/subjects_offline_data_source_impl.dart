@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:aprende_mas/config/data/data.dart';
 import 'package:aprende_mas/models/activities/activity/activity.dart';
 import 'package:aprende_mas/models/subjects/subjects.dart';
@@ -74,6 +75,10 @@ class SubjectsOfflineDataSourceImpl extends SubjectsOfflineDataSource {
               teacherFullName: row['DocenteNombre'] as String?,
               subjectId: row['MateriaId'] as int? ?? 0,
               groupId: row['GrupoId'] as int? ?? 0,
+              startDate: row['FechaInicio'] as String?,
+              endDate: row['FechaFin'] as String?,
+              links: row['Enlaces'] is List ? jsonEncode(row['Enlaces']) : row['Enlaces'] as String?,
+              frequencyDays: row['FrecuenciaDias'] as int? ?? 0,
             );
           }).toList();
 
@@ -158,9 +163,14 @@ class SubjectsOfflineDataSourceImpl extends SubjectsOfflineDataSource {
                   'GrupoId': null,
                   'MateriaId': subjectId,
                   'DocenteNombre': notice.teacherFullName,
+                  'FechaInicio': notice.startDate,
+                  'FechaFin': notice.endDate,
+                  'Enlaces': notice.links,
+                  'FrecuenciaDias': notice.frequencyDays,
                 },
                 conflictAlgorithm: ConflictAlgorithm.replace,
               );
+              debugPrint('✅ Aviso insertado');
             }
           }
           

@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:aprende_mas/models/models.dart';
 import 'package:aprende_mas/config/utils/general_utils.dart';
 import 'package:aprende_mas/models/notice_list/notice_model.dart';
@@ -58,6 +59,10 @@ class Subject {
               teacherFullName: n['DocenteNombre'] as String?, // 👈 NUEVO
               groupId: n['GrupoId'] as int? ?? 0,
               subjectId: n['MateriaId'] as int? ?? 0,
+              startDate: n['FechaInicio'] as String?,
+              endDate: n['FechaFin'] as String?,
+              links: n['Enlaces'] is List ? jsonEncode(n['Enlaces']) : n['Enlaces'],
+              frequencyDays: n['FrecuenciaDias'] as int? ?? 0,
             ))
             .toList(),
       );
