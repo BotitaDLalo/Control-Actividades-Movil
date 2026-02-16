@@ -1,4 +1,5 @@
 import 'package:aprende_mas/config/utils/packages.dart';
+import 'package:flutter/services.dart';
 import 'package:aprende_mas/providers/activity/activity_provider.dart';
 import 'package:aprende_mas/providers/activity/activty_form_provider.dart';
 import 'package:aprende_mas/views/widgets/alerts/error_dialog.dart';
@@ -195,6 +196,7 @@ class _FormActivitiesState extends ConsumerState<FormActivities> {
               controller: activityNotifier.puntajeController,
               onChanged: activityNotifier.onPuntajeChanged,
               keyboardType: TextInputType.number,
+              inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*'))],
               decoration: InputDecoration(
                 labelText: 'Puntaje (Opcional)',
                 focusedBorder: OutlineInputBorder(
@@ -255,6 +257,7 @@ class _FormActivitiesState extends ConsumerState<FormActivities> {
               TextFormField(
                 initialValue: activityForm.limiteEntregasPorAlumno.toString(),
                 keyboardType: TextInputType.number,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 decoration: InputDecoration(
                   labelText: 'Límite de entregas por alumno',
                   hintText: 'Ej: 1, 2, 3...',
