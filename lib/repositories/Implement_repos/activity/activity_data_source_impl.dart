@@ -172,7 +172,7 @@ class ActivityDataSourceImpl implements ActivityDataSource {
 
       // Si el status code es 400, lanzar excepción con mensaje personalizado
       if (res.statusCode == 400) {
-        throw SubmissionException('Has alcanzado el límite de entregas asignado por tu docente');
+        throw SubmissionException('Has llegado a tu límite de entregas asignado por el docente');
       }
 
       return false;

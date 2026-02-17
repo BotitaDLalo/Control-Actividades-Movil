@@ -238,6 +238,8 @@ Future<void> updateActivity(
       final success = await activityRepository.sendSubmission(activityId, answer, links: links);
       if (success) return true;
       return await _fallbackToOffline(activityId, answer, links: links);
+    } on SubmissionException {
+      rethrow;
     } catch (e) {
       return await _fallbackToOffline(activityId, answer, links: links);
     }
@@ -248,6 +250,8 @@ Future<void> updateActivity(
       final result = await activityRepository.sendSubmission(activityId, answer, links: links);
       if (result == true) return true;
       return await _fallbackToOffline(activityId, answer, links: links);
+    } on SubmissionException {
+      rethrow;
     } catch (e) {
       debugPrint("Error en sendSubmissionWithLinks: $e");
       return await _fallbackToOffline(activityId, answer, links: links);
@@ -259,6 +263,8 @@ Future<void> updateActivity(
       final success = await activityRepository.sendSubmission(activityId, answer, files: fileUrls);
       if (success) return true;
       return await _fallbackToOffline(activityId, answer, files: fileUrls);
+    } on SubmissionException {
+      rethrow;
     } catch (e) {
       debugPrint("Error en sendSubmissionWithFiles: $e");
       return await _fallbackToOffline(activityId, answer, files: fileUrls);
@@ -270,6 +276,8 @@ Future<void> updateActivity(
       final success = await activityRepository.sendSubmission(activityId, answer, links: links, files: fileUrls);
       if (success) return true;
       return await _fallbackToOffline(activityId, answer, links: links, files: fileUrls);
+    } on SubmissionException {
+      rethrow;
     } catch (e) {
       debugPrint("Error en sendSubmissionWithFilesAndLinks: $e");
       return await _fallbackToOffline(activityId, answer, links: links, files: fileUrls);
