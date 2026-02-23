@@ -170,7 +170,7 @@ class SubjectsOfflineDataSourceImpl extends SubjectsOfflineDataSource {
                 },
                 conflictAlgorithm: ConflictAlgorithm.replace,
               );
-              debugPrint('✅ Aviso insertado');
+              debugPrint('✅ [Offline] Aviso insertado: "${notice.title}" (MateriaId: $subjectId)');
             }
           }
           

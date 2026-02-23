@@ -1,9 +1,8 @@
-import 'package:aprende_mas/config/data/key_value_storage_service_impl.dart';
 import 'package:aprende_mas/config/utils/packages.dart';
 import 'package:aprende_mas/models/models.dart';
 import 'package:aprende_mas/views/widgets/activities_body/notice/notice_body/notice_body.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:aprende_mas/providers/notices/future_notices_provider.dart';
+import 'package:aprende_mas/providers/notices/notices_state_notifier.dart';
 
 class StudentNoticeOptionsScreen extends ConsumerStatefulWidget {
   final int groupId;
@@ -18,24 +17,22 @@ class StudentNoticeOptionsScreen extends ConsumerStatefulWidget {
 
 class _StudentNoticeOptionsScreenState
     extends ConsumerState<StudentNoticeOptionsScreen> {
-  NoticeModel notice = NoticeModel();
   final TextEditingController _searchController = TextEditingController();
   String _searchTerm = '';
 
   @override
   void initState() {
-    if (widget.groupId != 0) {
-      notice = notice.copyWith(groupId: widget.groupId);
-    } else if (widget.subjectId != 0) {
-      notice = notice.copyWith(subjectId: widget.subjectId);
-    }
+    super.initState();
     _searchController.addListener(() {
       setState(() {
         _searchTerm = _searchController.text;
       });
     });
 
-    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // Llama al notifier para cargar los avisos. El notifier se encargará del fallback offline.
+      ref.read(noticesProvider.notifier).getNotices(subjectId: widget.subjectId, groupId: widget.groupId);
+    });
   }
 
   @override
@@ -85,14 +82,20 @@ class _StudentNoticeOptionsScreenState
   @override
   Widget build(BuildContext context) {
     final subjectColor = getSubjectColor(widget.subjectId);
-    final futureNotices = ref.watch(futureNoticesProvider(notice));
+    final noticesState = ref.watch(noticesProvider);
 
     return Scaffold(
-      body: futureNotices.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stackTrace) => Center(child: Text(error.toString())),
-        data: (allNotices) {
-          // Filtrado local
+      body: Builder(builder: (context) {
+          // Muestra el loader solo si está cargando y la lista está vacía
+          if (noticesState.isLoading && noticesState.lsNotices.isEmpty) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          // No mostramos un error de conexión, ya que el fallback a offline debería funcionar.
+          // Simplemente trabajamos con la lista de avisos que el notifier nos da.
+
+          final allNotices = noticesState.lsNotices;
+
           final filteredNotices = allNotices.where((element) {
             // 1. Validar vigencia
             if (!_isNoticeActive(element)) return false;
