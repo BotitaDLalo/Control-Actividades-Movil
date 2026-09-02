@@ -37,7 +37,7 @@ class MainApp extends ConsumerWidget {
     final appRouter = ref.watch(goRouterProvider);
     final isConnected = ref.watch(connectivityStatusProvider);
     onNewNotice(ref);
-    
+
     return MaterialApp.router(
       routerConfig: appRouter,
       debugShowCheckedModeBanner: false,
